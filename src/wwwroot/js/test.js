@@ -1,1 +1,0 @@
-function greeter(e){return"Hello, "+e}var user="Jane User";document.body.innerHTML=greeter(user);

@@ -1,0 +1,27 @@
+{
+  "name": "kolan",
+  "version": "1.0.0",
+  "description": "A recursive collaborative Kanban",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PaddiM8/Kolan.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/PaddiM8/Kolan/issues"
+  },
+  "homepage": "https://github.com/PaddiM8/Kolan#readme",
+  "devDependencies": {
+    "gulp": "^4.0.2",
+    "gulp-jsdoc3": "^2.0.0",
+    "gulp-sass": "^4.0.2",
+    "node-sass": "^4.12.0"
+  }
+}

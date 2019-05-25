@@ -1,8 +1,9 @@
-const gulp   = require("gulp");
-const sass   = require("gulp-sass");
-const jsdoc  = require("gulp-jsdoc3");
-const ts     = require("gulp-typescript");
-const terser = require('gulp-terser');
+const gulp    = require("gulp");
+const sass    = require("gulp-sass");
+const jsdoc   = require("gulp-jsdoc3");
+const ts      = require("gulp-typescript");
+const terser  = require('gulp-terser');
+const webpack = require('webpack-stream');
 
 sass.compiler = require("node-sass");
 
@@ -16,14 +17,25 @@ gulp.task("ts", function() {
    return gulp.src("./src/wwwroot/ts/**/*.ts")
       .pipe(ts({
          experimentalDecorators: true,
-         target: "ES5",
-         lib: ["es2015", "dom"]
+         target: "ES6",
+         lib: ["es2017", "dom"],
+         module: "commonjs"
       }))
+      .pipe(gulp.dest("./src/wwwroot/js"));
+});
+
+gulp.task("compress", () => {
+   return gulp.src("./src/wwwroot/js/**/*.js")
       .pipe(terser({
          compress: true,
          mangle: true
-      }))
-      .pipe(gulp.dest("./src/wwwroot/js"));
+      }));
+});
+
+gulp.task('webpack', function() {
+   return gulp.src('src/wwwroot/js/index.js')
+      .pipe(webpack(require('./webpack.config.js')))
+      .pipe(gulp.dest('src/wwwroot/dist/'));
 });
 
 gulp.task("doc", function(cb) {
@@ -34,8 +46,9 @@ gulp.task("doc", function(cb) {
 
 gulp.task("watch", function() {
    gulp.watch("./src/wwwroot/scss/*.scss", gulp.series("sass"));
-   gulp.watch("./src/wwwroot/ts/*.ts", gulp.series("ts"));
-   gulp.watch("./src/wwwroot/ts/components/*.ts", gulp.series("ts"));
+   gulp.watch("./src/wwwroot/ts/**/*.ts", gulp.series("ts"));
+   gulp.watch("./src/wwwroot/js/**/*.js", gulp.series("webpack"));
 });
 
-gulp.task("default", gulp.series("sass", "ts", "doc", "watch"));
+gulp.task("default", gulp.series("sass", "ts", "doc", "webpack", "watch"));
+gulp.task("produce", gulp.series("sass", "ts", "compress", "doc", "webpack"));

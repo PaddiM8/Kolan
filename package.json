@@ -20,12 +20,15 @@
   "homepage": "https://github.com/PaddiM8/Kolan#readme",
   "devDependencies": {
     "gulp": "^4.0.2",
+    "gulp-bro": "^1.0.3",
     "gulp-jsdoc3": "^2.0.0",
     "gulp-sass": "^4.0.2",
     "gulp-terser": "^1.2.0",
     "gulp-typescript": "^5.0.1",
     "node-sass": "^4.12.0",
-    "typescript": "^3.4.5"
+    "typescript": "^3.4.5",
+    "webpack-cli": "^3.3.2",
+    "webpack-stream": "^5.2.1"
   },
   "dependencies": {
     "lit-element": "^2.1.0"

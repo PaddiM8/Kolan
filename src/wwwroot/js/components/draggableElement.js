@@ -1,1 +1,120 @@
-"use strict";var __extends=this&&this.__extends||function(){var e=function(t,n){return(e=Object.setPrototypeOf||{__proto__:[]}instanceof Array&&function(e,t){e.__proto__=t}||function(e,t){for(var n in t)t.hasOwnProperty(n)&&(e[n]=t[n])})(t,n)};return function(t,n){function o(){this.constructor=t}e(t,n),t.prototype=null===n?Object.create(n):(o.prototype=n.prototype,new o)}}(),__makeTemplateObject=this&&this.__makeTemplateObject||function(e,t){return Object.defineProperty?Object.defineProperty(e,"raw",{value:t}):e.raw=t,e},__decorate=this&&this.__decorate||function(e,t,n,o){var r,s=arguments.length,l=s<3?t:null===o?o=Object.getOwnPropertyDescriptor(t,n):o;if("object"==typeof Reflect&&"function"==typeof Reflect.decorate)l=Reflect.decorate(e,t,n,o);else for(var i=e.length-1;i>=0;i--)(r=e[i])&&(l=(s<3?r(l):s>3?r(t,n,l):r(t,n))||l);return s>3&&l&&Object.defineProperty(t,n,l),l};Object.defineProperty(exports,"__esModule",{value:!0});var templateObject_1,templateObject_2,lit_element_1=require("lit-element"),Draggable=function(e){function t(){var t=null!==e&&e.apply(this,arguments)||this;return t.placeholder="placeholder",t.mouseIsDown=!1,t.startPos={X:0,Y:0},t.detached=!1,t}return __extends(t,e),Object.defineProperty(t,"styles",{get:function(){return lit_element_1.css(templateObject_1||(templateObject_1=__makeTemplateObject(["\n      :host {\n        display: block;\n        -moz-user-select: none;\n        user-select: none;\n      }\n    "],["\n      :host {\n        display: block;\n        -moz-user-select: none;\n        user-select: none;\n      }\n    "])))},enumerable:!0,configurable:!0}),t.prototype.render=function(){return lit_element_1.html(templateObject_2||(templateObject_2=__makeTemplateObject(["<slot></slot>"],["<slot></slot>"])))},t.prototype.firstUpdated=function(e){var t=this;this.addEventListener("mousedown",function(e){return t.onMouseDown(e)}),document.body.addEventListener("mouseup",function(){t.detached&&t.onMouseUp(t)}),document.body.addEventListener("mousemove",function(e){t.mouseIsDown&&t.onMouseMove(e)})},t.prototype.onMouseDown=function(e){this.mouseIsDown=!0,this.startPos={X:e.clientX-this.getBoundingClientRect().left,Y:e.clientY-this.getBoundingClientRect().top}},t.prototype.onMouseUp=function(e){e.mouseIsDown=!1;var t=e.getRelatedElementsUnder();e.style.position="",e.style.width="";var n=e.parentElement.parentElement.querySelector(this.placeholder);t.taskList.insertBefore(e,n),n.style.display="none",e.detached=!1},t.prototype.onMouseMove=function(e){if(!this.detached){var t=getComputedStyle(this),n=this.parentElement.parentElement.querySelector(this.placeholder);this.parentElement.insertBefore(n,this),Object.assign(n.style,{width:t.width,height:t.height,display:"block"}),this.parentElement.parentElement.appendChild(this),this.style.width=t.width,this.style.position="fixed",this.detached=!0}var o=e.clientX-this.startPos.X,r=e.clientY-this.startPos.Y;this.style.left=o+"px",this.style.top=r+"px";var s=this.getRelatedElementsUnder();if(null!=s.closestDraggable){n=this.parentElement.parentElement.querySelector(this.placeholder);s.middlePoint.Y<=this.getMiddlePoint(s.closestDraggable).Y&&this.lastHoveredDraggable!=s.closestDraggable?(s.taskList.insertBefore(n,s.closestDraggable),this.lastHoveredDraggable=s.closestDraggable):this.lastHoveredDraggable!=s.closestDraggable.nextSibling&&(s.taskList.insertBefore(n,s.closestDraggable.nextSibling),this.lastHoveredDraggable=s.closestDraggable.nextSibling)}},t.prototype.getRelatedElementsUnder=function(){var e=this.getMiddlePoint(),t=document.elementsFromPoint(e.X,e.Y);return{closestDraggable:t.filter(function(e){return"DRAGGABLE-ELEMENT"==e.tagName})[1],taskList:t.filter(function(e){return"TASKLIST"==e.tagName})[0],middlePoint:e}},t.prototype.getMiddlePoint=function(e){void 0===e&&(e=this);var t=e.getBoundingClientRect();return{X:t.width/2+t.left,Y:t.height/2+t.top}},t=__decorate([lit_element_1.customElement("draggable-element")],t)}(lit_element_1.LitElement);exports.Draggable=Draggable;
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const lit_element_1 = require("lit-element");
+let Draggable = class Draggable extends lit_element_1.LitElement {
+    constructor() {
+        super(...arguments);
+        this.placeholder = "placeholder";
+        this.mouseIsDown = false;
+        this.startPos = { X: 0, Y: 0 };
+        this.detached = false;
+    }
+    static get styles() {
+        return lit_element_1.css `
+      :host {
+        display: block;
+        -moz-user-select: none;
+        user-select: none;
+      }
+    `;
+    }
+    render() {
+        return lit_element_1.html `<slot></slot>`;
+    }
+    firstUpdated(changedProperties) {
+        this.addEventListener('mousedown', e => this.onMouseDown(e));
+        document.body.addEventListener('mouseup', () => {
+            if (this.detached)
+                this.onMouseUp(this);
+        });
+        document.body.addEventListener('mousemove', e => {
+            if (this.mouseIsDown)
+                this.onMouseMove(e);
+        });
+    }
+    onMouseDown(e) {
+        this.mouseIsDown = true;
+        this.startPos = {
+            X: e.clientX - this.getBoundingClientRect().left,
+            Y: e.clientY - this.getBoundingClientRect().top
+        };
+    }
+    onMouseUp(element) {
+        element.mouseIsDown = false;
+        const elementsUnder = element.getRelatedElementsUnder();
+        // Attach element
+        element.style.position = "";
+        element.style.width = "";
+        // Move placeholder
+        const placeholder = element.parentElement.parentElement.querySelector(this.placeholder);
+        elementsUnder.taskList.insertBefore(element, placeholder);
+        placeholder.style.display = "none";
+        element.detached = false;
+    }
+    onMouseMove(e) {
+        // Detach from list
+        if (!this.detached) {
+            const computedStyle = getComputedStyle(this);
+            // Placeholder
+            const placeholder = this.parentElement.parentElement.querySelector(this.placeholder);
+            this.parentElement.insertBefore(placeholder, this); // Move placeholder to list slot
+            Object.assign(placeholder.style, {
+                width: computedStyle.width,
+                height: computedStyle.height,
+                display: "block"
+            });
+            // Draggable
+            this.parentElement.parentElement.appendChild(this); // Move task out from tasklists, then get position: fixed
+            this.style.width = computedStyle.width;
+            this.style.position = "fixed";
+            this.detached = true;
+        }
+        const parentRect = this.parentElement.parentElement.getBoundingClientRect();
+        const newPos = {
+            X: e.clientX - this.startPos.X - parentRect.left,
+            Y: e.clientY - this.startPos.Y - parentRect.top
+        };
+        this.style.left = newPos.X + "px";
+        this.style.top = newPos.Y + "px";
+        // Show where item will be dropped
+        const elementsUnder = this.getRelatedElementsUnder();
+        // If a draggable is under, and the placeholder wasn't already inserted there
+        if (elementsUnder.closestDraggable != undefined) {
+            const placeholder = this.parentElement.parentElement.querySelector(this.placeholder);
+            const overTopHalf = elementsUnder.middlePoint.Y <= this.getMiddlePoint(elementsUnder.closestDraggable).Y;
+            // If over the top half of the element
+            if (overTopHalf && this.lastHoveredDraggable != elementsUnder.closestDraggable) {
+                elementsUnder.taskList.insertBefore(placeholder, elementsUnder.closestDraggable);
+                this.lastHoveredDraggable = elementsUnder.closestDraggable; // Remember last placement 
+            }
+            else if (this.lastHoveredDraggable != elementsUnder.closestDraggable.nextSibling) { // If over the bottom half of the element
+                elementsUnder.taskList.insertBefore(placeholder, elementsUnder.closestDraggable.nextSibling);
+                this.lastHoveredDraggable = elementsUnder.closestDraggable.nextSibling;
+            }
+        }
+    }
+    getRelatedElementsUnder() {
+        const middlePoint = this.getMiddlePoint();
+        const elementsOnPoint = document.elementsFromPoint(middlePoint.X, middlePoint.Y);
+        const closestDraggable = elementsOnPoint.filter(x => x.tagName == "DRAGGABLE-ELEMENT")[1];
+        const taskList = elementsOnPoint.filter(x => x.tagName == "TASKLIST")[0];
+        return { closestDraggable, taskList, middlePoint };
+    }
+    getMiddlePoint(element = this) {
+        const rect = element.getBoundingClientRect();
+        return {
+            X: rect.width / 2 + rect.left,
+            Y: rect.height / 2 + rect.top
+        };
+    }
+};
+Draggable = __decorate([
+    lit_element_1.customElement('draggable-element')
+], Draggable);
+exports.Draggable = Draggable;

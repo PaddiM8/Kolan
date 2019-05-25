@@ -1,0 +1,1 @@
+body{margin:0}header h1{font-size:5em;text-align:center;font-family:'Inter', sans-serif;font-weight:500;font-style:normal}main{position:absolute;width:500px;height:200px;top:30%;left:50%;transform:translate(-50%, -70%)}main form{width:100%;margin-top:15px;margin-left:50%;transform:translateX(-50%)}main form .input{width:100%}main form input[type="submit"]{float:right}

@@ -13,9 +13,11 @@ gulp.task("sass", function() {
 });
 
 gulp.task("ts", function() {
-   return gulp.src("./src/wwwroot/ts/*.ts")
+   return gulp.src("./src/wwwroot/ts/**/*.ts")
       .pipe(ts({
-         experimentalAsyncFunctions: true
+         experimentalDecorators: true,
+         target: "ES5",
+         lib: ["es2015", "dom"]
       }))
       .pipe(terser({
          compress: true,
@@ -33,6 +35,7 @@ gulp.task("doc", function(cb) {
 gulp.task("watch", function() {
    gulp.watch("./src/wwwroot/scss/*.scss", gulp.series("sass"));
    gulp.watch("./src/wwwroot/ts/*.ts", gulp.series("ts"));
+   gulp.watch("./src/wwwroot/ts/components/*.ts", gulp.series("ts"));
 });
 
 gulp.task("default", gulp.series("sass", "ts", "doc", "watch"));

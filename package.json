@@ -20,6 +20,7 @@
   "homepage": "https://github.com/PaddiM8/Kolan#readme",
   "devDependencies": {
     "gulp": "^4.0.2",
+    "gulp-autoprefixer": "^6.1.0",
     "gulp-bro": "^1.0.3",
     "gulp-jsdoc3": "^2.0.0",
     "gulp-sass": "^4.0.2",

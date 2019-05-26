@@ -2,14 +2,21 @@ const gulp    = require("gulp");
 const sass    = require("gulp-sass");
 const jsdoc   = require("gulp-jsdoc3");
 const ts      = require("gulp-typescript");
-const terser  = require('gulp-terser');
-const webpack = require('webpack-stream');
+const terser  = require("gulp-terser");
+const webpack = require("webpack-stream");
+const prefix  = require("gulp-autoprefixer");
 
 sass.compiler = require("node-sass");
 
 gulp.task("sass", function() {
    return gulp.src("./src/wwwroot/scss/*.scss")
-      .pipe(sass({outputStyle: 'compressed'}).on("error", sass.logError))
+      .pipe(sass({
+         outputStyle: 'compressed'
+      }).on("error", sass.logError))
+      .pipe(prefix({
+         browsers: ['last 2 versions'],
+         cascade: false
+      }))
       .pipe(gulp.dest("./src/wwwroot/css"));
 });
 

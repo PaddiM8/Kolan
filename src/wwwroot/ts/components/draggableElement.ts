@@ -1,5 +1,10 @@
 import { LitElement, html, css, property, customElement } from 'lit-element';
 
+/**
+ * Lit-element that can be dragged and dropped. Needs a <tasklist> parent
+ * and a <section> grandparent. Place a <placeholder> element inside the section
+ * and style it as you wish.
+ */
 @customElement('draggable-element')
 export class Draggable extends LitElement {
    private placeholder = "placeholder";
@@ -23,6 +28,7 @@ export class Draggable extends LitElement {
    }
 
    firstUpdated(changedProperties) {
+      this.addEventListener("click", () => this.mouseIsDown = false); // otherwise it won't let go when you click
       this.addEventListener('mousedown', e => this.onMouseDown(e));
       document.body.addEventListener('mouseup', () => {
          if (this.detached) this.onMouseUp(this);
@@ -103,6 +109,10 @@ export class Draggable extends LitElement {
       }
    }
 
+   /**
+    * Get <draggable> element under the element currently being dragged, and 
+    * also the hovered tasklist.
+    */
    private getRelatedElementsUnder() {
       const middlePoint = this.getMiddlePoint();
       const elementsOnPoint = document.elementsFromPoint(middlePoint.X, middlePoint.Y);
@@ -112,6 +122,10 @@ export class Draggable extends LitElement {
       return { closestDraggable, taskList, middlePoint };
    }
 
+   /**
+    * Get the global coordinates of the elements middle point.
+    * @param   {element} element The element to get the middle point of
+    */
    private getMiddlePoint(element: Element = this) {
       const rect = element.getBoundingClientRect();
       return {

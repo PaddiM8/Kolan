@@ -7,7 +7,17 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const lit_element_1 = require("lit-element");
+/**
+ * Lit-element that can be dragged and dropped. Needs a <tasklist> parent
+ * and a <section> grandparent. Place a <placeholder> element inside the section
+ * and style it as you wish.
+ */
 let Draggable = class Draggable extends lit_element_1.LitElement {
+    /**
+     * Lit-element that can be dragged and dropped. Needs a <tasklist> parent
+     * and a <section> grandparent. Place a <placeholder> element inside the section
+     * and style it as you wish.
+     */
     constructor() {
         super(...arguments);
         this.placeholder = "placeholder";
@@ -28,6 +38,7 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
         return lit_element_1.html `<slot></slot>`;
     }
     firstUpdated(changedProperties) {
+        this.addEventListener("click", () => this.mouseIsDown = false); // otherwise it won't let go when you click
         this.addEventListener('mousedown', e => this.onMouseDown(e));
         document.body.addEventListener('mouseup', () => {
             if (this.detached)
@@ -99,6 +110,10 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
             }
         }
     }
+    /**
+     * Get <draggable> element under the element currently being dragged, and
+     * also the hovered tasklist.
+     */
     getRelatedElementsUnder() {
         const middlePoint = this.getMiddlePoint();
         const elementsOnPoint = document.elementsFromPoint(middlePoint.X, middlePoint.Y);
@@ -106,6 +121,10 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
         const taskList = elementsOnPoint.filter(x => x.tagName == "TASKLIST")[0];
         return { closestDraggable, taskList, middlePoint };
     }
+    /**
+     * Get the global coordinates of the elements middle point.
+     * @param   {element} element The element to get the middle point of
+     */
     getMiddlePoint(element = this) {
         const rect = element.getBoundingClientRect();
         return {

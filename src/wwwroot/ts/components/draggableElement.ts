@@ -28,8 +28,11 @@ export class Draggable extends LitElement {
    }
 
    firstUpdated(changedProperties) {
-      this.addEventListener("click", () => this.mouseIsDown = false); // otherwise it won't let go when you click
-      this.addEventListener('mousedown', e => this.onMouseDown(e));
+      let dragger = this.querySelector(".dragger");
+      if (dragger == undefined) dragger = this;
+
+      dragger.addEventListener("click", () => this.mouseIsDown = false); // otherwise it won't let go when you click
+      dragger.addEventListener('mousedown', e => this.onMouseDown(e));
       document.body.addEventListener('mouseup', () => {
          if (this.detached) this.onMouseUp(this);
       });
@@ -53,8 +56,10 @@ export class Draggable extends LitElement {
       // Attach element
       element.style.position = "";
       element.style.width = "";
+      element.style.top = "";
+      element.style.left = "";
 
-      // Move placeholder
+      // Move to placeholder
       const placeholder: HTMLElement = element.parentElement.parentElement.querySelector(this.placeholder);
       elementsUnder.taskList.insertBefore(element, placeholder);
       placeholder.style.display = "none";

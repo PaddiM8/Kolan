@@ -1,0 +1,314 @@
+
+{
+  "header": {
+    "event": "Allocation failed - JavaScript heap out of memory",
+    "trigger": "FatalError",
+    "filename": "report.20190527.192410.3680.0.001.json",
+    "dumpEventTime": "2019-05-27T19:24:10Z",
+    "dumpEventTimeStamp": "1558977850205",
+    "processId": 3680,
+    "cwd": "/home/paddi/Projects/Websites/Kolan",
+    "commandLine": [
+      "node",
+      "/usr/bin/gulp"
+    ],
+    "nodejsVersion": "v11.15.0",
+    "glibcVersionRuntime": "2.29",
+    "glibcVersionCompiler": "2.29",
+    "wordSize": 64,
+    "arch": "x64",
+    "platform": "linux",
+    "componentVersions": {
+      "node": "11.15.0",
+      "v8": "7.0.276.38-node.19",
+      "uv": "1.29.1",
+      "zlib": "1.2.11",
+      "brotli": "1.0.7",
+      "ares": "1.15.0",
+      "modules": "67",
+      "nghttp2": "1.36.0",
+      "napi": "4",
+      "llhttp": "1.1.1",
+      "http_parser": "2.8.0",
+      "openssl": "1.1.1b",
+      "cldr": "35.1",
+      "icu": "64.2",
+      "tz": "2019a",
+      "unicode": "12.1"
+    },
+    "release": {
+      "name": "node",
+      "headersUrl": "https://nodejs.org/download/release/v11.15.0/node-v11.15.0-headers.tar.gz",
+      "sourceUrl": "https://nodejs.org/download/release/v11.15.0/node-v11.15.0.tar.gz"
+    },
+    "osName": "Linux",
+    "osRelease": "4.19.20-1-vfio-lts",
+    "osVersion": "#1 SMP PREEMPT Thu Apr 4 17:05:12 CEST 2019",
+    "osMachine": "x86_64",
+    "host": "paddi-pc"
+  },
+  "javascriptStack": {
+    "message": "No stack.",
+    "stack": [
+      "Unavailable."
+    ]
+  },
+  "nativeStack": [
+    {
+      "pc": "0x0000555c82c38a91",
+      "symbol": "report::TriggerNodeReport(v8::Isolate*, node::Environment*, char const*, char const*, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, v8::Local<v8::String>) [gulp]"
+    },
+    {
+      "pc": "0x0000555c82b2929f",
+      "symbol": "node::OnFatalError(char const*, char const*) [gulp]"
+    },
+    {
+      "pc": "0x0000555c82ccf002",
+      "symbol": "v8::Utils::ReportOOMFailure(v8::internal::Isolate*, char const*, bool) [gulp]"
+    },
+    {
+      "pc": "0x0000555c82ccf25b",
+      "symbol": "v8::internal::V8::FatalProcessOutOfMemory(v8::internal::Isolate*, char const*, bool) [gulp]"
+    },
+    {
+      "pc": "0x0000555c83066573",
+      "symbol": " [gulp]"
+    },
+    {
+      "pc": "0x0000555c830666b4",
+      "symbol": " [gulp]"
+    },
+    {
+      "pc": "0x0000555c83076656",
+      "symbol": "v8::internal::Heap::PerformGarbageCollection(v8::internal::GarbageCollector, v8::GCCallbackFlags) [gulp]"
+    },
+    {
+      "pc": "0x0000555c83076ffe",
+      "symbol": "v8::internal::Heap::CollectGarbage(v8::internal::AllocationSpace, v8::internal::GarbageCollectionReason, v8::GCCallbackFlags) [gulp]"
+    },
+    {
+      "pc": "0x0000555c83079a1d",
+      "symbol": "v8::internal::Heap::AllocateRawWithLightRetry(int, v8::internal::AllocationSpace, v8::internal::AllocationAlignment) [gulp]"
+    },
+    {
+      "pc": "0x0000555c83079a72",
+      "symbol": "v8::internal::Heap::AllocateRawWithRetryOrFail(int, v8::internal::AllocationSpace, v8::internal::AllocationAlignment) [gulp]"
+    },
+    {
+      "pc": "0x0000555c83047685",
+      "symbol": "v8::internal::Factory::NewFillerObject(int, bool, v8::internal::AllocationSpace) [gulp]"
+    },
+    {
+      "pc": "0x0000555c832b6def",
+      "symbol": "v8::internal::Runtime_AllocateInNewSpace(int, v8::internal::Object**, v8::internal::Isolate*) [gulp]"
+    },
+    {
+      "pc": "0x0000228ce03cfc5d",
+      "symbol": ""
+    }
+  ],
+  "javascriptHeap": {
+    "totalMemory": 1497612288,
+    "totalCommittedMemory": 1496012464,
+    "usedMemory": 1438301304,
+    "availableMemory": 33574984,
+    "memoryLimit": 1526909922,
+    "heapSpaces": {
+      "read_only_space": {
+        "memorySize": 524288,
+        "committedMemory": 42224,
+        "capacity": 515584,
+        "used": 33520,
+        "available": 482064
+      },
+      "new_space": {
+        "memorySize": 8388608,
+        "committedMemory": 8388200,
+        "capacity": 4124672,
+        "used": 777736,
+        "available": 3346936
+      },
+      "old_space": {
+        "memorySize": 1343950848,
+        "committedMemory": 1343407640,
+        "capacity": 1297249936,
+        "used": 1296609616,
+        "available": 640320
+      },
+      "code_space": {
+        "memorySize": 5767168,
+        "committedMemory": 5631328,
+        "capacity": 4950048,
+        "used": 4950048,
+        "available": 0
+      },
+      "map_space": {
+        "memorySize": 2633728,
+        "committedMemory": 2195424,
+        "capacity": 1654960,
+        "used": 1654960,
+        "available": 0
+      },
+      "large_object_space": {
+        "memorySize": 136347648,
+        "committedMemory": 136347648,
+        "capacity": 163381088,
+        "used": 134275424,
+        "available": 29105664
+      },
+      "new_large_object_space": {
+        "memorySize": 0,
+        "committedMemory": 0,
+        "capacity": 0,
+        "used": 0,
+        "available": 0
+      }
+    }
+  },
+  "resourceUsage": {
+    "userCpuSeconds": 282.61,
+    "kernelCpuSeconds": 14.8999,
+    "cpuConsumptionPercent": 0.305863,
+    "maxRss": 1613705216,
+    "pageFaults": {
+      "IORequired": 372,
+      "IONotRequired": 3274584
+    },
+    "fsActivity": {
+      "reads": 132992,
+      "writes": 17704
+    }
+  },
+  "uvthreadResourceUsage": {
+    "userCpuSeconds": 127.127,
+    "kernelCpuSeconds": 5.94791,
+    "cpuConsumptionPercent": 0.136811,
+    "fsActivity": {
+      "reads": 111744,
+      "writes": 0
+    }
+  },
+  "libuv": [
+  ],
+  "environmentVariables": {
+    "COLORTERM": "truecolor",
+    "DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/user/1000/bus",
+    "DISPLAY": ":0",
+    "EDITOR": "nvim",
+    "FLUTTER_HOME": "/opt/flutter",
+    "GDK_BACKEND": "wayland",
+    "GTK_THEME": "Arc-Gruvbox",
+    "GTK_USE_PORTAL": "1",
+    "HOME": "/home/paddi",
+    "I3SOCK": "/run/user/1000/sway-ipc.1000.702.sock",
+    "INVOCATION_ID": "352051cf715341a9b6e048b4504d99e7",
+    "JOURNAL_STREAM": "9:20741",
+    "KITTY_WINDOW_ID": "1",
+    "LANG": "en_GB.UTF-8",
+    "LC_ALL": "en_GB.UTF-8",
+    "LOGNAME": "paddi",
+    "MAIL": "/var/spool/mail/paddi",
+    "MOZ_PLUGIN_PATH": "/usr/lib/mozilla/plugins",
+    "OLDPWD": "/home/paddi/Projects/Websites/Kolan/src",
+    "PATH": "/usr/local/sbin:/usr/local/bin:/usr/bin:/var/lib/flatpak/exports/bin:/opt/flutter/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/opt/servo:/var/lib/flatpak/exports/bin:/opt/flutter/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/opt/servo",
+    "PWD": "/home/paddi/Projects/Websites/Kolan",
+    "SDL_VIDEODRIVER": "wayland",
+    "SHELL": "/bin/zsh",
+    "SHLVL": "3",
+    "SWAYSOCK": "/run/user/1000/sway-ipc.1000.702.sock",
+    "TERM": "screen-256color",
+    "TERMINFO": "/usr/lib/kitty/terminfo",
+    "TMUX": "/tmp//tmux-1000/default,24273,0",
+    "TMUX_PANE": "%6",
+    "TMUX_PLUGIN_MANAGER_PATH": "/home/paddi/.tmux/plugins/",
+    "USER": "paddi",
+    "WAYLAND_DISPLAY": "wayland-0",
+    "WINDOWID": "50331662",
+    "XCURSOR_SIZE": "24",
+    "XDG_DATA_DIRS": "/home/paddi/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share",
+    "XDG_RUNTIME_DIR": "/run/user/1000",
+    "XDG_SEAT": "seat0",
+    "XDG_SESSION_CLASS": "user",
+    "XDG_SESSION_ID": "1",
+    "XDG_SESSION_TYPE": "tty",
+    "XDG_VTNR": "1",
+    "XKB_DEFAULT_LAYOUT": "se_bakk",
+    "XKB_DEFAULT_MODEL": "pc101",
+    "_": "/usr/bin/gulp",
+    "_JAVA_AWT_WM_NONREPARENTING": "1",
+    "is_vim": "ps -o state= -o comm= -t '#{pane_tty}'     | grep -iqE '^[^TXZ ]+ +(\\S+\\/)?g?(view|n?vim?x?)(diff)?$'",
+    "INIT_CWD": "/home/paddi/Projects/Websites/Kolan"
+  },
+  "userLimits": {
+    "core_file_size_blocks": {
+      "soft": "unlimited",
+      "hard": "unlimited"
+    },
+    "data_seg_size_kbytes": {
+      "soft": "unlimited",
+      "hard": "unlimited"
+    },
+    "file_size_blocks": {
+      "soft": "unlimited",
+      "hard": "unlimited"
+    },
+    "max_locked_memory_bytes": {
+      "soft": 65536,
+      "hard": 65536
+    },
+    "max_memory_size_kbytes": {
+      "soft": "unlimited",
+      "hard": "unlimited"
+    },
+    "open_files": {
+      "soft": 524288,
+      "hard": 524288
+    },
+    "stack_size_bytes": {
+      "soft": 8388608,
+      "hard": "unlimited"
+    },
+    "cpu_time_seconds": {
+      "soft": "unlimited",
+      "hard": "unlimited"
+    },
+    "max_user_processes": {
+      "soft": 62750,
+      "hard": 62750
+    },
+    "virtual_memory_kbytes": {
+      "soft": "unlimited",
+      "hard": "unlimited"
+    }
+  },
+  "sharedObjects": [
+    "linux-vdso.so.1",
+    "/usr/lib/libz.so.1",
+    "/usr/lib/libuv.so.1",
+    "/usr/lib/libcares.so.2",
+    "/usr/lib/libnghttp2.so.14",
+    "/usr/lib/libcrypto.so.1.1",
+    "/usr/lib/libssl.so.1.1",
+    "/usr/lib/libicui18n.so.64",
+    "/usr/lib/libicuuc.so.64",
+    "/usr/lib/libdl.so.2",
+    "/usr/lib/librt.so.1",
+    "/usr/lib/libstdc++.so.6",
+    "/usr/lib/libm.so.6",
+    "/usr/lib/libgcc_s.so.1",
+    "/usr/lib/libpthread.so.0",
+    "/usr/lib/libc.so.6",
+    "/usr/lib/libnsl.so.2",
+    "/usr/lib/libicudata.so.64",
+    "/lib64/ld-linux-x86-64.so.2",
+    "/usr/lib/libtirpc.so.3",
+    "/usr/lib/libgssapi_krb5.so.2",
+    "/usr/lib/libkrb5.so.3",
+    "/usr/lib/libk5crypto.so.3",
+    "/usr/lib/libcom_err.so.2",
+    "/usr/lib/libkrb5support.so.0",
+    "/usr/lib/libkeyutils.so.1",
+    "/usr/lib/libresolv.so.2",
+    "/home/paddi/Projects/Websites/Kolan/node_modules/node-sass/vendor/linux-x64-67/binding.node"
+  ]
+}

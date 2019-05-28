@@ -1,6 +1,6 @@
 const gulp    = require("gulp");
 const sass    = require("gulp-sass");
-const jsdoc   = require("gulp-jsdoc3");
+const jsdoc   = require("gulp-typedoc");
 const ts      = require("gulp-typescript");
 const terser  = require("gulp-terser");
 const webpack = require("webpack-stream");
@@ -45,10 +45,9 @@ gulp.task('webpack', function() {
       .pipe(gulp.dest('src/wwwroot/dist/'));
 });
 
-gulp.task("doc", function(cb) {
-   return gulp.src(["README.md", "./wwwroot/js/*.js"], {read: false})
-      .pipe(jsdoc(cb))
-      .pipe(gulp.dest("./docs"));
+gulp.task("doc", function() {
+   return gulp.src(["README.md", "./src/wwwroot/ts/**/*.ts"], {read: false})
+      .pipe(jsdoc({out: "./docs"}));
 });
 
 gulp.task("watch", function() {
@@ -57,5 +56,5 @@ gulp.task("watch", function() {
    gulp.watch("./src/wwwroot/js/**/*.js", gulp.series("webpack"));
 });
 
-gulp.task("default", gulp.series("sass", "ts", "doc", "webpack", "watch"));
+gulp.task("default", gulp.series("sass", "ts", "webpack", "watch"));
 gulp.task("produce", gulp.series("sass", "ts", "compress", "doc", "webpack"));

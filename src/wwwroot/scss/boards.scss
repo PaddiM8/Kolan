@@ -42,15 +42,16 @@ header h1 {
    line-height: $size;
    text-align: center;
    margin-top: 40px;
+   color: black;
+
    width: $size;
-   height: $size;
    border-radius: 50%;
    transition: .3s ease background-color;
 
    span {
       margin: auto;
       padding-left: 2px;
-      margin-top: -1px;
+      margin-top: -2px;
    }
 
 }
@@ -66,11 +67,34 @@ header h1 {
 }
 
 draggable-element {
-   color: white;
-   padding: 18px 28px 30px 28px;
+   color: $white;
+   padding: 18px 28px 20px 75px;
    margin-bottom: 15px;
    border-radius: 9px;
    @extend .shadow;
+   position: relative;
+   cursor: pointer;
+   background-color: $primary;
+   transition: .3s ease background-color;
+
+   .dragger {
+      position: absolute;
+      padding-left: 35px;
+      padding-right: 20px;
+      border-top-left-radius: 9px;
+      border-bottom-left-radius: 9px;
+      height: 100%;
+      top: 0;
+      left: 0;
+      background: url("../res/hamburger.svg") no-repeat center;
+      background-size: 30px auto;
+      background-color: #585abc;
+      cursor: pointer;
+   }
+}
+
+draggable-element:hover {
+   background-color: #585abc;
 }
 
 tasklist {

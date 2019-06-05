@@ -81,7 +81,7 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = "./src/wwwroot/js/boards.js");
+/******/ 	return __webpack_require__(__webpack_require__.s = "./src/wwwroot/js/components/components.js");
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -290,18 +290,6 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) *
 
 /***/ }),
 
-/***/ "./src/wwwroot/js/boards.js":
-/*!**********************************!*\
-  !*** ./src/wwwroot/js/boards.js ***!
-  \**********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\n/*import \"./components/draggableElement\";\nimport \"./components/dialogBox\";*/\n__webpack_require__(/*! ./components/components */ \"./src/wwwroot/js/components/components.js\");\nconst boardListController_1 = __webpack_require__(/*! ./controllers/boardListController */ \"./src/wwwroot/js/controllers/boardListController.js\");\nconst addBoardDialog_1 = __webpack_require__(/*! ./dialogs/addBoardDialog */ \"./src/wwwroot/js/dialogs/addBoardDialog.js\");\nconst dialogBox_1 = __webpack_require__(/*! ./components/dialogBox */ \"./src/wwwroot/js/components/dialogBox.js\");\nwindow.addEventListener(\"load\", () => new Boards().initiate());\nclass Boards {\n    /**\n     * Add event listeners, dialogs that will be used, and more (on page load)\n     */\n    initiate() {\n        // Events\n        document.getElementById(\"addBoard\").addEventListener(\"click\", this.onAddBoardClick);\n        // Prepare dialog\n        let addDialog = new dialogBox_1.DialogBox(addBoardDialog_1.addBoardDialog, \"addBoardDialog\");\n        document.body.appendChild(addDialog);\n        addDialog.addEventListener(\"submitDialog\", (e) => this.addBoardItem(e.detail.name, e.detail.description));\n    }\n    /**\n     * Runs when the 'add board' button is clicked, shows the dialog\n     */\n    onAddBoardClick() {\n        const addBoardDialog = document.getElementById(\"addBoardDialog\");\n        addBoardDialog.shown = true;\n    }\n    ;\n    /** Adds a board item\n     * @param   name        {string} Board name.\n     * @param   description {string} Board description.\n     */\n    addBoardItem(name, description) {\n        const boardListController = new boardListController_1.BoardListController(document\n            .querySelector(\".board-list tasklist\"));\n        boardListController.addBoard(name, description);\n    }\n}\n\n\n//# sourceURL=webpack:///./src/wwwroot/js/boards.js?");
-
-/***/ }),
-
 /***/ "./src/wwwroot/js/components/components.js":
 /*!*************************************************!*\
   !*** ./src/wwwroot/js/components/components.js ***!
@@ -335,42 +323,6 @@ eval("\nvar __decorate = (this && this.__decorate) || function (decorators, targ
 
 "use strict";
 eval("\nvar __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {\n    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;\n    if (typeof Reflect === \"object\" && typeof Reflect.decorate === \"function\") r = Reflect.decorate(decorators, target, key, desc);\n    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;\n    return c > 3 && r && Object.defineProperty(target, key, r), r;\n};\nObject.defineProperty(exports, \"__esModule\", { value: true });\nconst lit_element_1 = __webpack_require__(/*! lit-element */ \"./node_modules/lit-element/lit-element.js\");\n/**\n * Lit-element that can be dragged and dropped. Needs a <tasklist> parent\n * and a <section> grandparent. Place a <placeholder> element inside the section\n * and style it as you wish.\n */\nlet Draggable = class Draggable extends lit_element_1.LitElement {\n    /**\n     * Lit-element that can be dragged and dropped. Needs a <tasklist> parent\n     * and a <section> grandparent. Place a <placeholder> element inside the section\n     * and style it as you wish.\n     */\n    constructor() {\n        super(...arguments);\n        this.placeholder = \"placeholder\";\n        this.mouseIsDown = false;\n        this.startPos = { X: 0, Y: 0 };\n        this.detached = false;\n    }\n    static get styles() {\n        return lit_element_1.css `\n      :host {\n        display: block;\n        -moz-user-select: none;\n        user-select: none;\n      }\n    `;\n    }\n    render() {\n        return lit_element_1.html `<slot></slot>`;\n    }\n    firstUpdated(changedProperties) {\n        let dragger = this.querySelector(\".dragger\");\n        if (dragger == undefined)\n            dragger = this;\n        dragger.addEventListener(\"click\", () => this.mouseIsDown = false); // otherwise it won't let go when you click\n        dragger.addEventListener('mousedown', e => this.onMouseDown(e));\n        document.body.addEventListener('mouseup', () => {\n            if (this.detached)\n                this.onMouseUp(this);\n        });\n        document.body.addEventListener('mousemove', e => {\n            if (this.mouseIsDown)\n                this.onMouseMove(e);\n        });\n    }\n    onMouseDown(e) {\n        this.mouseIsDown = true;\n        this.startPos = {\n            X: e.clientX - this.getBoundingClientRect().left,\n            Y: e.clientY - this.getBoundingClientRect().top\n        };\n    }\n    onMouseUp(element) {\n        element.mouseIsDown = false;\n        // Attach element\n        element.style.position = \"\";\n        element.style.width = \"\";\n        element.style.top = \"\";\n        element.style.left = \"\";\n        // Move to placeholder\n        const placeholder = element.parentElement.parentElement.querySelector(this.placeholder);\n        let taskListIndex = Array.from(placeholder.parentNode.parentNode.children)\n            .indexOf(placeholder.parentElement);\n        element.parentElement.children[taskListIndex]\n            .insertBefore(element, placeholder);\n        placeholder.style.display = \"none\";\n        element.detached = false;\n    }\n    onMouseMove(e) {\n        // Detach from list\n        if (!this.detached) {\n            const computedStyle = getComputedStyle(this);\n            // Placeholder\n            const placeholder = this.parentElement.parentElement.querySelector(this.placeholder);\n            this.parentElement.insertBefore(placeholder, this); // Move placeholder to list slot\n            Object.assign(placeholder.style, {\n                width: computedStyle.width,\n                height: computedStyle.height,\n                display: \"block\"\n            });\n            // Draggable\n            this.parentElement.parentElement.appendChild(this); // Move task out from tasklists, then get position: fixed\n            this.style.width = computedStyle.width;\n            this.style.position = \"fixed\";\n            this.detached = true;\n        }\n        const parentRect = this.parentElement.parentElement.getBoundingClientRect();\n        const newPos = {\n            X: e.clientX - this.startPos.X - parentRect.left,\n            Y: e.clientY - this.startPos.Y - parentRect.top\n        };\n        this.style.left = newPos.X + \"px\";\n        this.style.top = newPos.Y + \"px\";\n        // Show where item will be dropped\n        const elementsUnder = this.getRelatedElementsUnder();\n        // If a draggable is under, and the placeholder wasn't already inserted there\n        if (elementsUnder.closestDraggable != undefined) {\n            const placeholder = this.parentElement.parentElement.querySelector(this.placeholder);\n            const overTopHalf = elementsUnder.middlePoint.Y <= this.getMiddlePoint(elementsUnder.closestDraggable).Y;\n            // If over the top half of the element\n            if (overTopHalf && this.lastHoveredDraggable != elementsUnder.closestDraggable) {\n                elementsUnder.taskList.insertBefore(placeholder, elementsUnder.closestDraggable);\n                this.lastHoveredDraggable = elementsUnder.closestDraggable; // Remember last placement \n            }\n            else if (this.lastHoveredDraggable != elementsUnder.closestDraggable.nextSibling) { // If over the bottom half of the element\n                elementsUnder.taskList.insertBefore(placeholder, elementsUnder.closestDraggable.nextSibling);\n                this.lastHoveredDraggable = elementsUnder.closestDraggable.nextSibling;\n            }\n        }\n    }\n    /**\n     * Get <draggable> element under the element currently being dragged, and\n     * also the hovered tasklist.\n     */\n    getRelatedElementsUnder() {\n        const middlePoint = this.getMiddlePoint();\n        const elementsOnPoint = document.elementsFromPoint(middlePoint.X, middlePoint.Y);\n        const closestDraggable = elementsOnPoint.filter(x => x.tagName == \"DRAGGABLE-ELEMENT\")[1];\n        const taskList = elementsOnPoint.filter(x => x.tagName == \"TASKLIST\")[0];\n        return { closestDraggable, taskList, middlePoint };\n    }\n    /**\n     * Get the global coordinates of the elements middle point.\n     * @param   {element} element The element to get the middle point of\n     */\n    getMiddlePoint(element = this) {\n        const rect = element.getBoundingClientRect();\n        return {\n            X: rect.width / 2 + rect.left,\n            Y: rect.height / 2 + rect.top\n        };\n    }\n};\nDraggable = __decorate([\n    lit_element_1.customElement('draggable-element')\n], Draggable);\nexports.Draggable = Draggable;\n\n\n//# sourceURL=webpack:///./src/wwwroot/js/components/draggableElement.js?");
-
-/***/ }),
-
-/***/ "./src/wwwroot/js/controllers/boardListController.js":
-/*!***********************************************************!*\
-  !*** ./src/wwwroot/js/controllers/boardListController.js ***!
-  \***********************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\n/**\n * Controller to add/remove/edit/etc. items in a board list.\n */\nObject.defineProperty(exports, \"__esModule\", { value: true });\nclass BoardListController {\n    constructor(boardlist) {\n        this._boardlist = boardlist;\n    }\n    /**\n     * Add a board to the board list.\n     * @param   name        {string} Board name.\n     * @param   description {string} Board description.\n     * @param   color       {string} Board background color as HEX value.\n     */\n    addBoard(name, description, color = \"\") {\n        const item = document.createElement(\"draggable-element\");\n        item.insertAdjacentHTML(\"beforeend\", `<span class=\"dragger\"></span><h2>${name}</h2><p>${description}</p>`);\n        if (color != \"\")\n            item.style.backgroundColor = color;\n        this._boardlist.appendChild(item);\n        item.addEventListener(\"click\", (e) => this.onClickEvent(e));\n    }\n    /**\n     * Fires when the board item is clicked, ends if the clicked part was the dragger.\n     */\n    onClickEvent(e) {\n        const draggerUnder = document.elementsFromPoint(e.clientX, e.clientY)\n            .filter(x => x.classList.contains(\"dragger\"));\n        if (draggerUnder.length > 0)\n            return;\n        alert(\"clicked\");\n    }\n}\nexports.BoardListController = BoardListController;\n\n\n//# sourceURL=webpack:///./src/wwwroot/js/controllers/boardListController.js?");
-
-/***/ }),
-
-/***/ "./src/wwwroot/js/dialogs/addBoardDialog.js":
-/*!**************************************************!*\
-  !*** ./src/wwwroot/js/dialogs/addBoardDialog.js ***!
-  \**************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nconst inputType_1 = __webpack_require__(/*! ../enums/inputType */ \"./src/wwwroot/js/enums/inputType.js\");\n/** Dialog template for adding board items\n */\nexports.addBoardDialog = {\n    title: \"Add Board\",\n    primaryButton: \"Add\",\n    inputs: [\n        {\n            key: \"name\",\n            value: \"Board name\",\n            inputType: inputType_1.InputType.Text\n        },\n        {\n            key: \"description\",\n            value: \"Short description\",\n            inputType: inputType_1.InputType.Text\n        }\n    ]\n};\n\n\n//# sourceURL=webpack:///./src/wwwroot/js/dialogs/addBoardDialog.js?");
-
-/***/ }),
-
-/***/ "./src/wwwroot/js/enums/inputType.js":
-/*!*******************************************!*\
-  !*** ./src/wwwroot/js/enums/inputType.js ***!
-  \*******************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar InputType;\n(function (InputType) {\n    InputType[InputType[\"Text\"] = 0] = \"Text\";\n})(InputType = exports.InputType || (exports.InputType = {}));\n\n\n//# sourceURL=webpack:///./src/wwwroot/js/enums/inputType.js?");
 
 /***/ })
 

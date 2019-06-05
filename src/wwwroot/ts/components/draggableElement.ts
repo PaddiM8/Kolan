@@ -51,7 +51,6 @@ export class Draggable extends LitElement {
 
    onMouseUp(element) {
       element.mouseIsDown = false;
-      const elementsUnder = element.getRelatedElementsUnder();
 
       // Attach element
       element.style.position = "";
@@ -61,7 +60,10 @@ export class Draggable extends LitElement {
 
       // Move to placeholder
       const placeholder: HTMLElement = element.parentElement.parentElement.querySelector(this.placeholder);
-      elementsUnder.taskList.insertBefore(element, placeholder);
+      let taskListIndex = Array.from(placeholder.parentNode.parentNode.children)
+                                                .indexOf(placeholder.parentElement);
+      element.parentElement.children[taskListIndex]
+         .insertBefore(element, placeholder);
       placeholder.style.display = "none";
       element.detached = false;
    }

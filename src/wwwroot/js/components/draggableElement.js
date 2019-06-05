@@ -61,7 +61,6 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
     }
     onMouseUp(element) {
         element.mouseIsDown = false;
-        const elementsUnder = element.getRelatedElementsUnder();
         // Attach element
         element.style.position = "";
         element.style.width = "";
@@ -69,7 +68,10 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
         element.style.left = "";
         // Move to placeholder
         const placeholder = element.parentElement.parentElement.querySelector(this.placeholder);
-        elementsUnder.taskList.insertBefore(element, placeholder);
+        let taskListIndex = Array.from(placeholder.parentNode.parentNode.children)
+            .indexOf(placeholder.parentElement);
+        element.parentElement.children[taskListIndex]
+            .insertBefore(element, placeholder);
         placeholder.style.display = "none";
         element.detached = false;
     }

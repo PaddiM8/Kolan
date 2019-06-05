@@ -1,12 +1,21 @@
 import { InputType } from "../enums/inputType";
+import { IDialogTemplate } from "./IDialogTemplate";
 
-export const addBoardDialog = [
-   {
-      value: "Board Name",
-      inputType: InputType.Text
-   },
-   {
-      description: "Short Description",
-      inputType: InputType.Text
-   }
-]
+/** Dialog template for adding board items
+ */
+export const addBoardDialog: IDialogTemplate = {
+   title: "Add Board",
+   primaryButton: "Add",
+   inputs: [
+      {
+         key: "name",
+         value: "Board name",
+         inputType: InputType.Text
+      },
+      {
+         key: "description",
+         value: "Short description",
+         inputType: InputType.Text
+      }
+   ]
+}

@@ -9,7 +9,7 @@ const prefix  = require("gulp-autoprefixer");
 sass.compiler = require("node-sass");
 
 gulp.task("sass", function() {
-   return gulp.src("./src/wwwroot/scss/*.scss")
+   return gulp.src("./src/wwwroot/scss/**/*.scss")
       .pipe(sass({
          outputStyle: 'compressed'
       }).on("error", sass.logError))
@@ -51,7 +51,7 @@ gulp.task("doc", function() {
 });
 
 gulp.task("watch", function() {
-   gulp.watch("./src/wwwroot/scss/*.scss", gulp.series("sass"));
+   gulp.watch("./src/wwwroot/scss/**/*.scss", gulp.series("sass"));
    gulp.watch("./src/wwwroot/ts/**/*.ts", gulp.series("ts"));
    gulp.watch("./src/wwwroot/js/**/*.js", gulp.series("webpack"));
 });

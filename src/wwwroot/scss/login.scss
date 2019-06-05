@@ -1,6 +1,7 @@
-body {
-   margin: 0;
-}
+@import "./common";
+@import "./mixins";
+
+@include ui-elements;
 
 header h1  {
    font-size: 5em;

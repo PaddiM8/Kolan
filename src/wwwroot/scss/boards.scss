@@ -1,4 +1,4 @@
-@import 'common.scss';
+@import 'common';
 
 body {
    margin: 0;
@@ -71,11 +71,11 @@ draggable-element {
    padding: 18px 28px 20px 75px;
    margin-bottom: 15px;
    border-radius: 9px;
-   @extend .shadow;
    position: relative;
    cursor: pointer;
    background-color: $primary;
    transition: .3s ease background-color;
+   @extend .shadow;
 
    .dragger {
       position: absolute;
@@ -90,6 +90,11 @@ draggable-element {
       background-size: 30px auto;
       background-color: #585abc;
       cursor: pointer;
+   }
+
+   h2 {
+      font-weight: 500;
+      font-size: 1.8em;
    }
 }
 

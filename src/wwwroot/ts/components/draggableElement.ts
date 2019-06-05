@@ -10,6 +10,7 @@ export class Draggable extends LitElement {
    private placeholder = "placeholder";
    private mouseIsDown = false;
    private startPos = {X: 0, Y: 0};
+   private mouseDownPos = {X: 0, Y: 0};
    private detached = false;
    private lastHoveredDraggable;
 
@@ -33,11 +34,18 @@ export class Draggable extends LitElement {
 
       dragger.addEventListener("click", () => this.mouseIsDown = false); // otherwise it won't let go when you click
       dragger.addEventListener('mousedown', e => this.onMouseDown(e));
-      document.body.addEventListener('mouseup', () => {
-         if (this.detached) this.onMouseUp(this);
+      this.addEventListener('click', e => this.onClick(e));
+      document.body.addEventListener('mouseup', (e) => {
+         if (this.detached) this.onMouseUp(this, e);
       });
       document.body.addEventListener('mousemove', e => {
          if (this.mouseIsDown) this.onMouseMove(e);
+      });
+      this.addEventListener("mousedown", e => { // Save mouse coordinates when mouse down anywhere on element
+         this.mouseDownPos = {
+            X: e.clientX,
+            Y: e.clientY
+         };
       });
    }
 
@@ -49,7 +57,17 @@ export class Draggable extends LitElement {
       };
    }
 
-   onMouseUp(element) {
+   onClick(e) {
+      // If mouse is at same position as before, it's just a click.
+      // Fire the "draggableClick" event, since a normal click event also fires
+      // even when the element has been dragged.
+      if (this.mouseDownPos.X == e.clientX &&
+         this.mouseDownPos.Y == e.clientY) {
+         this.dispatchEvent(new CustomEvent("draggableClick"));
+      }
+   }
+
+   onMouseUp(element, e) {
       element.mouseIsDown = false;
 
       // Attach element
@@ -61,7 +79,7 @@ export class Draggable extends LitElement {
       // Move to placeholder
       const placeholder: HTMLElement = element.parentElement.parentElement.querySelector(this.placeholder);
       let taskListIndex = Array.from(placeholder.parentNode.parentNode.children)
-                                                .indexOf(placeholder.parentElement);
+         .indexOf(placeholder.parentElement);
       element.parentElement.children[taskListIndex]
          .insertBefore(element, placeholder);
       placeholder.style.display = "none";

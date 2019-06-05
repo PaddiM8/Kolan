@@ -23,6 +23,7 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
         this.placeholder = "placeholder";
         this.mouseIsDown = false;
         this.startPos = { X: 0, Y: 0 };
+        this.mouseDownPos = { X: 0, Y: 0 };
         this.detached = false;
     }
     static get styles() {
@@ -43,13 +44,20 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
             dragger = this;
         dragger.addEventListener("click", () => this.mouseIsDown = false); // otherwise it won't let go when you click
         dragger.addEventListener('mousedown', e => this.onMouseDown(e));
-        document.body.addEventListener('mouseup', () => {
+        this.addEventListener('click', e => this.onClick(e));
+        document.body.addEventListener('mouseup', (e) => {
             if (this.detached)
-                this.onMouseUp(this);
+                this.onMouseUp(this, e);
         });
         document.body.addEventListener('mousemove', e => {
             if (this.mouseIsDown)
                 this.onMouseMove(e);
+        });
+        this.addEventListener("mousedown", e => {
+            this.mouseDownPos = {
+                X: e.clientX,
+                Y: e.clientY
+            };
         });
     }
     onMouseDown(e) {
@@ -59,7 +67,16 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
             Y: e.clientY - this.getBoundingClientRect().top
         };
     }
-    onMouseUp(element) {
+    onClick(e) {
+        // If mouse is at same position as before, it's just a click.
+        // Fire the "draggableClick" event, since a normal click event also fires
+        // even when the element has been dragged.
+        if (this.mouseDownPos.X == e.clientX &&
+            this.mouseDownPos.Y == e.clientY) {
+            this.dispatchEvent(new CustomEvent("draggableClick"));
+        }
+    }
+    onMouseUp(element, e) {
         element.mouseIsDown = false;
         // Attach element
         element.style.position = "";

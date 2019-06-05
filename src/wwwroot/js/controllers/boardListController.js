@@ -19,17 +19,13 @@ class BoardListController {
         if (color != "")
             item.style.backgroundColor = color;
         this._boardlist.appendChild(item);
-        item.addEventListener("click", (e) => this.onClickEvent(e));
+        item.addEventListener("draggableClick", (e) => this.onClickEvent(e));
     }
     /**
      * Fires when the board item is clicked, ends if the clicked part was the dragger.
      */
     onClickEvent(e) {
-        const draggerUnder = document.elementsFromPoint(e.clientX, e.clientY)
-            .filter(x => x.classList.contains("dragger"));
-        if (draggerUnder.length > 0)
-            return;
-        alert("clicked");
+        console.log("clicked");
     }
 }
 exports.BoardListController = BoardListController;

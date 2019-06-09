@@ -15,13 +15,13 @@ header {
    }
 }
 
-.boards, .board-head {
+.tasklists, .list-head {
    display: grid;
    width: 100%;
    grid-template-columns: repeat(4, 1fr);
 }
 
-.board-head .item {
+.list-head .item {
    width: 100%;
    border-right: 2px solid $gray;
    height: 50px;
@@ -29,6 +29,16 @@ header {
    text-align: center;
    line-height: 50px;
    border-bottom: 2px solid $gray;
+}
+
+.plus {
+   display: inline;
+   float: right;
+   margin-right: 10px;
+   font-size: 30px;
+   font-weight: 100;
+   color: black;
+   cursor: pointer;
 }
 
 placeholder {
@@ -40,4 +50,24 @@ tasklist {
    min-height: calc(100vh - 144px);
    border-right: 2px solid $gray;
    box-sizing: border-box;
+
 }
+
+placeholder {
+   display: none;
+   padding: 17px;
+   border: 3px dashed black;
+   z-index: 9;
+   margin: 10px;
+}
+
+draggable-element {
+   display: block;
+   padding: 20px;
+   background-color: blue;
+   border-radius: 9px;
+   color: white;
+   margin: 10px;
+   user-select: none;
+}
+

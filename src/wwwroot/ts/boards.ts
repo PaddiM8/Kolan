@@ -1,35 +1,25 @@
-/*import "./components/draggableElement";
-import "./components/dialogBox";*/
 import "./components/components";
 import { BoardListController } from "./controllers/boardListController";
 import { addBoardDialog } from "./dialogs/addBoardDialog";
 import { DialogBox } from "./components/dialogBox";
 
-window.addEventListener("load", () => new Boards().initiate());
+window.addEventListener("load", () => new Boards());
 
 class Boards {
    /**
     * Add event listeners, dialogs that will be used, and more (on page load)
     */
-   initiate() {
-      // Events
-      document.getElementById("addBoard").addEventListener("click",
-         this.onAddBoardClick);
-
+   constructor() {
       // Prepare dialog
       let addDialog = new DialogBox(addBoardDialog, "addBoardDialog");
       document.body.appendChild(addDialog);
       addDialog.addEventListener("submitDialog", (e: CustomEvent) =>
          this.addBoardItem(e.detail.name, e.detail.description));
-   }
 
-   /**
-    * Runs when the 'add board' button is clicked, shows the dialog
-    */
-   onAddBoardClick() {
-      const addBoardDialog: any = document.getElementById("addBoardDialog");
-      addBoardDialog.shown = true;
-   };
+      // Events
+      document.getElementById("addBoard").addEventListener("click", () =>
+         addDialog.shown = true);
+   }
 
    /** Adds a board item
     * @param   name        {string} Board name.

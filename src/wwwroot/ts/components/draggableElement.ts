@@ -31,8 +31,8 @@ export class Draggable extends LitElement {
    firstUpdated(changedProperties) {
       let dragger = this.querySelector(".dragger");
       if (dragger == undefined) dragger = this;
+      else dragger.addEventListener("click", () => this.mouseIsDown = false); // otherwise it won't let go when you click
 
-      dragger.addEventListener("click", () => this.mouseIsDown = false); // otherwise it won't let go when you click
       dragger.addEventListener('mousedown', e => this.onMouseDown(e));
       this.addEventListener('click', e => this.onClick(e));
       document.body.addEventListener('mouseup', (e) => {
@@ -115,12 +115,13 @@ export class Draggable extends LitElement {
       this.style.left = newPos.X + "px";
       this.style.top = newPos.Y + "px";
 
-      // Show where item will be dropped
+      /// Show where item will be dropped ///
       const elementsUnder = this.getRelatedElementsUnder();
+      const placeholder: HTMLElement = this.parentElement.parentElement.querySelector(this.placeholder);
+      if (elementsUnder.taskList == undefined) return;
 
       // If a draggable is under, and the placeholder wasn't already inserted there
       if (elementsUnder.closestDraggable != undefined) {
-         const placeholder: HTMLElement = this.parentElement.parentElement.querySelector(this.placeholder);
          const overTopHalf = elementsUnder.middlePoint.Y <= this.getMiddlePoint(elementsUnder.closestDraggable).Y;
 
          // If over the top half of the element
@@ -131,6 +132,8 @@ export class Draggable extends LitElement {
             elementsUnder.taskList.insertBefore(placeholder, elementsUnder.closestDraggable.nextSibling);
             this.lastHoveredDraggable = elementsUnder.closestDraggable.nextSibling;
          }
+      } else if (elementsUnder.taskList.children.length == 0) { // If empty tasklist
+         elementsUnder.taskList.appendChild(placeholder);
       }
    }
 

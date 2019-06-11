@@ -118,22 +118,28 @@ export class Draggable extends LitElement {
       /// Show where item will be dropped ///
       const elementsUnder = this.getRelatedElementsUnder();
       const placeholder: HTMLElement = this.parentElement.parentElement.querySelector(this.placeholder);
-      if (elementsUnder.taskList == undefined) return;
+      const tasklistElements = elementsUnder.tasklist.children;
+      let lastRect = undefined;
+      if (tasklistElements.length > 0 )
+         lastRect = tasklistElements[tasklistElements.length - 1].getBoundingClientRect(); // Get last element in tasklist if not empty
+      if (elementsUnder.tasklist == undefined) return;
 
       // If a draggable is under, and the placeholder wasn't already inserted there
-      if (elementsUnder.closestDraggable != undefined) {
+      if (elementsUnder.closestDraggable != undefined && elementsUnder.closestDraggable != this) {
          const overTopHalf = elementsUnder.middlePoint.Y <= this.getMiddlePoint(elementsUnder.closestDraggable).Y;
 
          // If over the top half of the element
          if  (overTopHalf && this.lastHoveredDraggable != elementsUnder.closestDraggable) {
-            elementsUnder.taskList.insertBefore(placeholder, elementsUnder.closestDraggable);
-            this.lastHoveredDraggable = elementsUnder.closestDraggable; // Remember last placement 
+            elementsUnder.tasklist.insertBefore(placeholder, elementsUnder.closestDraggable);
+            this.lastHoveredDraggable = elementsUnder.closestDraggable; // Remember last placement
          } else if (this.lastHoveredDraggable != elementsUnder.closestDraggable.nextSibling) { // If over the bottom half of the element
-            elementsUnder.taskList.insertBefore(placeholder, elementsUnder.closestDraggable.nextSibling);
+            elementsUnder.tasklist.insertBefore(placeholder, elementsUnder.closestDraggable.nextSibling);
             this.lastHoveredDraggable = elementsUnder.closestDraggable.nextSibling;
          }
-      } else if (elementsUnder.taskList.children.length == 0) { // If empty tasklist
-         elementsUnder.taskList.appendChild(placeholder);
+      } else if (lastRect == undefined) { // If empty tasklist
+         elementsUnder.tasklist.appendChild(placeholder);
+      } else if (this.getMiddlePoint().Y > lastRect.top + lastRect.height) {  // If at bottom
+         elementsUnder.tasklist.appendChild(placeholder);
       }
    }
 
@@ -144,10 +150,18 @@ export class Draggable extends LitElement {
    private getRelatedElementsUnder() {
       const middlePoint = this.getMiddlePoint();
       const elementsOnPoint = document.elementsFromPoint(middlePoint.X, middlePoint.Y);
-      const closestDraggable = elementsOnPoint.filter(x => x.tagName == "DRAGGABLE-ELEMENT")[1];
-      const taskList = elementsOnPoint.filter(x => x.tagName == "TASKLIST")[0];
+      let   closestDraggable = elementsOnPoint.filter(x => x.tagName == "DRAGGABLE-ELEMENT")[1];
+      const tasklist = elementsOnPoint.filter(x => x.tagName == "TASKLIST")[0];
 
-      return { closestDraggable, taskList, middlePoint };
+      if (tasklist != undefined && closestDraggable == undefined) {
+         const under = document.elementsFromPoint(middlePoint.X, middlePoint.Y + 40)
+            .filter(x => x.tagName == "DRAGGABLE-ELEMENT");
+
+         if (under[1] == undefined) closestDraggable = under[0];
+         else closestDraggable = under[1];
+      }
+
+      return { closestDraggable, tasklist, middlePoint };
    }
 
    /**

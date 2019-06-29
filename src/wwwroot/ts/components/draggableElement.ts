@@ -58,6 +58,10 @@ export class Draggable extends LitElement {
    }
 
    onClick(e) {
+      this.mouseIsDown = false;
+      if (e.target != this && e.target.parentElement != this) // Ignore if it's a grand-child
+         return;
+
       // If mouse is at same position as before, it's just a click.
       // Fire the "draggableClick" event, since a normal click event also fires
       // even when the element has been dragged.
@@ -87,6 +91,8 @@ export class Draggable extends LitElement {
    }
 
    onMouseMove(e) {
+      if (e.buttons != 1) return; // If left-click mouse button is not being held down, return
+
       // Detach from list
       if (!this.detached) {
          const computedStyle = getComputedStyle(this);
@@ -108,7 +114,7 @@ export class Draggable extends LitElement {
 
       const parentRect = this.parentElement.parentElement.getBoundingClientRect();
       const newPos = {
-         X: e.clientX - this.startPos.X - parentRect.left,
+         X: e.clientX - this.startPos.X - parentRect.left - 20,
          Y: e.clientY - this.startPos.Y - parentRect.top
       }
 

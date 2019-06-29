@@ -24,6 +24,6 @@ class Board {
     }
     addTask(tasklist, title, description) {
         const tasklistController = new tasklistController_1.TasklistController(tasklist);
-        tasklistController.addBoard(title, description);
+        tasklistController.addTask(title, description);
     }
 }

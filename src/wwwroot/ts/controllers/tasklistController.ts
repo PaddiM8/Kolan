@@ -17,14 +17,23 @@ export class TasklistController {
     * @param   description {string} Task description.
     * @param   color       {string} Task background color as HEX value.
     */
-   public addBoard(title: string, description: string, color: string = "") {
+   public addTask(title: string, description: string, color: string = "") {
       const item = new Draggable();
       item.insertAdjacentHTML("beforeend",
-         `<h2>${title}</h2><p>${description}</p>`);
+         `
+         <h2>${title}</h2><p>${description}</p>
+         <div class="overlay">
+            <span class="edit overlay-button"></span>
+            <span class="options overlay-button"></span>
+         </div>
+         `);
+
       if (color != "") item.style.backgroundColor = color;
       this._tasklist.appendChild(item);
 
-      item.addEventListener("draggableClick", (e) => this.onClickEvent(e));
+      item.addEventListener("draggableClick", e => this.onClickEvent(e));
+      item.addEventListener("mouseover", () => this.onHoverEvent(item));
+      item.addEventListener("mouseleave", () => this.onMouseLeaveEvent(item));
    }
 
    /**
@@ -32,5 +41,19 @@ export class TasklistController {
     */
    onClickEvent(e) {
       console.log("clicked");
+   }
+
+   /**
+    * Fires when the board item is hovered
+    */
+   onHoverEvent(item) {
+      item.querySelector(".overlay").style.display = "block";
+   }
+
+   /**
+    * Fires when the mouse leaves the board item
+    */
+   onMouseLeaveEvent(item) {
+      item.querySelector(".overlay").style.display = "";
    }
 }

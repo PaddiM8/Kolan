@@ -7,6 +7,7 @@ import { LitElement, html, css, property, customElement } from 'lit-element';
  */
 @customElement('draggable-element')
 export class Draggable extends LitElement {
+   @property() movable = true;
    private placeholder = "placeholder";
    private mouseIsDown = false;
    private startPos = {X: 0, Y: 0};
@@ -50,7 +51,7 @@ export class Draggable extends LitElement {
    }
 
    onMouseDown(e) {
-      this.mouseIsDown = true;
+      this.mouseIsDown = true && this.movable;
       this.startPos = {
          X: e.clientX - this.getBoundingClientRect().left,
          Y: e.clientY - this.getBoundingClientRect().top

@@ -20,6 +20,7 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
      */
     constructor() {
         super(...arguments);
+        this.movable = true;
         this.placeholder = "placeholder";
         this.mouseIsDown = false;
         this.startPos = { X: 0, Y: 0 };
@@ -62,7 +63,7 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
         });
     }
     onMouseDown(e) {
-        this.mouseIsDown = true;
+        this.mouseIsDown = true && this.movable;
         this.startPos = {
             X: e.clientX - this.getBoundingClientRect().left,
             Y: e.clientY - this.getBoundingClientRect().top
@@ -183,6 +184,9 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
         };
     }
 };
+__decorate([
+    lit_element_1.property()
+], Draggable.prototype, "movable", void 0);
 Draggable = __decorate([
     lit_element_1.customElement('draggable-element')
 ], Draggable);

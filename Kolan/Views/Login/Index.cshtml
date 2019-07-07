@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+      <title>Kolan</title>
+      <link rel="stylesheet" type="text/css" href="https://rsms.me/inter/inter.css">
+      <link rel="stylesheet" type="text/css" href="~/css/login.css">
+      <script src="~/dist/components.js"></script>
+   </head>
+   <body>
+      <main>
+         <header>
+            <h1>Kolan</h1>
+         </header>
+         <section>
+            @model LoginViewModel
+            <form asp-action="Login" method="post">
+               <label class="error">@Html.ValidationMessageFor(m => m.Username)</label>
+               <input asp-for="Username" class="input" placeholder="Username..." /><br />
+               <label class="error">@Html.ValidationMessageFor(m => m.Password)</label>
+               <input asp-for="Password" class="input" placeholder="Password..." /><br />
+               <input type="submit" value="Login" />
+            </form>
+         </section>
+      </main>
+   </body>
+</html>

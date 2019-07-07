@@ -9,7 +9,7 @@ const prefix  = require("gulp-autoprefixer");
 sass.compiler = require("node-sass");
 
 gulp.task("sass", function() {
-   return gulp.src("./src/wwwroot/scss/**/*.scss")
+   return gulp.src("./Kolan/wwwroot/scss/**/*.scss")
       .pipe(sass({
          outputStyle: 'compressed'
       }).on("error", sass.logError))
@@ -17,22 +17,22 @@ gulp.task("sass", function() {
          browsers: ['last 2 versions'],
          cascade: false
       }))
-      .pipe(gulp.dest("./src/wwwroot/css"));
+      .pipe(gulp.dest("./Kolan/wwwroot/css"));
 });
 
 gulp.task("ts", function() {
-   return gulp.src("./src/wwwroot/ts/**/*.ts")
+   return gulp.src("./Kolan/wwwroot/ts/**/*.ts")
       .pipe(ts({
          experimentalDecorators: true,
          target: "ES6",
          lib: ["es2017", "dom"],
          module: "commonjs"
       }))
-      .pipe(gulp.dest("./src/wwwroot/js"));
+      .pipe(gulp.dest("./Kolan/wwwroot/js"));
 });
 
 gulp.task("compress", () => {
-   return gulp.src("./src/wwwroot/js/**/*.js")
+   return gulp.src("./Kolan/wwwroot/js/**/*.js")
       .pipe(terser({
          compress: true,
          mangle: true
@@ -40,20 +40,20 @@ gulp.task("compress", () => {
 });
 
 gulp.task('webpack', function() {
-   return gulp.src('src/wwwroot/js/index.js')
+   return gulp.src('Kolan/wwwroot/js/index.js')
       .pipe(webpack(require('./webpack.config.js')))
-      .pipe(gulp.dest('src/wwwroot/dist/'));
+      .pipe(gulp.dest('Kolan/wwwroot/dist/'));
 });
 
 gulp.task("doc", function() {
-   return gulp.src(["README.md", "./src/wwwroot/ts/**/*.ts"], {read: false})
+   return gulp.src(["README.md", "./Kolan/wwwroot/ts/**/*.ts"], {read: false})
       .pipe(jsdoc({out: "./docs"}));
 });
 
 gulp.task("watch", function() {
-   gulp.watch("./src/wwwroot/scss/**/*.scss", gulp.series("sass"));
-   gulp.watch("./src/wwwroot/ts/**/*.ts", gulp.series("ts"));
-   gulp.watch("./src/wwwroot/js/**/*.js", gulp.series("webpack"));
+   gulp.watch("./Kolan/wwwroot/scss/**/*.scss", gulp.series("sass"));
+   gulp.watch("./Kolan/wwwroot/ts/**/*.ts", gulp.series("ts"));
+   gulp.watch("./Kolan/wwwroot/js/**/*.js", gulp.series("webpack"));
 });
 
 gulp.task("default", gulp.series("sass", "ts", "webpack", "watch"));

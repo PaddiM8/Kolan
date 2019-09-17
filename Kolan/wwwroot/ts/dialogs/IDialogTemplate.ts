@@ -6,9 +6,12 @@ import { InputType } from "../enums/inputType";
  * Input elements
  */
 export interface IDialogTemplate {
-   title: string;
-   primaryButton: string;
-   inputs: IDialogInputs[];
+    requestAction: string;
+    requestMethod: string;
+    requestType: string;
+    title: string;
+    primaryButton: string;
+    inputs: IDialogInputs[];
 }
 
 /** Defines dialog inputs
@@ -17,7 +20,7 @@ export interface IDialogTemplate {
  * InputType
  */
 interface IDialogInputs {
-   key: string;
-   value: string;
-   inputType: InputType;
+    key: string;
+    value: string;
+    inputType: InputType;
 }

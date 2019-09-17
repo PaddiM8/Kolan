@@ -1,8 +1,10 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const apiRequester_1 = require("../apiRequester");
+const requestParameter_1 = require("../requestParameter");
 /**
  * Controller to add/remove/edit/etc. items in a board list.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
 class BoardListController {
     constructor(boardlist) {
         this._boardlist = boardlist;
@@ -19,13 +21,20 @@ class BoardListController {
         if (color != "")
             item.style.backgroundColor = color;
         this._boardlist.appendChild(item);
-        item.addEventListener("draggableClick", (e) => this.onClickEvent(e));
+        item.addEventListener("draggableClick", e => this.onClickEvent(e));
+        item.addEventListener("taskInternalMove", e => this.onInternalMove(e["detail"]["fromIndex"], e["detail"]["toIndex"]), false);
     }
     /**
      * Fires when the board item is clicked, ends if the clicked part was the dragger.
      */
     onClickEvent(e) {
         console.log("clicked");
+    }
+    onInternalMove(fromIndex, toIndex) {
+        new apiRequester_1.ApiRequester().send("Boards", "ChangeOrder", "POST", [
+            new requestParameter_1.RequestParameter("fromIndex", fromIndex),
+            new requestParameter_1.RequestParameter("toIndex", toIndex)
+        ]);
     }
 }
 exports.BoardListController = BoardListController;

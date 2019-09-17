@@ -68,6 +68,8 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
             X: e.clientX - this.getBoundingClientRect().left,
             Y: e.clientY - this.getBoundingClientRect().top
         };
+        this.currentTaskList = this.parentElement;
+        this.currentIndex = this.getArrayItemIndex(this.parentElement.children, this);
     }
     onClick(e) {
         this.mouseIsDown = false;
@@ -89,13 +91,29 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
         element.style.top = "";
         element.style.left = "";
         // Move to placeholder
-        const placeholder = element.parentElement.parentElement.querySelector(this.placeholder);
-        let taskListIndex = Array.from(placeholder.parentNode.parentNode.children)
-            .indexOf(placeholder.parentElement);
-        element.parentElement.children[taskListIndex]
-            .insertBefore(element, placeholder);
+        const placeholder = this.currentTaskList.parentElement.querySelector(this.placeholder);
+        const targetTaskList = placeholder.parentElement;
+        const targetIndex = this.getArrayItemIndex(placeholder.parentElement.children, placeholder);
+        placeholder.parentElement.insertBefore(element, placeholder);
         placeholder.style.display = "none";
         element.detached = false;
+        if (this.currentTaskList != targetTaskList) { // If moved to another tasklist
+            this.dispatchEvent(new CustomEvent("taskExternalMove", {
+                "detail": {
+                    fromTaskList: this.currentTaskList,
+                    toTaskList: targetTaskList,
+                    toIndex: targetIndex
+                }
+            }));
+        }
+        else if (this.currentIndex != targetIndex) { // If moved within the same tasklist.
+            this.dispatchEvent(new CustomEvent("taskInternalMove", {
+                "detail": {
+                    fromIndex: this.currentIndex,
+                    toIndex: targetIndex
+                }
+            }));
+        }
     }
     onMouseMove(e) {
         if (e.buttons != 1)
@@ -182,6 +200,9 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
             X: rect.width / 2 + rect.left,
             Y: rect.height / 2 + rect.top
         };
+    }
+    getArrayItemIndex(array, item) {
+        return Array.from(array).indexOf(item);
     }
 };
 __decorate([

@@ -2,12 +2,12 @@ import { LitElement, html, customElement, property } from 'lit-element';
 
 @customElement("text-input")
 class TextInput extends LitElement {
-   @property() placeholder = "";
-   @property() type = "";
+    @property() placeholder = "";
+    @property() type = "";
 
-   render(){
-      console.log("hi");
-      return html`
+    render(){
+        console.log("hi");
+        return html`
       <style>
          :host input {
             padding: 10px 12px 10px 12px;
@@ -29,5 +29,5 @@ class TextInput extends LitElement {
       hi
       <input type="text" placeholder="${html`${this.placeholder}`} />"
     `;
-   }
+    }
 }

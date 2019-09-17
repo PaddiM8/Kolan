@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace Kolan
 {
-   class User
+   public class User
    {
       [JsonProperty("id")]
       public string Id { get; set; }

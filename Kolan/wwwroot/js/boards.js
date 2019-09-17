@@ -4,6 +4,7 @@ require("./components/components");
 const boardListController_1 = require("./controllers/boardListController");
 const addBoardDialog_1 = require("./dialogs/addBoardDialog");
 const dialogBox_1 = require("./components/dialogBox");
+const apiRequester_1 = require("./apiRequester");
 window.addEventListener("load", () => new Boards());
 class Boards {
     /**
@@ -14,6 +15,8 @@ class Boards {
         let addDialog = new dialogBox_1.DialogBox(addBoardDialog_1.addBoardDialog, "addBoardDialog");
         document.body.appendChild(addDialog);
         addDialog.addEventListener("submitDialog", (e) => this.addBoardItem(e.detail.name, e.detail.description));
+        // Load boards
+        this.loadBoards();
         // Events
         document.getElementById("addBoard").addEventListener("click", () => addDialog.shown = true);
     }
@@ -25,5 +28,13 @@ class Boards {
         const boardListController = new boardListController_1.BoardListController(document
             .querySelector(".board-list tasklist"));
         boardListController.addBoard(name, description);
+    }
+    loadBoards() {
+        new apiRequester_1.ApiRequester().send("Boards", "", "GET").then(result => {
+            const boards = JSON.parse(result.toString());
+            for (const item of boards) {
+                this.addBoardItem(item.board.name, item.board.description);
+            }
+        });
     }
 }

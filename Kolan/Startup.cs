@@ -16,6 +16,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.CookiePolicy;
+using Kolan.Repositories;
 
 namespace Kolan
 {
@@ -32,6 +33,10 @@ namespace Kolan
       // This method gets called by the runtime. Use this method to add services to the container.
       public void ConfigureServices(IServiceCollection services)
       {
+          // Dependency injection
+          services.AddSingleton<UnitOfWork>(new UnitOfWork(Database.Client));
+
+          // Security
          var signKey = new SymmetricSecurityKey(Encoding.UTF8
                .GetBytes(Config.Values.SecurityKey));
 
@@ -97,6 +102,10 @@ namespace Kolan
                routes.MapRoute(
                      name: "default",
                      template: "{controller=Login}/{action=Index}/{id?}");
+
+               routes.MapRoute(
+                     name: "api",
+                     template: "api/{controller}/{action}/{id?}");
                });
       }
    }

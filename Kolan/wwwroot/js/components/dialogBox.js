@@ -7,6 +7,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const lit_element_1 = require("lit-element");
+const apiRequester_1 = require("../apiRequester");
+const requestParameter_1 = require("../requestParameter");
 /**
  * Dialog element that takes an IDialogTemplate as input
  * and returns an object with the values as an event.
@@ -38,9 +40,15 @@ let DialogBox = class DialogBox extends lit_element_1.LitElement {
      * and clears the dialog
      */
     submitHandler() {
+        let formData = this.getFormData();
+        // Do request
+        if (this.dialogOptions.requestAction != undefined) {
+            let requestParameters = formData["requestParameters"];
+            new apiRequester_1.ApiRequester().send(this.dialogOptions.requestAction, this.dialogOptions.requestMethod, this.dialogOptions.requestType, requestParameters);
+        }
         // Fire event
         this.dispatchEvent(new CustomEvent("submitDialog", {
-            detail: this.getInputValues()
+            detail: formData["inputValues"]
         }));
         this.hide();
     }
@@ -52,18 +60,23 @@ let DialogBox = class DialogBox extends lit_element_1.LitElement {
     }
     /** Get user input in the dialog
      */
-    getInputValues() {
+    getFormData() {
         let input = {};
+        let requestParameters = [];
         let dialogItems = this.shadowRoot.querySelector(".dialog").children;
         let counter = 0; // Index for each "input" element looped through
-        for (let element of dialogItems) {
+        for (const element of dialogItems) {
             if (element.tagName == "INPUT") {
                 let key = this.dialogOptions.inputs[counter].key; // Gets the prefered key value for the input element
                 input[key] = element.value;
+                requestParameters.push(new requestParameter_1.RequestParameter(key, element.value));
                 counter++;
             }
         }
-        return input;
+        return {
+            inputValues: input,
+            requestParameters: requestParameters
+        };
     }
     /** Hide the dialog and clear the values
      */

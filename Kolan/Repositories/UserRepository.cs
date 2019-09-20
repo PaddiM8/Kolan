@@ -13,6 +13,9 @@ namespace Kolan.Repositories
         {
         }
 
+        /// <summary>
+        /// Create a user
+        /// </summary>
         public async Task AddAsync(User entity)
         {
             await Client.Cypher

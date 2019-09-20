@@ -8,7 +8,7 @@ namespace Kolan
 {
    class Generator
    {
-      public string Id(string salt)
+      public string NewId(string salt)
       {
          long ticks = (long)(DateTime.UtcNow
                .Subtract(new DateTime(1970, 1, 1, 0, 0, 0, 0))).TotalMilliseconds; // Epoch time

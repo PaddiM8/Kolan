@@ -12,26 +12,34 @@ namespace Kolan
     {
         public static GraphClient Client;
 
-        public static void Init()
+        public static async void Init()
         {
+            // Create graph client
             Client = new GraphClient(new Uri(Config.Values.DatabaseUrl),
                                      Config.Values.DatabaseUser,
                                      Config.Values.DatabasePassword);
             Client.Connect();
+
+            // Check if empty, if so, start setup process
             var query = Client.Cypher.Match("(n)")
                                      .Return(n => n.As<object>())
                                      .Limit(1);
             if (query.Results.Count() == 0)
                 Setup();
 
+            // Debugging user
             new UserController(new UnitOfWork(Client)).Create("bakk", "pass");
+            await new UnitOfWork(Client).Boards.GetAsync("YV8PgRwPz", "bakk");
         }
 
         public static void Setup()
         {
             try
             {
+                // Constraints
                 Client.Cypher.CreateUniqueConstraint("u:User", "u.username")
+                             .ExecuteWithoutResults();
+                Client.Cypher.CreateUniqueConstraint("b:Board", "b.id")
                              .ExecuteWithoutResults();
             }
             catch (NeoException)

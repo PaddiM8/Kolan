@@ -26,6 +26,12 @@ namespace Kolan.Controllers.Api
             return await _uow.Boards.GetAllAsync(User.Identity.Name);
         }
 
+        [HttpGet("{id}")]
+        public async Task<object> GetBoard(string id)
+        {
+            return await _uow.Boards.GetAsync(id, User.Identity.Name);
+        }
+
         [HttpPost]
         public async Task<IActionResult> Create([FromForm]string name, [FromForm]string description)
         {

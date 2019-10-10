@@ -10,13 +10,10 @@ namespace Kolan.Controllers
 {
     public class BoardController : Controller
     {
-        public IActionResult Index()
+        [HttpGet("Board/{id}")]
+        public IActionResult Index(string id)
         {
-            return View();
-        }
-
-        public IActionResult Privacy()
-        {
+            ViewData["id"] = id;
             return View();
         }
 

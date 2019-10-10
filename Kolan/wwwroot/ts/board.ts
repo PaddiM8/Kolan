@@ -1,6 +1,9 @@
+declare const viewData;
+
 import { DialogBox } from "./components/dialogBox"
 import { addTaskDialog } from "./dialogs/addTaskDialog";
 import { TasklistController } from "./controllers/tasklistController";
+import { ApiRequester } from "./apiRequester";
 
 window.addEventListener("load", () => new Board());
 
@@ -15,6 +18,9 @@ class Board {
             this.addTask(this._currentTasklist,
                 e.detail.title,
                 e.detail.description));
+
+        // Load board
+        this.loadBoard();
 
         // Events
         const plusElements = document.getElementsByClassName("plus");
@@ -32,5 +38,15 @@ class Board {
     addTask(tasklist, title, description) {
         const tasklistController = new TasklistController(tasklist);
         tasklistController.addTask(title, description);
+    }
+
+    private loadBoard()
+    {
+        new ApiRequester().send("Board", viewData.id, "GET").then(result => {
+            const boards = JSON.parse(result.toString());
+            for (const item of boards) {
+                this.addTask(item.board.group, item.board.name, item.board.description);
+            }
+        });
     }
 }

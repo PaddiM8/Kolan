@@ -7,7 +7,7 @@ namespace Kolan.Models
 {
     public class Board
     {
-        [JsonProperty("Id")]
+        [JsonProperty("id")]
         public string Id          { get; set; }
 
         [JsonProperty("name")]

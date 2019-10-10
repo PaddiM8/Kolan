@@ -37,13 +37,12 @@ namespace Kolan.Repositories
         {
 
             var result = await Client.Cypher
-                .Match("(board:Board)-[:ChildGroup]->(group:Group)-[rel:ChildBoard]->(childBoard:Board)")
+                .Match("(board:Board)-[:ChildGroup]->(group:Group)")
                 .Where((Board board) => board.Id == id)
-                .Return((group, rel, board) => new
+                .Return((board, group) => new
                         {
-                            Group = rel.As<Group>(),
-                            Relationship = rel.As<ChildBoardRelationship>(),
-                            Board = board.As<Board>()
+                            Board = board.As<Board>(),
+                            Group = group.As<Group>()
                         })
                 .ResultsAsync;
 

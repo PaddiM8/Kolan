@@ -15,7 +15,7 @@ class Boards {
         let addDialog = new DialogBox(addBoardDialog, "addBoardDialog");
         document.body.appendChild(addDialog);
         addDialog.addEventListener("submitDialog", (e: CustomEvent) =>
-            this.addBoardItem(e.detail.name, e.detail.description));
+            this.addBoardItem(e.detail.id, e.detail.name, e.detail.description));
 
         // Load boards
         this.loadBoards();
@@ -29,10 +29,10 @@ class Boards {
      * @param   name        {string} Board name.
      * @param   description {string} Board description.
      */
-    private addBoardItem(name, description) {
+    private addBoardItem(id, name, description) {
         const boardListController = new BoardListController(document
             .querySelector(".board-list tasklist"));
-        boardListController.addBoard(name, description);
+        boardListController.addBoard(id, name, description);
     }
 
     private loadBoards()
@@ -40,7 +40,7 @@ class Boards {
         new ApiRequester().send("Boards", "", "GET").then(result => {
             const boards = JSON.parse(result.toString());
             for (const item of boards) {
-                this.addBoardItem(item.board.name, item.board.description);
+                this.addBoardItem(item.board.id, item.board.name, item.board.description);
             }
         });
     }

@@ -18,8 +18,9 @@ export class BoardListController {
      * @param   description {string} Board description.
      * @param   color       {string} Board background color as HEX value.
      */
-    public addBoard(name: string, description: string, color: string = "") {
+    public addBoard(id: string, name: string, description: string, color: string = "") {
         const item = document.createElement("draggable-element");
+        item.id = id;
         item.insertAdjacentHTML("beforeend",
             `<span class="dragger"></span><h2>${name}</h2><p>${description}</p>`);
         if (color != "") item.style.backgroundColor = color;
@@ -34,7 +35,8 @@ export class BoardListController {
      * Fires when the board item is clicked, ends if the clicked part was the dragger.
      */
     onClickEvent(e) {
-        console.log("clicked");
+        console.log(e);
+        console.log(e.id);
     }
 
     onInternalMove(fromIndex, toIndex) {

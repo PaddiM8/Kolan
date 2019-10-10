@@ -6,7 +6,6 @@
 
       <link rel="stylesheet" type="text/css" href="https://rsms.me/inter/inter.css">
       <link rel="stylesheet" type="text/css" href="~/css/board.css">
-      <script src="~/dist/board.js"></script>
    </head>
    <body>
       <img class="gear" src="res/gear.svg" alt="Settings">
@@ -40,5 +39,12 @@
             <tasklist></tasklist>
          </section>
       </main>
+
+      <script>
+          const viewData = {
+              id: '@ViewData["id"]'
+          };
+      </script>
+      <script src="~/dist/board.js"></script>
    </body>
 </html>

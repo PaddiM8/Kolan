@@ -42,14 +42,24 @@ let DialogBox = class DialogBox extends lit_element_1.LitElement {
     submitHandler() {
         let formData = this.getFormData();
         // Do request
-        if (this.dialogOptions.requestAction != undefined) {
+        if (this.dialogOptions.requestAction != undefined) // Not all dialogs do requests
+         {
             let requestParameters = formData["requestParameters"];
-            new apiRequester_1.ApiRequester().send(this.dialogOptions.requestAction, this.dialogOptions.requestMethod, this.dialogOptions.requestType, requestParameters);
+            const request = new apiRequester_1.ApiRequester().send(this.dialogOptions.requestAction, this.dialogOptions.requestMethod, this.dialogOptions.requestType, requestParameters);
+            request.then(output => {
+                const outputJson = JSON.parse(output);
+                // Fire event
+                this.dispatchEvent(new CustomEvent("submitDialog", {
+                    detail: Object.assign({}, outputJson, formData["inputValues"])
+                }));
+            });
         }
-        // Fire event
-        this.dispatchEvent(new CustomEvent("submitDialog", {
-            detail: formData["inputValues"]
-        }));
+        else {
+            // Fire event
+            this.dispatchEvent(new CustomEvent("submitDialog", {
+                detail: formData["inputValues"]
+            }));
+        }
         this.hide();
     }
     /** When the cancel button in the dialog is clicked. Hides and clears

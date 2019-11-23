@@ -66,7 +66,7 @@ namespace Kolan.Repositories
         /// Add a root board to a user.
         /// <param name="username">User to add it to.</param>
         /// </summary>
-        public async Task AddAsync(Board entity, string username)
+        public async Task<string> AddAsync(Board entity, string username)
         {
             string id = _generator.NewId(username);
 
@@ -78,6 +78,8 @@ namespace Kolan.Repositories
                 .Set("group.amount = group.amount + 1")
                 .Set($"board.id = '{id}'")
                 .ExecuteWithoutResultsAsync();
+
+            return id;
         }
 
         /// <summary>

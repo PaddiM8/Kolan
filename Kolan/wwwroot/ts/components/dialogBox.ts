@@ -43,26 +43,36 @@ export class DialogBox extends LitElement {
         let formData = this.getFormData();
 
         // Do request
-        if (this.dialogOptions.requestAction != undefined)
+        if (this.dialogOptions.requestAction != undefined) // Not all dialogs do requests
         {
             let requestParameters: RequestParameter[] = formData["requestParameters"];
-            new ApiRequester().send(
+            const request = new ApiRequester().send(
                 this.dialogOptions.requestAction,
                 this.dialogOptions.requestMethod,
                 this.dialogOptions.requestType,
                 requestParameters
             );
+
+            request.then(output => {
+                const outputJson = JSON.parse(output as string);
+
+                // Fire event
+                this.dispatchEvent(new CustomEvent("submitDialog", {
+                    detail: { ...outputJson, ...formData["inputValues"] }
+                }));
+            });
+        } else {
+            // Fire event
+            this.dispatchEvent(new CustomEvent("submitDialog", {
+                detail: formData["inputValues"]
+            }));
         }
 
-        // Fire event
-        this.dispatchEvent(new CustomEvent("submitDialog", {
-            detail: formData["inputValues"]
-        }));
 
         this.hide();
     }
 
-    /** When the cancel button in the dialog is clicked. Hides and clears 
+    /** When the cancel button in the dialog is clicked. Hides and clears
      * the dialog
      */
     cancelHandler() {

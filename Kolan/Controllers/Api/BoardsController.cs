@@ -41,9 +41,9 @@ namespace Kolan.Controllers.Api
                 Description = description
             };
 
-            await _uow.Boards.AddAsync(board, User.Identity.Name); // Add board to current user
+            string id = await _uow.Boards.AddAsync(board, User.Identity.Name); // Add board to current user
 
-            return new EmptyResult();
+            return Ok(new { id = id });
         }
 
         [Route("ChangeOrder")]

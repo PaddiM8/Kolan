@@ -33,6 +33,15 @@ header h1 {
    float: left;
 }
 
+.gear {
+    position: absolute;
+    width: 58px;
+    height: auto;
+    top: 0;
+    right: 0;
+    margin: 10px;
+}
+
 #addBoard {
    $size: 60px;
    display: grid;

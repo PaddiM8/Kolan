@@ -1,39 +1,23 @@
 @import "reset";
 
-$white: #fff7f7;
+$white: #fafafa;
 $dark: #343434;
 $primary: #6163dd;
 $secondary: #d8A147;
 $gray: #dbdbdb;
 
 body {
-   background-color: $white;
-   margin: 0;
+    background-color: $white;
+    margin: 0;
 }
 
 .shadow {
-   box-shadow: 2px 2px 2px 1px $gray;
+    box-shadow: 2px 2px 2px 1px $gray;
 }
 
 hr {
-   border: 0;
-   height: 0;
-   border-top: 1px solid rgba(0, 0, 0, 0.3);
-   border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+    border: 0;
+    height: 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.4);
 }
-
-.gear {
-   width: 45px;
-   height: auto;
-   position: absolute;
-   top: 0;
-   right: 0;
-   cursor: pointer;
-   margin: 20px;
-   transition: .3s ease transform;
-}
-
-.gear:hover {
-   transform: rotate(25deg);
-}
-

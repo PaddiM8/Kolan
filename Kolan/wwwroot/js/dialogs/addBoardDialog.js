@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const inputType_1 = require("../enums/inputType");
-/** Dialog template for adding board items
+/** add board dialog schematic
  */
 exports.addBoardDialog = {
     requestAction: "Boards",

@@ -26,15 +26,17 @@
     "gulp-jsdoc3": "^2.0.0",
     "gulp-sass": "^4.0.2",
     "gulp-terser": "^1.2.0",
-    "gulp-typedoc": "^2.2.2",
+    "gulp-typedoc": "^2.2.3",
     "gulp-typescript": "^5.0.1",
     "node-sass": "^4.13.0",
-    "typedoc": "^0.15.0",
+    "typedoc": "^0.15.3",
     "typescript": "^3.4.5",
     "webpack-cli": "^3.3.2",
     "webpack-stream": "^5.2.1"
   },
   "dependencies": {
+    "@fortawesome/free-solid-svg-icons": "^5.11.2",
+    "font-awesome-svg-png": "^1.2.2",
     "lit-element": "^2.1.0"
   }
 }

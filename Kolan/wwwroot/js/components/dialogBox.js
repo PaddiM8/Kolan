@@ -9,6 +9,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const lit_element_1 = require("lit-element");
 const apiRequester_1 = require("../apiRequester");
 const requestParameter_1 = require("../requestParameter");
+const inputType_1 = require("../enums/inputType");
+const inputList_1 = require("./inputList");
 /**
  * Dialog element that takes an IDialogTemplate as input
  * and returns an object with the values as an event.
@@ -22,12 +24,11 @@ let DialogBox = class DialogBox extends lit_element_1.LitElement {
     }
     render() {
         return lit_element_1.html `
-        <link rel="stylesheet" type="text/css" href="../css/components/dialog.css">
+         <link rel="stylesheet" type="text/css" href="../css/components/dialog.css">
          <div class="dialogBackground"></div>
          <section class="dialog">
             <h2>${lit_element_1.html `${this.dialogOptions.title}`}</h2>
-            ${this.dialogOptions.inputs.map(x => lit_element_1.html `<p>${x.value}:</p>
-               <input type="text" placeholder="${x.value}..." /><br />`)}
+            ${this.dialogOptions.inputs.map(x => lit_element_1.html `${this.getComponentHtml(x.inputType, x.value)}`)}
             <button @click="${this.submitHandler}">${lit_element_1.html `${this.dialogOptions.primaryButton}`}</button>
             <button class="secondary" @click="${this.cancelHandler}">Cancel</button>
          </section>`;
@@ -97,6 +98,17 @@ let DialogBox = class DialogBox extends lit_element_1.LitElement {
                 element.value = "";
         }
         this.shown = false;
+    }
+    getComponentHtml(inputType, value) {
+        switch (inputType) {
+            case inputType_1.InputType.Text:
+                return lit_element_1.html `<p>${value}:</p>
+                            <input type="text" placeholder="${value}..." /><br />`;
+            case inputType_1.InputType.InputList:
+                return new inputList_1.InputList();
+            default:
+                return "";
+        }
     }
 };
 __decorate([

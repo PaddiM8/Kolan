@@ -1,7 +1,7 @@
 import { InputType } from "../enums/inputType";
 import { IDialogTemplate } from "./IDialogTemplate";
 
-/** Dialog template for adding board items
+/** add board dialog schematic
  */
 export const addBoardDialog: IDialogTemplate = {
     requestAction: "Boards",

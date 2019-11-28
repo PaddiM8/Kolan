@@ -1,3 +1,4 @@
 export enum InputType {
-    Text
+    Text,
+    InputList,
 }

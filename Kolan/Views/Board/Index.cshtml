@@ -8,35 +8,38 @@
       <link rel="stylesheet" type="text/css" href="~/css/board.css">
    </head>
    <body>
-      <img class="gear" src="res/gear.svg" alt="Settings">
       <main>
          <header>
             <h1>Board Name</h1>
+            <div class="right">
+                <img id="shareButton" class="share" src="/res/share-alt.svg" alt="Share" role="button">
+                <img class="gear" src="/res/cog.svg" alt="Settings" role="button">
+            </div>
          </header>
          <div class="list-head">
-            <div class="item">
-               Backlog
-               <span id="addBoard" class="plus"><span>+</span></span>
-            </div>
-            <div class="item">
-               Ready
-               <span id="addBoard" class="plus"><span>+</span></span>
-            </div>
-            <div class="item">
-               Work in Progress
-               <span id="addBoard" class="plus"><span>+</span></span>
-            </div>
-            <div class="item">
-               Done
-               <span id="addBoard" class="plus"><span>+</span></span>
-            </div>
+             <div class="item">
+                 Backlog
+                 <span id="addBoard" class="plus"><span>+</span></span>
+             </div>
+             <div class="item">
+                 Ready
+                 <span id="addBoard" class="plus"><span>+</span></span>
+             </div>
+             <div class="item">
+                 Work in Progress
+                 <span id="addBoard" class="plus"><span>+</span></span>
+             </div>
+             <div class="item">
+                 Done
+                 <span id="addBoard" class="plus"><span>+</span></span>
+             </div>
          </div>
          <section class="tasklists">
-            <placeholder></placeholder>
-            <tasklist></tasklist>
-            <tasklist></tasklist>
-            <tasklist></tasklist>
-            <tasklist></tasklist>
+             <placeholder></placeholder>
+             <tasklist></tasklist>
+             <tasklist></tasklist>
+             <tasklist></tasklist>
+             <tasklist></tasklist>
          </section>
       </main>
 

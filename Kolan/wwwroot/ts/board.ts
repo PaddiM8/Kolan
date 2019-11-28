@@ -2,6 +2,7 @@ declare const viewData;
 
 import { DialogBox } from "./components/dialogBox"
 import { addTaskDialog } from "./dialogs/addTaskDialog";
+import { shareDialog } from "./dialogs/shareDialog";
 import { TasklistController } from "./controllers/tasklistController";
 import { ApiRequester } from "./apiRequester";
 
@@ -11,13 +12,17 @@ class Board {
     private _currentTasklist: Element;
 
     constructor() {
-        // Prepare dialog
-        let addDialog = new DialogBox(addTaskDialog, "addTaskDialog");
-        document.body.appendChild(addDialog);
-        addDialog.addEventListener("submitDialog", (e: CustomEvent) =>
+        // Prepare addTaskDialog
+        let addDialogElement = new DialogBox(addTaskDialog, "addTaskDialog");
+        document.body.appendChild(addDialogElement);
+        addDialogElement.addEventListener("submitDialog", (e: CustomEvent) =>
             this.addTask(this._currentTasklist,
                 e.detail.title,
                 e.detail.description));
+
+        // Prepare shareDialog
+        let shareDialogElement = new DialogBox(shareDialog, "shareDialog");
+        document.body.appendChild(shareDialogElement);
 
         // Load board
         this.loadBoard();
@@ -26,13 +31,16 @@ class Board {
         const plusElements = document.getElementsByClassName("plus");
         for (let plus of <any>plusElements) {
             plus.addEventListener("click", e => {
-                addDialog.shown = true;
+                addDialogElement.shown = true;
                 const item = e.currentTarget.parentElement;
                 const taskListId = [...item.parentElement.children].indexOf(item);
                 this._currentTasklist = document
                     .getElementsByTagName("tasklist")[taskListId];
             });
         }
+
+        const shareButton = document.getElementById("shareButton");
+        shareButton.addEventListener("click", e => shareDialogElement.shown = true)
     }
 
     addTask(tasklist, title, description) {

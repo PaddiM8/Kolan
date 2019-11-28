@@ -27,9 +27,9 @@ namespace Kolan
             if (query.Results.Count() == 0)
                 Setup();
 
-            // Debugging user
+            // Debugging users
             new UserController(new UnitOfWork(Client)).Create("bakk", "pass");
-            await new UnitOfWork(Client).Boards.GetAsync("YV8PgRwPz", "bakk");
+            new UserController(new UnitOfWork(Client)).Create("bakk2", "pass");
         }
 
         public static void Setup()

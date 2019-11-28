@@ -14,7 +14,6 @@ let TextInput = class TextInput extends lit_element_1.LitElement {
         this.type = "";
     }
     render() {
-        console.log("hi");
         return lit_element_1.html `
       <style>
          :host input {
@@ -34,7 +33,6 @@ let TextInput = class TextInput extends lit_element_1.LitElement {
             border: 1px solid #0062ff;
          }
       </style>
-      hi
       <input type="text" placeholder="${lit_element_1.html `${this.placeholder}`} />"
     `;
     }

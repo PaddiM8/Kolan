@@ -2,6 +2,8 @@ import { LitElement, html, css, property, customElement } from "lit-element";
 import { IDialogTemplate } from "../dialogs/IDialogTemplate";
 import { ApiRequester } from "../apiRequester";
 import { RequestParameter } from "../requestParameter";
+import { InputType } from "../enums/inputType"
+import { InputList } from "./inputList"
 
 /**
  * Dialog element that takes an IDialogTemplate as input
@@ -20,12 +22,11 @@ export class DialogBox extends LitElement {
 
     render() {
         return html`
-        <link rel="stylesheet" type="text/css" href="../css/components/dialog.css">
+         <link rel="stylesheet" type="text/css" href="../css/components/dialog.css">
          <div class="dialogBackground"></div>
          <section class="dialog">
             <h2>${html`${this.dialogOptions.title}`}</h2>
-            ${this.dialogOptions.inputs.map(x => html`<p>${x.value}:</p>
-               <input type="text" placeholder="${x.value}..." /><br />`)}
+            ${this.dialogOptions.inputs.map(x => html`${this.getComponentHtml(x.inputType, x.value)}`)}
             <button @click="${this.submitHandler}">${html`${this.dialogOptions.primaryButton}`}</button>
             <button class="secondary" @click="${this.cancelHandler}">Cancel</button>
          </section>`;
@@ -111,5 +112,17 @@ export class DialogBox extends LitElement {
         }
 
         this.shown = false;
+    }
+
+    private getComponentHtml(inputType: InputType, value: string) {
+        switch (inputType) {
+            case InputType.Text:
+                return html`<p>${value}:</p>
+                            <input type="text" placeholder="${value}..." /><br />`;
+            case InputType.InputList:
+                return new InputList();
+            default:
+                return "";
+        }
     }
 }

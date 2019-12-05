@@ -55,5 +55,22 @@ namespace Kolan.Controllers.Api
             return new EmptyResult();
         }
 
+        [Route("{id}/Users")]
+        [HttpPost]
+        public async Task<IActionResult> AddUser(string id, [FromForm]string username)
+        {
+            await _uow.Boards.AddUserAsync(id, username);
+
+            return new EmptyResult();
+        }
+
+        [Route("{id}/Users")]
+        [HttpDelete]
+        public async Task<IActionResult> RemoveUser(string id, [FromForm]string username)
+        {
+            await _uow.Boards.RemoveUserAsync(id, username);
+
+            return new EmptyResult();
+        }
     }
 }

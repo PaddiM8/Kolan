@@ -12,7 +12,7 @@ exports.shareDialog = {
     inputs: [
         {
             key: "inputList",
-            value: "Users",
+            value: "Name of user",
             inputType: inputType_1.InputType.InputList
         }
     ]

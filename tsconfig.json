@@ -1,0 +1,9 @@
+{
+    "compilerOptions": {
+        "sourceMap": true,
+        "experimentalDecorators": true,
+        "target": "ES6",
+        "lib": ["es2017", "dom"],
+        "module": "commonjs"
+    }
+}

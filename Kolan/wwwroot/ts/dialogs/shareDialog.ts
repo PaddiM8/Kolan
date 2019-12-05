@@ -12,7 +12,7 @@ export const shareDialog: IDialogTemplate = {
     inputs: [
         {
             key: "inputList",
-            value: "Users",
+            value: "Name of user",
             inputType: InputType.InputList
         }
     ]

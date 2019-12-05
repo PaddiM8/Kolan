@@ -90,7 +90,6 @@ namespace Kolan.Repositories
         /// </summary>
         public async Task SwapAsync(int fromIndex, int toIndex, string username)
         {
-            Console.WriteLine(fromIndex + ", " + toIndex + ", " + username);
             await Client.Cypher
                 .Match("(user:User)-[:ChildGroup]->(group:Group)-[rel:ChildBoard]->(:Board)",
                        "(group)-[rel2:ChildBoard]->(:Board)")
@@ -99,6 +98,39 @@ namespace Kolan.Repositories
                 .AndWhere((ChildBoardRelationship rel2) => rel2.Index == toIndex)
                 .Set("rel.index = " + toIndex.ToString())
                 .Set("rel2.index = " + fromIndex.ToString())
+                .ExecuteWithoutResultsAsync();
+        }
+
+        /// <summary>
+        /// Add a user to board for collaboration
+        /// </summary>
+        /// <param name="boardId">Id of the relevant board</param>
+        /// <param name="username">Username of user to add</param>
+        public async Task AddUserAsync(string boardId, string username)
+        {
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.WriteLine("boardId: " + boardId + ", username: " + username);
+            await Client.Cypher
+                .Match("(board:Board), (user:User)-[:ChildGroup]->(group:Group)")
+                .Where((Board board) => board.Id == boardId)
+                .AndWhere((User user) => user.Username == username)
+                .Create("(group)-[:ChildBoard]->(board)")
+                .ExecuteWithoutResultsAsync();
+        }
+
+        /// <summary>
+        /// Remove a user from being able to edit the board
+        /// </summary>
+        /// <param name="boardId">Id of the relevant board</param>
+        /// <param name="username">Username of user to remove</param>
+        public async Task RemoveUserAsync(string boardId, string username)
+        {
+            await Client.Cypher
+                .Match("(board:Board)", 
+                       "(user:User)-[:ChildGroup]->(group:Group)-[rel:ChildBoard]->(board)")
+                .Where((Board board) => board.Id == boardId)
+                .AndWhere((User user) => user.Username == username)
+                .Delete("rel")
                 .ExecuteWithoutResultsAsync();
         }
     }

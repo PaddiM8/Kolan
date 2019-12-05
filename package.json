@@ -20,23 +20,26 @@
   "homepage": "https://github.com/PaddiM8/Kolan#readme",
   "devDependencies": {
     "@types/es6-promise": "^3.3.0",
+    "fa-icons": "^0.1.7",
     "gulp": "^4.0.2",
     "gulp-autoprefixer": "^6.1.0",
     "gulp-bro": "^1.0.3",
     "gulp-jsdoc3": "^2.0.0",
+    "gulp-notify": "^3.2.0",
     "gulp-sass": "^4.0.2",
     "gulp-terser": "^1.2.0",
     "gulp-typedoc": "^2.2.3",
     "gulp-typescript": "^5.0.1",
     "node-sass": "^4.13.0",
     "typedoc": "^0.15.3",
-    "typescript": "^3.4.5",
-    "webpack-cli": "^3.3.2",
+    "typescript": "^3.7.3",
+    "webpack-cli": "^3.3.10",
     "webpack-stream": "^5.2.1"
   },
   "dependencies": {
     "@fortawesome/free-solid-svg-icons": "^5.11.2",
-    "font-awesome-svg-png": "^1.2.2",
-    "lit-element": "^2.1.0"
+    "@microsoft/signalr": "^3.1.0",
+    "@types/node": "^12.12.14",
+    "lit-element": "^2.2.1"
   }
 }

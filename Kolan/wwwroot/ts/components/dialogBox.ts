@@ -120,7 +120,7 @@ export class DialogBox extends LitElement {
                 return html`<p>${value}:</p>
                             <input type="text" placeholder="${value}..." /><br />`;
             case InputType.InputList:
-                return new InputList();
+                return new InputList(value);
             default:
                 return "";
         }

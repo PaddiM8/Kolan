@@ -51,7 +51,7 @@ let DialogBox = class DialogBox extends lit_element_1.LitElement {
                 const outputJson = JSON.parse(output);
                 // Fire event
                 this.dispatchEvent(new CustomEvent("submitDialog", {
-                    detail: Object.assign({}, outputJson, formData["inputValues"])
+                    detail: Object.assign(Object.assign({}, outputJson), formData["inputValues"])
                 }));
             });
         }
@@ -105,7 +105,7 @@ let DialogBox = class DialogBox extends lit_element_1.LitElement {
                 return lit_element_1.html `<p>${value}:</p>
                             <input type="text" placeholder="${value}..." /><br />`;
             case inputType_1.InputType.InputList:
-                return new inputList_1.InputList();
+                return new inputList_1.InputList(value);
             default:
                 return "";
         }

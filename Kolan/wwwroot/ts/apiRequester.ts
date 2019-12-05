@@ -13,7 +13,7 @@ export class ApiRequester {
     send(action: string, method: string, requestType: string, requestParameters: RequestParameter[] = null) {
         return new Promise((resolve, reject) => {
             const req = new XMLHttpRequest();
-            let url = "api/" + action;
+            let url = "/api/" + action;
             if (method) url += "/" + method;
 
             req.open(requestType, url);

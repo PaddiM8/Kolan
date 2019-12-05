@@ -13,11 +13,6 @@ const lit_element_1 = require("lit-element");
  * and style it as you wish.
  */
 let Draggable = class Draggable extends lit_element_1.LitElement {
-    /**
-     * Lit-element that can be dragged and dropped. Needs a <tasklist> parent
-     * and a <section> grandparent. Place a <placeholder> element inside the section
-     * and style it as you wish.
-     */
     constructor() {
         super(...arguments);
         this.movable = true;

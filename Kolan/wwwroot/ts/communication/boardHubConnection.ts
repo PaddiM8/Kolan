@@ -8,7 +8,8 @@ export class BoardHubConnection {
             .withUrl("/hub")
             .build();
 
-        this.connection.on("receiveMessage", message => console.log(message));
+        this.connection.on("receiveNewBoard", (board, groupName) => console.log(board));
         this.connection.invoke("join", boardId);
+        this.connection.start();
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -46,18 +47,7 @@ namespace Kolan.Repositories
                         })
                 .ResultsAsync;
 
-            if (result.Count() == 0)
-            {
-                await Client.Cypher
-                    .Match("(board:Board)")
-                    .Where((Board board) => board.Id == id)
-                    .Create("(board)-[:ChildGroup]->(:Group { name: 'Backlog' })")
-                    .Create("(board)-[:ChildGroup]->(:Group { name: 'In Progress' })")
-                    .Create("(board)-[:ChildGroup]->(:Group { name: 'Done' })")
-                    .ExecuteWithoutResultsAsync();
-            }
-
-            Console.WriteLine(JsonConvert.SerializeObject(result));
+            if (result.Count() == 0) await AddDefaultGroups(id); // Add default groups if the board is empty
 
             return result;
         }
@@ -73,6 +63,39 @@ namespace Kolan.Repositories
             await Client.Cypher
                 .Match("(user:User)-[:ChildGroup]->(group:Group)")
                 .Where((User user) => user.Username == username)
+                .Create("(group)-[rel:ChildBoard {index: group.amount}]->(board:Board {newBoard})")
+                .WithParam("newBoard", entity)
+                .Set("group.amount = group.amount + 1")
+                .Set($"board.id = '{id}'")
+                .ExecuteWithoutResultsAsync();
+
+            return id;
+        }
+        ///
+        /// <summary>
+        /// Add a root board to a parent board.
+        /// <param name="parentId">Id of parent board</param>
+        /// </summary>
+        public async Task<string> AddAsync(Board entity, string parentId, string groupName, string username)
+        {
+            string id = _generator.NewId(username);
+
+            IEnumerable<int> childrenCount = await Client.Cypher
+                .Match("(board:Board)-[:ChildGroup]->(group:Group)")
+                .Where((Board board) => board.Id == parentId)
+                .Return<int>("count(group)")
+                .ResultsAsync;
+            bool isEmpty = childrenCount.First() == 0;
+
+            if (isEmpty) await AddDefaultGroups(parentId);
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.WriteLine(parentId);
+            Console.WriteLine(groupName);
+
+            await Client.Cypher
+                .Match("(parentBoard:Board)-[:ChildGroup]->(group:Group)")
+                .Where((Board parentBoard) => parentBoard.Id == parentId)
+                .AndWhere((Group group) => group.Name == groupName)
                 .Create("(group)-[rel:ChildBoard {index: group.amount}]->(board:Board {newBoard})")
                 .WithParam("newBoard", entity)
                 .Set("group.amount = group.amount + 1")
@@ -108,8 +131,6 @@ namespace Kolan.Repositories
         /// <param name="username">Username of user to add</param>
         public async Task AddUserAsync(string boardId, string username)
         {
-            Console.ForegroundColor = ConsoleColor.Blue;
-            Console.WriteLine("boardId: " + boardId + ", username: " + username);
             await Client.Cypher
                 .Match("(board:Board), (user:User)-[:ChildGroup]->(group:Group)")
                 .Where((Board board) => board.Id == boardId)
@@ -131,6 +152,18 @@ namespace Kolan.Repositories
                 .Where((Board board) => board.Id == boardId)
                 .AndWhere((User user) => user.Username == username)
                 .Delete("rel")
+                .ExecuteWithoutResultsAsync();
+        }
+
+        private async Task AddDefaultGroups(string id)
+        {
+            await Client.Cypher
+                .Match("(board:Board)")
+                .Where((Board board) => board.Id == id)
+                .Create("(board)-[:ChildGroup]->(group1:Group { name: 'Backlog' })")
+                .Create("(group1)-[:ChildGroup]->(group2:Group { name: 'Ready' })")
+                .Create("(group2)-[:ChildGroup]->(group3:Group { name: 'In Progress' })")
+                .Create("(group3)-[:ChildGroup]->(:Group { name: 'Done' })")
                 .ExecuteWithoutResultsAsync();
         }
     }

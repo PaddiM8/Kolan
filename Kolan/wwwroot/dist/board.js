@@ -183,7 +183,12 @@ class Board {
         const plusElements = document.getElementsByClassName("plus");
         for (let plus of plusElements) {
             plus.addEventListener("click", e => {
+                const groupName = e.currentTarget.parentElement.dataset.name;
                 addDialogElement.shown = true;
+                addDialogElement.dialogOptions.requestMethod = viewData.id;
+                addDialogElement.extraRequestParameters = [
+                    new requestParameter_1.RequestParameter("groupName", groupName)
+                ];
                 const item = e.currentTarget.parentElement;
                 const taskListId = [...item.parentElement.children].indexOf(item);
                 this._currentTasklist = document
@@ -236,8 +241,9 @@ class BoardHubConnection {
         this.connection = new signalR.HubConnectionBuilder()
             .withUrl("/hub")
             .build();
-        this.connection.on("receiveMessage", message => console.log(message));
+        this.connection.on("receiveNewBoard", (board, groupName) => console.log(board));
         this.connection.invoke("join", boardId);
+        this.connection.start();
     }
 }
 exports.BoardHubConnection = BoardHubConnection;
@@ -274,6 +280,7 @@ let DialogBox = class DialogBox extends lit_element_1.LitElement {
     constructor(dialogOptions, id) {
         super();
         this.shown = false;
+        this.extraRequestParameters = [];
         this.dialogOptions = dialogOptions;
         this.id = id;
     }
@@ -300,7 +307,8 @@ let DialogBox = class DialogBox extends lit_element_1.LitElement {
         // Do request
         if (this.dialogOptions.requestAction != undefined) // Not all dialogs do requests
          {
-            let requestParameters = formData["requestParameters"];
+            let requestParameters = [...formData["requestParameters"],
+                ...this.extraRequestParameters];
             const request = new apiRequester_1.ApiRequester().send(this.dialogOptions.requestAction, this.dialogOptions.requestMethod, this.dialogOptions.requestType, requestParameters);
             request.then(output => {
                 const outputJson = JSON.parse(output);
@@ -369,6 +377,12 @@ let DialogBox = class DialogBox extends lit_element_1.LitElement {
 __decorate([
     lit_element_1.property({ type: Boolean })
 ], DialogBox.prototype, "shown", void 0);
+__decorate([
+    lit_element_1.property({ type: Array() })
+], DialogBox.prototype, "extraRequestParameters", void 0);
+__decorate([
+    lit_element_1.property({ type: Object })
+], DialogBox.prototype, "dialogOptions", void 0);
 DialogBox = __decorate([
     lit_element_1.customElement('dialog-box')
 ], DialogBox);
@@ -842,7 +856,7 @@ const inputType_1 = __webpack_require__(/*! ../enums/inputType */ "./Kolan/wwwro
 /** add task dialog schematic
  */
 exports.addTaskDialog = {
-    requestAction: "",
+    requestAction: "Boards",
     requestMethod: "",
     requestType: "POST",
     title: "Add Task",
@@ -7154,7 +7168,7 @@ UpdatingElement[_a] = true;
 /*!*************************************************!*\
   !*** ./node_modules/lit-element/lit-element.js ***!
   \*************************************************/
-/*! exports provided: html, svg, TemplateResult, SVGTemplateResult, LitElement, defaultConverter, notEqual, UpdatingElement, customElement, property, query, queryAll, eventOptions, supportsAdoptingStyleSheets, CSSResult, unsafeCSS, css */
+/*! exports provided: defaultConverter, notEqual, UpdatingElement, customElement, property, query, queryAll, eventOptions, html, svg, TemplateResult, SVGTemplateResult, supportsAdoptingStyleSheets, CSSResult, unsafeCSS, css, LitElement */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";

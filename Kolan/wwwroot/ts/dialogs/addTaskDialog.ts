@@ -4,7 +4,7 @@ import { IDialogTemplate } from "./IDialogTemplate";
 /** add task dialog schematic
  */
 export const addTaskDialog: IDialogTemplate = {
-    requestAction: "",
+    requestAction: "Boards",
     requestMethod: "",
     requestType: "POST",
     title: "Add Task",

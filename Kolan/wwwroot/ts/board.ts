@@ -37,7 +37,14 @@ class Board {
         const plusElements = document.getElementsByClassName("plus");
         for (let plus of <any>plusElements) {
             plus.addEventListener("click", e => {
+                const groupName = e.currentTarget.parentElement.dataset.name;
+
                 addDialogElement.shown = true;
+                addDialogElement.dialogOptions.requestMethod = viewData.id;
+                addDialogElement.extraRequestParameters = [ 
+                    new RequestParameter("groupName", groupName)
+                ];
+
                 const item = e.currentTarget.parentElement;
                 const taskListId = [...item.parentElement.children].indexOf(item);
                 this._currentTasklist = document

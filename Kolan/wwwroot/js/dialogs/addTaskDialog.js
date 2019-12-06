@@ -4,7 +4,7 @@ const inputType_1 = require("../enums/inputType");
 /** add task dialog schematic
  */
 exports.addTaskDialog = {
-    requestAction: "",
+    requestAction: "Boards",
     requestMethod: "",
     requestType: "POST",
     title: "Add Task",

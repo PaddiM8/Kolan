@@ -12,7 +12,8 @@ import { InputList } from "./inputList"
 @customElement('dialog-box')
 export class DialogBox extends LitElement {
     @property({type: Boolean}) shown = false;
-    dialogOptions: IDialogTemplate;
+    @property({type: Array<RequestParameter>()}) extraRequestParameters = [];
+    @property({type: Object}) dialogOptions: IDialogTemplate
 
     constructor(dialogOptions, id) {
         super();
@@ -46,7 +47,8 @@ export class DialogBox extends LitElement {
         // Do request
         if (this.dialogOptions.requestAction != undefined) // Not all dialogs do requests
         {
-            let requestParameters: RequestParameter[] = formData["requestParameters"];
+            let requestParameters: RequestParameter[] = [...formData["requestParameters"], 
+                                                         ...this.extraRequestParameters];
             const request = new ApiRequester().send(
                 this.dialogOptions.requestAction,
                 this.dialogOptions.requestMethod,

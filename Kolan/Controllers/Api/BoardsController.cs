@@ -4,9 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 using Kolan.Models;
 using Kolan.Repositories;
+using Kolan.Hubs;
 
 namespace Kolan.Controllers.Api
 {
@@ -14,10 +16,12 @@ namespace Kolan.Controllers.Api
     public class BoardsController : Controller
     {
         private readonly UnitOfWork _uow;
+        private readonly IHubContext<BoardHub, IBoardClient> _boardHubContext;
 
-        public BoardsController(UnitOfWork uow)
+        public BoardsController(UnitOfWork uow, IHubContext<BoardHub, IBoardClient> boardHubContext)
         {
             _uow = uow;
+            _boardHubContext = boardHubContext;
         }
 
         [HttpGet]
@@ -42,6 +46,22 @@ namespace Kolan.Controllers.Api
             };
 
             string id = await _uow.Boards.AddAsync(board, User.Identity.Name); // Add board to current user
+
+            return Ok(new { id = id });
+        }
+
+        [HttpPost("{parentId}")]
+        public async Task<IActionResult> Create(string parentId, string groupName,
+                [FromForm]string name, [FromForm]string description)
+        {
+            var board = new Board
+            {
+                Name = name,
+                Description = description
+            };
+
+            string id = await _uow.Boards.AddAsync(board, parentId, groupName, User.Identity.Name); // Add board to parent board
+            await _boardHubContext.Clients.Group(parentId).ReceiveNewBoard(board, groupName); // Send to client
 
             return Ok(new { id = id });
         }

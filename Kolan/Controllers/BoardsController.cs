@@ -12,6 +12,8 @@ namespace Kolan.Controllers
     {
         public IActionResult Index()
         {
+            ViewData["username"] = User.Identity.Name;
+
             return View();
         }
 

@@ -13,7 +13,7 @@ class Board {
         // Prepare addTaskDialog
         let addDialogElement = new dialogBox_1.DialogBox(addTaskDialog_1.addTaskDialog, "addTaskDialog");
         document.body.appendChild(addDialogElement);
-        addDialogElement.addEventListener("submitDialog", (e) => this.addTask(this._currentTasklist, e.detail.title, e.detail.description));
+        addDialogElement.addEventListener("submitDialog", (e) => this.addTask(this._currentTasklist, e.detail.name, e.detail.description));
         // Prepare shareDialog
         let shareDialogElement = new dialogBox_1.DialogBox(shareDialog_1.shareDialog, "shareDialog");
         document.body.appendChild(shareDialogElement);
@@ -44,9 +44,9 @@ class Board {
         // Websockets
         new boardHubConnection_1.BoardHubConnection(viewData.id);
     }
-    addTask(tasklist, title, description) {
+    addTask(tasklist, name, description) {
         const tasklistController = new tasklistController_1.TasklistController(tasklist);
-        tasklistController.addTask(title, description);
+        tasklistController.addTask(name, description);
     }
     handleUserAdded(username) {
         const requestParameters = [new requestParameter_1.RequestParameter("username", username)];

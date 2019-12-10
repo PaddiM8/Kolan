@@ -37,10 +37,13 @@ class Boards {
 
     private loadBoards()
     {
+        const boardListController = new BoardListController(document
+            .querySelector(".board-list tasklist"));
+
         new ApiRequester().send("Boards", "", "GET").then(result => {
-            const boards = JSON.parse(result.toString());
+            const boards = JSON.parse(result as string);
             for (const item of boards) {
-                this.addBoardItem(item.board.id, item.board.name, item.board.description);
+                boardListController.addBoardToBottom(item.id, item.name, item.description);
             }
         });
     }

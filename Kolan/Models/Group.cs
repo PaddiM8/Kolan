@@ -9,7 +9,7 @@ namespace Kolan.Models
         [JsonProperty("name")]
         public string Name { get; set; }
 
-        [JsonProperty("amount")]
-        public int Amount = 0;
+        [JsonProperty("id")]
+        public string Id { get; set; }
     }
 }

@@ -411,7 +411,8 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
                 "detail": {
                     fromTaskList: this.currentTaskList,
                     toTaskList: targetTaskList,
-                    toIndex: targetIndex
+                    toIndex: targetIndex,
+                    toItem: this.previousElementSibling
                 }
             }));
         }
@@ -419,7 +420,8 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
             this.dispatchEvent(new CustomEvent("taskInternalMove", {
                 "detail": {
                     fromIndex: this.currentIndex,
-                    toIndex: targetIndex
+                    toIndex: targetIndex,
+                    toItem: this.previousElementSibling
                 }
             }));
         }

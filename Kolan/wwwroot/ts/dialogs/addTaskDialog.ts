@@ -11,7 +11,7 @@ export const addTaskDialog: IDialogTemplate = {
     primaryButton: "Add",
     inputs: [
         {
-            key: "title",
+            key: "name",
             value: "Task title",
             inputType: InputType.Text
         },

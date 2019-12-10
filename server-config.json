@@ -1,7 +1,7 @@
 {
    "databaseUrl": "http://localhost:7474/db/data",
    "databaseUser": "neo4j",
-   "databasePassword": "neo4j",
+   "databasePassword": "pass",
    "securityKey": "insert_security_key",
    "hashIterations": 20000,
    "saltLength": 16

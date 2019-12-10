@@ -30,10 +30,12 @@ class Boards {
         boardListController.addBoard(id, name, description);
     }
     loadBoards() {
+        const boardListController = new boardListController_1.BoardListController(document
+            .querySelector(".board-list tasklist"));
         new apiRequester_1.ApiRequester().send("Boards", "", "GET").then(result => {
-            const boards = JSON.parse(result.toString());
+            const boards = JSON.parse(result);
             for (const item of boards) {
-                this.addBoardItem(item.board.id, item.board.name, item.board.description);
+                boardListController.addBoardToBottom(item.id, item.name, item.description);
             }
         });
     }

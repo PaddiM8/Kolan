@@ -10,14 +10,14 @@ class TasklistController {
     }
     /**
      * Add a task to the tasklist.
-     * @param   title       {string} Task title.
+     * @param   name        {string} Task title.
      * @param   description {string} Task description.
      * @param   color       {string} Task background color as HEX value.
      */
-    addTask(title, description, color = "") {
+    addTask(name, description, color = "") {
         const item = new draggableElement_1.Draggable();
         item.insertAdjacentHTML("beforeend", `
-         <h2>${title}</h2><p>${description}</p>
+         <h2>${name}</h2><p>${description}</p>
          <div class="edit-layer">
             <input type="text" /><br />
             <textarea></textarea>
@@ -66,21 +66,21 @@ class TasklistController {
     toggleEditMode(item) {
         // Hide/show original text
         const editLayer = item.querySelector(".edit-layer");
-        const title = item.querySelector("h2");
+        const name = item.querySelector("h2");
         const text = item.querySelector("p");
         editLayer.style.display = this._inEditMode ? "none" : "block"; // Hide if in edit mode
-        title.style.display = this._inEditMode ? "block" : "none"; // Show if in edit mode
+        name.style.display = this._inEditMode ? "block" : "none"; // Show if in edit mode
         text.style.display = this._inEditMode ? "block" : "none";
         // Update text
-        const titleEdit = editLayer.querySelector("input");
+        const nameEdit = editLayer.querySelector("input");
         const textEdit = editLayer.querySelector("textarea");
         const itemStyle = window.getComputedStyle(item, null);
         if (this._inEditMode) {
-            title.innerHTML = titleEdit.value;
+            name.innerHTML = nameEdit.value;
             text.innerHTML = textEdit.value;
         }
         else {
-            titleEdit.value = title.innerHTML;
+            nameEdit.value = name.innerHTML;
             textEdit.value = text.innerHTML;
         }
         this.onMouseLeaveEvent(item);

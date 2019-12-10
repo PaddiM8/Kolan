@@ -67,10 +67,19 @@ namespace Kolan.Controllers.Api
         }
 
         [Route("ChangeOrder")]
-        [HttpPost]
-        public async Task<IActionResult> ChangeOrder([FromForm]int fromIndex, [FromForm]int toIndex)
+        [HttpPost("{parentId}")]
+        public async Task<IActionResult> ChangeOrder(string parentId, [FromForm]string boardId, [FromForm]string targetId)
         {
-            await _uow.Boards.SwapAsync(fromIndex, toIndex, User.Identity.Name);
+            await _uow.Boards.MoveAsync(parentId, boardId, targetId, false);
+
+            return new EmptyResult();
+        }
+
+        [Route("ChangeOrder")]
+        [HttpPost]
+        public async Task<IActionResult> ChangeOrder([FromForm]string boardId, [FromForm]string targetId)
+        {
+            await _uow.Boards.MoveAsync(User.Identity.Name, boardId, targetId, true);
 
             return new EmptyResult();
         }

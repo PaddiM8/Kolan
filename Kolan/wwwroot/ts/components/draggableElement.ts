@@ -100,14 +100,16 @@ export class Draggable extends LitElement {
                 "detail": {
                     fromTaskList: this.currentTaskList,
                     toTaskList: targetTaskList,
-                    toIndex: targetIndex
+                    toIndex: targetIndex,
+                    toItem: this.previousElementSibling
                 }
             }));
         } else if (this.currentIndex != targetIndex) { // If moved within the same tasklist.
             this.dispatchEvent(new CustomEvent("taskInternalMove", {
                 "detail": {
                     fromIndex: this.currentIndex,
-                    toIndex: targetIndex
+                    toIndex: targetIndex,
+                    toItem: this.previousElementSibling
                 }
             }));
         }

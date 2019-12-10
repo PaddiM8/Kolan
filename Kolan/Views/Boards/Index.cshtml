@@ -7,7 +7,6 @@
 
       <link rel="stylesheet" type="text/css" href="https://rsms.me/inter/inter.css">
       <link rel="stylesheet" type="text/css" href="~/css/boards.css">
-      <script src="~/dist/boards.js"></script>
    </head>
    <body>
        <img class="gear" src="/res/cog.svg" alt="Settings">
@@ -23,5 +22,11 @@
                </tasklist>
            </section>
        </main>
+    <script>
+        const viewData = {
+            username: '@ViewData["username"]'
+        };
+    </script>
+    <script src="~/dist/boards.js"></script>
    </body>
 </html>

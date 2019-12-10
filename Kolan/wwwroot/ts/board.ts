@@ -19,7 +19,7 @@ class Board {
         document.body.appendChild(addDialogElement);
         addDialogElement.addEventListener("submitDialog", (e: CustomEvent) =>
             this.addTask(this._currentTasklist,
-                e.detail.title,
+                e.detail.name,
                 e.detail.description));
 
         // Prepare shareDialog
@@ -59,9 +59,9 @@ class Board {
         new BoardHubConnection(viewData.id);
     }
 
-    addTask(tasklist, title, description) {
+    addTask(tasklist, name, description) {
         const tasklistController = new TasklistController(tasklist);
-        tasklistController.addTask(title, description);
+        tasklistController.addTask(name, description);
     }
 
     handleUserAdded(username: string) {

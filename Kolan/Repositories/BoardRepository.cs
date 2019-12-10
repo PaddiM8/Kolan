@@ -21,16 +21,14 @@ namespace Kolan.Repositories
 
         /// <summary>
         /// Return all the root boards of a user.
-        /// <param name="usernem">User to get the boards from.</param>
+        /// <param name="username">User to get the boards from.</param>
         /// </summary>
         public async Task<object> GetAllAsync(string username)
         {
             return await Client.Cypher
-                .Match("(user:User)-[:ChildGroup]->(group:Group)-[rel:ChildBoard]->(board:Board)")
+                .Match("(user:User)-[:ChildGroup]->(:Group)-[*]->(board:Board)")
                 .Where((User user) => user.Username == username)
-                .Return((rel, board) => new { Relationship = rel.As<ChildBoardRelationship>(),
-                                              Board = board.As<Board>() })
-                .OrderBy("rel.index")
+                .Return((board) => board.As<Board>())
                 .ResultsAsync;
         }
 
@@ -61,12 +59,12 @@ namespace Kolan.Repositories
             string id = _generator.NewId(username);
 
             await Client.Cypher
-                .Match("(user:User)-[:ChildGroup]->(group:Group)")
+                .Match("(user:User)-[:ChildGroup]->(previous)-[oldRel:Next]->(next)")
                 .Where((User user) => user.Username == username)
-                .Create("(group)-[rel:ChildBoard {index: group.amount}]->(board:Board {newBoard})")
+                .Create("(previous)-[:Next]->(board:Board {newBoard})-[:Next]->(next)")
                 .WithParam("newBoard", entity)
-                .Set("group.amount = group.amount + 1")
                 .Set($"board.id = '{id}'")
+                .Delete("oldRel")
                 .ExecuteWithoutResultsAsync();
 
             return id;
@@ -88,39 +86,43 @@ namespace Kolan.Repositories
             bool isEmpty = childrenCount.First() == 0;
 
             if (isEmpty) await AddDefaultGroups(parentId);
-            Console.ForegroundColor = ConsoleColor.Blue;
-            Console.WriteLine(parentId);
-            Console.WriteLine(groupName);
 
             await Client.Cypher
-                .Match("(parentBoard:Board)-[:ChildGroup]->(group:Group)")
+                .Match("(parentBoard:Board)-[:ChildGroup]->(previous)-[oldRel:Next]->(next)")
                 .Where((Board parentBoard) => parentBoard.Id == parentId)
-                .AndWhere((Group group) => group.Name == groupName)
-                .Create("(group)-[rel:ChildBoard {index: group.amount}]->(board:Board {newBoard})")
+                .Create("(previous)-[:Next]->(board:Board {newBoard})-[:Next]->(next)")
                 .WithParam("newBoard", entity)
-                .Set("group.amount = group.amount + 1")
                 .Set($"board.id = '{id}'")
+                .Delete("oldRel")
                 .ExecuteWithoutResultsAsync();
 
             return id;
         }
 
         /// <summary>
-        /// Swap the indexes of two root boards.
-        /// <param name="fromIndex">First index</param>
-        /// <param name="toIndex">Second index</param>
-        /// <param name="username">User with the boards.</param>
+        /// Move a board to under another board (or group)
+        /// <param name="hostId">Id of the parent board</param>
+        /// <param name="boardId">Id of board to move</param>
+        /// <param name="targetId">Id of board to put it under</param>
         /// </summary>
-        public async Task SwapAsync(int fromIndex, int toIndex, string username)
+        public async Task MoveAsync(string hostId, string boardId, string targetId, bool isRoot)
         {
+            string whereHostId = "host.id = {hostId}";
+            if (isRoot) whereHostId = "host.username = {hostId}"; // Username
+
             await Client.Cypher
-                .Match("(user:User)-[:ChildGroup]->(group:Group)-[rel:ChildBoard]->(:Board)",
-                       "(group)-[rel2:ChildBoard]->(:Board)")
-                .Where((User user) => user.Username == username)
-                .AndWhere((ChildBoardRelationship rel) => rel.Index == fromIndex)
-                .AndWhere((ChildBoardRelationship rel2) => rel2.Index == toIndex)
-                .Set("rel.index = " + toIndex.ToString())
-                .Set("rel2.index = " + fromIndex.ToString())
+                .Match("(host)")
+                .Where(whereHostId)
+                .WithParam("hostId", hostId)
+                .Match("(previous)-[previousRel:Next]->(board:Board)-[nextRel:Next]->(next)")
+                .Where((Board board) => board.Id == boardId)
+                .Match("(newPrevious)-[rel:Next]->(newNext)")
+                .Where("newPrevious.id = {targetId}")
+                .WithParam("targetId", targetId)
+                .Call("apoc.lock.nodes([host])")
+                .Delete("previousRel, nextRel, rel")
+                .Create("(previous)-[:Next]->(next)")
+                .Create("(newPrevious)-[:Next]->(board)-[:Next]->(newNext)")
                 .ExecuteWithoutResultsAsync();
         }
 
@@ -160,10 +162,10 @@ namespace Kolan.Repositories
             await Client.Cypher
                 .Match("(board:Board)")
                 .Where((Board board) => board.Id == id)
-                .Create("(board)-[:ChildGroup]->(group1:Group { name: 'Backlog' })")
-                .Create("(group1)-[:ChildGroup]->(group2:Group { name: 'Ready' })")
-                .Create("(group2)-[:ChildGroup]->(group3:Group { name: 'In Progress' })")
-                .Create("(group3)-[:ChildGroup]->(:Group { name: 'Done' })")
+                .Create("(board)-[:ChildGroup { order: 0 }]->(:Group { name: 'Backlog', id: 'a' })-[:Next]->(:End)")
+                .Create("(board)-[:ChildGroup { order: 1 }]->(:Group { name: 'Ready', id: 'b' })-[:Next]->(:End)")
+                .Create("(board)-[:ChildGroup { order: 2 }]->(:Group { name: 'In Progress',  id: 'c' })-[:Next]->(:End)")
+                .Create("(board)-[:ChildGroup { order: 3 }]->(:Group { name: 'Done', id: 'd' })-[:Next]->(:End)")
                 .ExecuteWithoutResultsAsync();
         }
     }

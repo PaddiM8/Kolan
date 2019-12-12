@@ -7,8 +7,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const lit_element_1 = require("lit-element");
-const apiRequester_1 = require("../apiRequester");
-const requestParameter_1 = require("../requestParameter");
+const apiRequester_1 = require("../communication/apiRequester");
+const requestParameter_1 = require("../communication/requestParameter");
 const inputType_1 = require("../enums/inputType");
 const inputList_1 = require("./inputList");
 /**
@@ -50,10 +50,10 @@ let DialogBox = class DialogBox extends lit_element_1.LitElement {
                 ...this.extraRequestParameters];
             const request = new apiRequester_1.ApiRequester().send(this.dialogOptions.requestAction, this.dialogOptions.requestMethod, this.dialogOptions.requestType, requestParameters);
             request.then(output => {
-                const outputJson = JSON.parse(output);
+                const outputObject = JSON.parse(output);
                 // Fire event
                 this.dispatchEvent(new CustomEvent("submitDialog", {
-                    detail: Object.assign(Object.assign({}, outputJson), formData["inputValues"])
+                    detail: { output: outputObject, input: formData["inputValues"] }
                 }));
             });
         }

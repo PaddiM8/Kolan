@@ -86,10 +86,10 @@
 /************************************************************************/
 /******/ ({
 
-/***/ "./Kolan/wwwroot/js/apiRequester.js":
-/*!******************************************!*\
-  !*** ./Kolan/wwwroot/js/apiRequester.js ***!
-  \******************************************/
+/***/ "./Kolan/wwwroot/js/communication/apiRequester.js":
+/*!********************************************************!*\
+  !*** ./Kolan/wwwroot/js/communication/apiRequester.js ***!
+  \********************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -146,6 +146,27 @@ exports.ApiRequester = ApiRequester;
 
 /***/ }),
 
+/***/ "./Kolan/wwwroot/js/communication/requestParameter.js":
+/*!************************************************************!*\
+  !*** ./Kolan/wwwroot/js/communication/requestParameter.js ***!
+  \************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+class RequestParameter {
+    constructor(key, value) {
+        this.key = key;
+        this.value = value;
+    }
+}
+exports.RequestParameter = RequestParameter;
+
+
+/***/ }),
+
 /***/ "./Kolan/wwwroot/js/components/components.js":
 /*!***************************************************!*\
   !*** ./Kolan/wwwroot/js/components/components.js ***!
@@ -181,8 +202,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const lit_element_1 = __webpack_require__(/*! lit-element */ "./node_modules/lit-element/lit-element.js");
-const apiRequester_1 = __webpack_require__(/*! ../apiRequester */ "./Kolan/wwwroot/js/apiRequester.js");
-const requestParameter_1 = __webpack_require__(/*! ../requestParameter */ "./Kolan/wwwroot/js/requestParameter.js");
+const apiRequester_1 = __webpack_require__(/*! ../communication/apiRequester */ "./Kolan/wwwroot/js/communication/apiRequester.js");
+const requestParameter_1 = __webpack_require__(/*! ../communication/requestParameter */ "./Kolan/wwwroot/js/communication/requestParameter.js");
 const inputType_1 = __webpack_require__(/*! ../enums/inputType */ "./Kolan/wwwroot/js/enums/inputType.js");
 const inputList_1 = __webpack_require__(/*! ./inputList */ "./Kolan/wwwroot/js/components/inputList.js");
 /**
@@ -224,10 +245,10 @@ let DialogBox = class DialogBox extends lit_element_1.LitElement {
                 ...this.extraRequestParameters];
             const request = new apiRequester_1.ApiRequester().send(this.dialogOptions.requestAction, this.dialogOptions.requestMethod, this.dialogOptions.requestType, requestParameters);
             request.then(output => {
-                const outputJson = JSON.parse(output);
+                const outputObject = JSON.parse(output);
                 // Fire event
                 this.dispatchEvent(new CustomEvent("submitDialog", {
-                    detail: Object.assign(Object.assign({}, outputJson), formData["inputValues"])
+                    detail: { output: outputObject, input: formData["inputValues"] }
                 }));
             });
         }
@@ -377,7 +398,7 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
             X: e.clientX - this.getBoundingClientRect().left,
             Y: e.clientY - this.getBoundingClientRect().top
         };
-        this.currentTaskList = this.parentElement;
+        this.currentTasklist = this.parentElement;
         this.currentIndex = this.getArrayItemIndex(this.parentElement.children, this);
     }
     onClick(e) {
@@ -400,17 +421,17 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
         element.style.top = "";
         element.style.left = "";
         // Move to placeholder
-        const placeholder = this.currentTaskList.parentElement.querySelector(this.placeholder);
-        const targetTaskList = placeholder.parentElement;
+        const placeholder = this.currentTasklist.parentElement.querySelector(this.placeholder);
+        const targetTasklist = placeholder.parentElement;
         const targetIndex = this.getArrayItemIndex(placeholder.parentElement.children, placeholder);
         placeholder.parentElement.insertBefore(element, placeholder);
         placeholder.style.display = "none";
         element.detached = false;
-        if (this.currentTaskList != targetTaskList) { // If moved to another tasklist
+        if (this.currentTasklist != targetTasklist) { // If moved to another tasklist
             this.dispatchEvent(new CustomEvent("taskExternalMove", {
                 "detail": {
-                    fromTaskList: this.currentTaskList,
-                    toTaskList: targetTaskList,
+                    fromTasklist: this.currentTasklist,
+                    toTasklist: targetTasklist,
                     toIndex: targetIndex,
                     toItem: this.previousElementSibling
                 }
@@ -669,27 +690,6 @@ var InputType;
     InputType[InputType["Text"] = 0] = "Text";
     InputType[InputType["InputList"] = 1] = "InputList";
 })(InputType = exports.InputType || (exports.InputType = {}));
-
-
-/***/ }),
-
-/***/ "./Kolan/wwwroot/js/requestParameter.js":
-/*!**********************************************!*\
-  !*** ./Kolan/wwwroot/js/requestParameter.js ***!
-  \**********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-class RequestParameter {
-    constructor(key, value) {
-        this.key = key;
-        this.value = value;
-    }
-}
-exports.RequestParameter = RequestParameter;
 
 
 /***/ }),

@@ -63,7 +63,7 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
             X: e.clientX - this.getBoundingClientRect().left,
             Y: e.clientY - this.getBoundingClientRect().top
         };
-        this.currentTaskList = this.parentElement;
+        this.currentTasklist = this.parentElement;
         this.currentIndex = this.getArrayItemIndex(this.parentElement.children, this);
     }
     onClick(e) {
@@ -86,17 +86,17 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
         element.style.top = "";
         element.style.left = "";
         // Move to placeholder
-        const placeholder = this.currentTaskList.parentElement.querySelector(this.placeholder);
-        const targetTaskList = placeholder.parentElement;
+        const placeholder = this.currentTasklist.parentElement.querySelector(this.placeholder);
+        const targetTasklist = placeholder.parentElement;
         const targetIndex = this.getArrayItemIndex(placeholder.parentElement.children, placeholder);
         placeholder.parentElement.insertBefore(element, placeholder);
         placeholder.style.display = "none";
         element.detached = false;
-        if (this.currentTaskList != targetTaskList) { // If moved to another tasklist
+        if (this.currentTasklist != targetTasklist) { // If moved to another tasklist
             this.dispatchEvent(new CustomEvent("taskExternalMove", {
                 "detail": {
-                    fromTaskList: this.currentTaskList,
-                    toTaskList: targetTaskList,
+                    fromTasklist: this.currentTasklist,
+                    toTasklist: targetTasklist,
                     toIndex: targetIndex,
                     toItem: this.previousElementSibling
                 }

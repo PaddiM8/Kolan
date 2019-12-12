@@ -170,7 +170,7 @@ class Boards {
         // Prepare dialog
         let addDialog = new dialogBox_1.DialogBox(addBoardDialog_1.addBoardDialog, "addBoardDialog");
         document.body.appendChild(addDialog);
-        addDialog.addEventListener("submitDialog", (e) => this.addBoardItem(e.detail.id, e.detail.name, e.detail.description));
+        addDialog.addEventListener("submitDialog", (e) => this.addBoardItem(e.detail.output.id, e.detail.input.name, e.detail.input.description));
         // Load boards
         this.loadBoards();
         // Events
@@ -196,6 +196,87 @@ class Boards {
         });
     }
 }
+
+
+/***/ }),
+
+/***/ "./Kolan/wwwroot/js/communication/apiRequester.js":
+/*!********************************************************!*\
+  !*** ./Kolan/wwwroot/js/communication/apiRequester.js ***!
+  \********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const es6_promise_1 = __webpack_require__(/*! es6-promise */ "./node_modules/es6-promise/dist/es6-promise.js");
+/** Do an API request
+ * @param action - Api action (controller)
+ * @param method - Api method (additional route, often empty)
+ * @param requestType - HTTP request type, eg. GET, POST, PUT, etc.
+ * @param requestParameters - A list of parameters to be pushed with the request.
+ */
+class ApiRequester {
+    /* Do a HTTP request
+     */
+    send(action, method, requestType, requestParameters = null) {
+        return new es6_promise_1.Promise((resolve, reject) => {
+            const req = new XMLHttpRequest();
+            let url = "/api/" + action;
+            if (method)
+                url += "/" + method;
+            req.open(requestType, url);
+            req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+            req.onerror = (e) => reject(Error(`Network Error: ${e}`));
+            req.onload = () => {
+                if (req.status === 200)
+                    resolve(req.response);
+                else
+                    reject(Error(req.statusText));
+            };
+            // Send data
+            if (requestParameters != null) {
+                req.send(this.createURLSearchParams(requestParameters));
+            }
+            else {
+                req.send();
+            }
+        });
+    }
+    /* Convert the request parameters to URLSearchParams,
+     * which can be read by the server.
+     */
+    createURLSearchParams(requestParameters) {
+        let params = new URLSearchParams();
+        for (let parameter of requestParameters) {
+            params.append(parameter.key, parameter.value);
+        }
+        return params;
+    }
+}
+exports.ApiRequester = ApiRequester;
+
+
+/***/ }),
+
+/***/ "./Kolan/wwwroot/js/communication/requestParameter.js":
+/*!************************************************************!*\
+  !*** ./Kolan/wwwroot/js/communication/requestParameter.js ***!
+  \************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+class RequestParameter {
+    constructor(key, value) {
+        this.key = key;
+        this.value = value;
+    }
+}
+exports.RequestParameter = RequestParameter;
 
 
 /***/ }),
@@ -235,8 +316,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const lit_element_1 = __webpack_require__(/*! lit-element */ "./node_modules/lit-element/lit-element.js");
-const apiRequester_1 = __webpack_require__(/*! ../apiRequester */ "./Kolan/wwwroot/js/apiRequester.js");
-const requestParameter_1 = __webpack_require__(/*! ../requestParameter */ "./Kolan/wwwroot/js/requestParameter.js");
+const apiRequester_1 = __webpack_require__(/*! ../communication/apiRequester */ "./Kolan/wwwroot/js/communication/apiRequester.js");
+const requestParameter_1 = __webpack_require__(/*! ../communication/requestParameter */ "./Kolan/wwwroot/js/communication/requestParameter.js");
 const inputType_1 = __webpack_require__(/*! ../enums/inputType */ "./Kolan/wwwroot/js/enums/inputType.js");
 const inputList_1 = __webpack_require__(/*! ./inputList */ "./Kolan/wwwroot/js/components/inputList.js");
 /**
@@ -278,10 +359,10 @@ let DialogBox = class DialogBox extends lit_element_1.LitElement {
                 ...this.extraRequestParameters];
             const request = new apiRequester_1.ApiRequester().send(this.dialogOptions.requestAction, this.dialogOptions.requestMethod, this.dialogOptions.requestType, requestParameters);
             request.then(output => {
-                const outputJson = JSON.parse(output);
+                const outputObject = JSON.parse(output);
                 // Fire event
                 this.dispatchEvent(new CustomEvent("submitDialog", {
-                    detail: Object.assign(Object.assign({}, outputJson), formData["inputValues"])
+                    detail: { output: outputObject, input: formData["inputValues"] }
                 }));
             });
         }
@@ -431,7 +512,7 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
             X: e.clientX - this.getBoundingClientRect().left,
             Y: e.clientY - this.getBoundingClientRect().top
         };
-        this.currentTaskList = this.parentElement;
+        this.currentTasklist = this.parentElement;
         this.currentIndex = this.getArrayItemIndex(this.parentElement.children, this);
     }
     onClick(e) {
@@ -454,17 +535,17 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
         element.style.top = "";
         element.style.left = "";
         // Move to placeholder
-        const placeholder = this.currentTaskList.parentElement.querySelector(this.placeholder);
-        const targetTaskList = placeholder.parentElement;
+        const placeholder = this.currentTasklist.parentElement.querySelector(this.placeholder);
+        const targetTasklist = placeholder.parentElement;
         const targetIndex = this.getArrayItemIndex(placeholder.parentElement.children, placeholder);
         placeholder.parentElement.insertBefore(element, placeholder);
         placeholder.style.display = "none";
         element.detached = false;
-        if (this.currentTaskList != targetTaskList) { // If moved to another tasklist
+        if (this.currentTasklist != targetTasklist) { // If moved to another tasklist
             this.dispatchEvent(new CustomEvent("taskExternalMove", {
                 "detail": {
-                    fromTaskList: this.currentTaskList,
-                    toTaskList: targetTaskList,
+                    fromTasklist: this.currentTasklist,
+                    toTasklist: targetTasklist,
                     toIndex: targetIndex,
                     toItem: this.previousElementSibling
                 }
@@ -718,8 +799,8 @@ exports.InputList = InputList;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const apiRequester_1 = __webpack_require__(/*! ../apiRequester */ "./Kolan/wwwroot/js/apiRequester.js");
-const requestParameter_1 = __webpack_require__(/*! ../requestParameter */ "./Kolan/wwwroot/js/requestParameter.js");
+const apiRequester_1 = __webpack_require__(/*! ../communication/apiRequester */ "./Kolan/wwwroot/js/communication/apiRequester.js");
+const requestParameter_1 = __webpack_require__(/*! ../communication/requestParameter */ "./Kolan/wwwroot/js/communication/requestParameter.js");
 /**
  * Controller to add/remove/edit/etc. items in a board list.
  */
@@ -749,7 +830,7 @@ class BoardListController {
     }
     createBoard(id, name, description, color = "") {
         const item = document.createElement("draggable-element");
-        item["boardId"] = id;
+        item.dataset.id = id;
         item.insertAdjacentHTML("beforeend", `<span class="dragger"></span><h2>${name}</h2><p>${description}</p>`);
         if (color != "")
             item.style.backgroundColor = color;
@@ -761,16 +842,16 @@ class BoardListController {
      * Fires when the board item is clicked, ends if the clicked part was the dragger.
      */
     onClickEvent(e) {
-        window.location.href = "../Board/" + e.target.boardId;
+        window.location.href = "../Board/" + e.target.dataset.id;
     }
     onInternalMove(item, toItem) {
         var target;
         if (toItem)
-            target = toItem.boardId;
+            target = toItem.dataset.id;
         else
-            target = viewData.username;
+            target = viewData.username; // If there is no item above, set the target to the user's username.
         new apiRequester_1.ApiRequester().send("Boards", "ChangeOrder", "POST", [
-            new requestParameter_1.RequestParameter("boardId", item.boardId),
+            new requestParameter_1.RequestParameter("boardId", item.dataset.id),
             new requestParameter_1.RequestParameter("targetId", target)
         ]);
     }
@@ -831,27 +912,6 @@ var InputType;
     InputType[InputType["Text"] = 0] = "Text";
     InputType[InputType["InputList"] = 1] = "InputList";
 })(InputType = exports.InputType || (exports.InputType = {}));
-
-
-/***/ }),
-
-/***/ "./Kolan/wwwroot/js/requestParameter.js":
-/*!**********************************************!*\
-  !*** ./Kolan/wwwroot/js/requestParameter.js ***!
-  \**********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-class RequestParameter {
-    constructor(key, value) {
-        this.key = key;
-        this.value = value;
-    }
-}
-exports.RequestParameter = RequestParameter;
 
 
 /***/ }),

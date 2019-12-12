@@ -1,13 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const dialogBox_1 = require("./components/dialogBox");
-const addTaskDialog_1 = require("./dialogs/addTaskDialog");
-const shareDialog_1 = require("./dialogs/shareDialog");
-const setupDialog_1 = require("./dialogs/setupDialog");
-const tasklistController_1 = require("./controllers/tasklistController");
-const apiRequester_1 = require("./apiRequester");
-const requestParameter_1 = require("./requestParameter");
-const boardHubConnection_1 = require("./communication/boardHubConnection");
+const dialogBox_1 = require("../components/dialogBox");
+const addTaskDialog_1 = require("../dialogs/addTaskDialog");
+const shareDialog_1 = require("../dialogs/shareDialog");
+const setupDialog_1 = require("../dialogs/setupDialog");
+const tasklistController_1 = require("../controllers/tasklistController");
+const apiRequester_1 = require("../communication/apiRequester");
+const requestParameter_1 = require("../communication/requestParameter");
+const boardHubConnection_1 = require("../communication/boardHubConnection");
 window.addEventListener("load", () => new Board());
 class Board {
     constructor() {

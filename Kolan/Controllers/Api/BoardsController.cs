@@ -33,7 +33,13 @@ namespace Kolan.Controllers.Api
         [HttpGet("{id}")]
         public async Task<object> GetBoard(string id)
         {
-            return await _uow.Boards.GetAsync(id, User.Identity.Name);
+            return await _uow.Boards.GetAsync(id);
+        }
+
+        [HttpPost("{id}/Setup")]
+        public async Task<object> Setup(string id)
+        {
+            return await _uow.Boards.SetupAsync(id);
         }
 
         [HttpPost]
@@ -51,7 +57,7 @@ namespace Kolan.Controllers.Api
         }
 
         [HttpPost("{parentId}")]
-        public async Task<IActionResult> Create(string parentId, string groupName,
+        public async Task<IActionResult> Create(string parentId, [FromForm]string groupId,
                 [FromForm]string name, [FromForm]string description)
         {
             var board = new Board
@@ -60,14 +66,14 @@ namespace Kolan.Controllers.Api
                 Description = description
             };
 
-            string id = await _uow.Boards.AddAsync(board, parentId, groupName, User.Identity.Name); // Add board to parent board
-            await _boardHubContext.Clients.Group(parentId).ReceiveNewBoard(board, groupName); // Send to client
+            string id = await _uow.Boards.AddAsync(board, groupId, User.Identity.Name); // Add board to parent board
+            await _boardHubContext.Clients.Group(parentId).ReceiveNewBoard(board, groupId); // Send to client
 
             return Ok(new { id = id });
         }
 
         [Route("ChangeOrder")]
-        [HttpPost("{parentId}")]
+        [HttpPost("{parentId}/ChangeOrder")]
         public async Task<IActionResult> ChangeOrder(string parentId, [FromForm]string boardId, [FromForm]string targetId)
         {
             await _uow.Boards.MoveAsync(parentId, boardId, targetId, false);
@@ -76,7 +82,7 @@ namespace Kolan.Controllers.Api
         }
 
         [Route("ChangeOrder")]
-        [HttpPost]
+        [HttpPost("ChangeOrder")]
         public async Task<IActionResult> ChangeOrder([FromForm]string boardId, [FromForm]string targetId)
         {
             await _uow.Boards.MoveAsync(User.Identity.Name, boardId, targetId, true);

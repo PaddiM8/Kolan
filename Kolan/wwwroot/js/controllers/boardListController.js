@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const apiRequester_1 = require("../apiRequester");
-const requestParameter_1 = require("../requestParameter");
+const apiRequester_1 = require("../communication/apiRequester");
+const requestParameter_1 = require("../communication/requestParameter");
 /**
  * Controller to add/remove/edit/etc. items in a board list.
  */
@@ -31,7 +31,7 @@ class BoardListController {
     }
     createBoard(id, name, description, color = "") {
         const item = document.createElement("draggable-element");
-        item["boardId"] = id;
+        item.dataset.id = id;
         item.insertAdjacentHTML("beforeend", `<span class="dragger"></span><h2>${name}</h2><p>${description}</p>`);
         if (color != "")
             item.style.backgroundColor = color;
@@ -43,16 +43,16 @@ class BoardListController {
      * Fires when the board item is clicked, ends if the clicked part was the dragger.
      */
     onClickEvent(e) {
-        window.location.href = "../Board/" + e.target.boardId;
+        window.location.href = "../Board/" + e.target.dataset.id;
     }
     onInternalMove(item, toItem) {
         var target;
         if (toItem)
-            target = toItem.boardId;
+            target = toItem.dataset.id;
         else
-            target = viewData.username;
+            target = viewData.username; // If there is no item above, set the target to the user's username.
         new apiRequester_1.ApiRequester().send("Boards", "ChangeOrder", "POST", [
-            new requestParameter_1.RequestParameter("boardId", item.boardId),
+            new requestParameter_1.RequestParameter("boardId", item.dataset.id),
             new requestParameter_1.RequestParameter("targetId", target)
         ]);
     }

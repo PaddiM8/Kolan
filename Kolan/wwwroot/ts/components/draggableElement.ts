@@ -13,8 +13,8 @@ export class Draggable extends LitElement {
     private startPos = {X: 0, Y: 0};
     private mouseDownPos = {X: 0, Y: 0};
     private detached = false;
-    private lastHoveredDraggable;
-    private currentTaskList: HTMLElement;
+    private lastHoveredDraggable: Draggable;
+    private currentTasklist: HTMLElement;
     private currentIndex: number;
 
     static get styles() {
@@ -59,7 +59,7 @@ export class Draggable extends LitElement {
             Y: e.clientY - this.getBoundingClientRect().top
         };
 
-        this.currentTaskList = this.parentElement;
+        this.currentTasklist = this.parentElement;
         this.currentIndex = this.getArrayItemIndex(this.parentElement.children, this);
     }
 
@@ -77,7 +77,7 @@ export class Draggable extends LitElement {
         }
     }
 
-    onMouseUp(element, e) {
+    onMouseUp(element: Draggable, e) {
         element.mouseIsDown = false;
 
         // Attach element
@@ -87,19 +87,19 @@ export class Draggable extends LitElement {
         element.style.left = "";
 
         // Move to placeholder
-        const placeholder: HTMLElement = this.currentTaskList.parentElement.querySelector(this.placeholder);
-        const targetTaskList = placeholder.parentElement;
+        const placeholder: HTMLElement = this.currentTasklist.parentElement.querySelector(this.placeholder);
+        const targetTasklist = placeholder.parentElement;
         const targetIndex = this.getArrayItemIndex(placeholder.parentElement.children, placeholder);
 
         placeholder.parentElement.insertBefore(element, placeholder);
         placeholder.style.display = "none";
         element.detached = false;
 
-        if (this.currentTaskList != targetTaskList) { // If moved to another tasklist
+        if (this.currentTasklist != targetTasklist) { // If moved to another tasklist
             this.dispatchEvent(new CustomEvent("taskExternalMove", {
                 "detail": {
-                    fromTaskList: this.currentTaskList,
-                    toTaskList: targetTaskList,
+                    fromTasklist: this.currentTasklist,
+                    toTasklist: targetTasklist,
                     toIndex: targetIndex,
                     toItem: this.previousElementSibling
                 }
@@ -146,7 +146,7 @@ export class Draggable extends LitElement {
         this.style.left = newPos.X + "px";
         this.style.top = newPos.Y + "px";
 
-        /// Show where item will be dropped ///
+        // Show where item will be dropped
         const elementsUnder = this.getRelatedElementsUnder();
         const placeholder: HTMLElement = this.parentElement.parentElement.querySelector(this.placeholder);
         const tasklistElements = elementsUnder.tasklist.children;
@@ -184,7 +184,7 @@ export class Draggable extends LitElement {
         let   closestDraggable = elementsOnPoint.filter(x => x.tagName == "DRAGGABLE-ELEMENT")[1];
         const tasklist = elementsOnPoint.filter(x => x.tagName == "TASKLIST")[0];
 
-        if (tasklist != undefined && closestDraggable == undefined) {
+        if (tasklist && !closestDraggable) {
             const under = document.elementsFromPoint(middlePoint.X, middlePoint.Y + 40)
                 .filter(x => x.tagName == "DRAGGABLE-ELEMENT");
 
@@ -207,6 +207,11 @@ export class Draggable extends LitElement {
         };
     }
 
+    /**
+     * Get the index of a specific item in an array
+     * @param array Array containing the item
+     * @param item The item of which the index is being found
+     */
     private getArrayItemIndex(array, item) {
         return Array.from(array).indexOf(item);
     }

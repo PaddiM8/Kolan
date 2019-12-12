@@ -32,20 +32,22 @@ namespace Kolan.Repositories
                 .ResultsAsync;
         }
 
-        public async Task<object> GetAsync(string id, string username)
+        /// <summary>
+        /// Return the groups and boards from a parent board.
+        /// </summary>
+        /// <param name="id">Parent board id</param>
+        public async Task<object> GetAsync(string id)
         {
-
             var result = await Client.Cypher
-                .Match("(board:Board)-[:ChildGroup]->(group:Group)")
-                .Where((Board board) => board.Id == id)
+                .Match("(parentBoard:Board)-[:ChildGroup]->(group:Group)")
+                .Where((Board parentBoard) => parentBoard.Id == id)
+                .OptionalMatch("(group)-[*]->(board:Board)")
                 .Return((board, group) => new
                         {
                             Board = board.As<Board>(),
                             Group = group.As<Group>()
                         })
                 .ResultsAsync;
-
-            if (result.Count() == 0) await AddDefaultGroups(id); // Add default groups if the board is empty
 
             return result;
         }
@@ -57,13 +59,13 @@ namespace Kolan.Repositories
         public async Task<string> AddAsync(Board entity, string username)
         {
             string id = _generator.NewId(username);
+            entity.Id = id;
 
             await Client.Cypher
                 .Match("(user:User)-[:ChildGroup]->(previous)-[oldRel:Next]->(next)")
                 .Where((User user) => user.Username == username)
                 .Create("(previous)-[:Next]->(board:Board {newBoard})-[:Next]->(next)")
                 .WithParam("newBoard", entity)
-                .Set($"board.id = '{id}'")
                 .Delete("oldRel")
                 .ExecuteWithoutResultsAsync();
 
@@ -74,29 +76,36 @@ namespace Kolan.Repositories
         /// Add a root board to a parent board.
         /// <param name="parentId">Id of parent board</param>
         /// </summary>
-        public async Task<string> AddAsync(Board entity, string parentId, string groupName, string username)
+        public async Task<string> AddAsync(Board entity, string groupId, string username)
         {
             string id = _generator.NewId(username);
-
-            IEnumerable<int> childrenCount = await Client.Cypher
-                .Match("(board:Board)-[:ChildGroup]->(group:Group)")
-                .Where((Board board) => board.Id == parentId)
-                .Return<int>("count(group)")
-                .ResultsAsync;
-            bool isEmpty = childrenCount.First() == 0;
-
-            if (isEmpty) await AddDefaultGroups(parentId);
+            entity.Id = id;
 
             await Client.Cypher
-                .Match("(parentBoard:Board)-[:ChildGroup]->(previous)-[oldRel:Next]->(next)")
-                .Where((Board parentBoard) => parentBoard.Id == parentId)
+                .Match("(:Board)-[:ChildGroup]->(previous:Group)-[oldRel:Next]->(next)")
+                .Where((Group previous) => previous.Id == groupId)
                 .Create("(previous)-[:Next]->(board:Board {newBoard})-[:Next]->(next)")
                 .WithParam("newBoard", entity)
-                .Set($"board.id = '{id}'")
                 .Delete("oldRel")
                 .ExecuteWithoutResultsAsync();
 
             return id;
+        }
+
+        /// <summary>
+        /// Add board groups
+        /// </summary>
+        public async Task<object> SetupAsync(string id)
+        {
+            IEnumerable<int> childrenCount = await Client.Cypher
+                .Match("(board:Board)-[:ChildGroup]->(group:Group)")
+                .Where((Board board) => board.Id == id)
+                .Return<int>("count(group)")
+                .ResultsAsync;
+            bool isEmpty = childrenCount.First() == 0;
+
+            if (isEmpty) return await AddDefaultGroups(id);
+            else         throw new InvalidOperationException();
         }
 
         /// <summary>
@@ -157,7 +166,8 @@ namespace Kolan.Repositories
                 .ExecuteWithoutResultsAsync();
         }
 
-        private async Task AddDefaultGroups(string id)
+        // This is all temporary ok
+        private async Task<object> AddDefaultGroups(string id)
         {
             await Client.Cypher
                 .Match("(board:Board)")
@@ -167,6 +177,12 @@ namespace Kolan.Repositories
                 .Create("(board)-[:ChildGroup { order: 2 }]->(:Group { name: 'In Progress',  id: 'c' })-[:Next]->(:End)")
                 .Create("(board)-[:ChildGroup { order: 3 }]->(:Group { name: 'Done', id: 'd' })-[:Next]->(:End)")
                 .ExecuteWithoutResultsAsync();
+
+            return await Client.Cypher
+                .Match("(board:Board)-[:ChildGroup]->(group:Group)")
+                .Where((Board board) => board.Id == id)
+                .Return((group) => group.As<Group>())
+                .ResultsAsync;
         }
     }
 }

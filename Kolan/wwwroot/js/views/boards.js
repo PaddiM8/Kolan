@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-require("./components/components");
-const boardListController_1 = require("./controllers/boardListController");
-const addBoardDialog_1 = require("./dialogs/addBoardDialog");
-const dialogBox_1 = require("./components/dialogBox");
-const apiRequester_1 = require("./apiRequester");
+require("../components/components");
+const boardListController_1 = require("../controllers/boardListController");
+const addBoardDialog_1 = require("../dialogs/addBoardDialog");
+const dialogBox_1 = require("../components/dialogBox");
+const apiRequester_1 = require("../communication/apiRequester");
 window.addEventListener("load", () => new Boards());
 class Boards {
     /**

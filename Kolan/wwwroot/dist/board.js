@@ -159,6 +159,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const dialogBox_1 = __webpack_require__(/*! ./components/dialogBox */ "./Kolan/wwwroot/js/components/dialogBox.js");
 const addTaskDialog_1 = __webpack_require__(/*! ./dialogs/addTaskDialog */ "./Kolan/wwwroot/js/dialogs/addTaskDialog.js");
 const shareDialog_1 = __webpack_require__(/*! ./dialogs/shareDialog */ "./Kolan/wwwroot/js/dialogs/shareDialog.js");
+const setupDialog_1 = __webpack_require__(/*! ./dialogs/setupDialog */ "./Kolan/wwwroot/js/dialogs/setupDialog.js");
 const tasklistController_1 = __webpack_require__(/*! ./controllers/tasklistController */ "./Kolan/wwwroot/js/controllers/tasklistController.js");
 const apiRequester_1 = __webpack_require__(/*! ./apiRequester */ "./Kolan/wwwroot/js/apiRequester.js");
 const requestParameter_1 = __webpack_require__(/*! ./requestParameter */ "./Kolan/wwwroot/js/requestParameter.js");
@@ -167,9 +168,11 @@ window.addEventListener("load", () => new Board());
 class Board {
     constructor() {
         // Prepare addTaskDialog
-        let addDialogElement = new dialogBox_1.DialogBox(addTaskDialog_1.addTaskDialog, "addTaskDialog");
-        document.body.appendChild(addDialogElement);
-        addDialogElement.addEventListener("submitDialog", (e) => this.addTask(this._currentTasklist, e.detail.name, e.detail.description));
+        this.addDialogElement = new dialogBox_1.DialogBox(addTaskDialog_1.addTaskDialog, "addTaskDialog");
+        this.addDialogElement.dialogOptions.requestMethod = viewData.id + "/" +
+            this.addDialogElement.dialogOptions.requestMethod;
+        document.body.appendChild(this.addDialogElement);
+        this.addDialogElement.addEventListener("submitDialog", (e) => this.addTask(this.currentTasklistId, e.detail.input.name, e.detail.input.description));
         // Prepare shareDialog
         let shareDialogElement = new dialogBox_1.DialogBox(shareDialog_1.shareDialog, "shareDialog");
         document.body.appendChild(shareDialogElement);
@@ -177,32 +180,54 @@ class Board {
          this.handleUserAdded(e.detail));
         shareDialogElement.addEventListener("itemRemoved", (e) => // User removed in the share dialog
          this.handleUserRemoved(e.detail));
+        // Prepare setupDialog
+        this.setupDialogElement = new dialogBox_1.DialogBox(setupDialog_1.setupDialog, "setupDialog");
+        this.setupDialogElement.dialogOptions.requestMethod = viewData.id + "/" +
+            this.setupDialogElement.dialogOptions.requestMethod;
+        document.body.appendChild(this.setupDialogElement);
+        this.setupDialogElement.addEventListener("submitDialog", (e) => {
+            for (const group of e.detail.output) {
+                this.addGroup(group.id, group.name);
+            }
+        });
         // Load board
         this.loadBoard();
-        // Events
-        const plusElements = document.getElementsByClassName("plus");
-        for (let plus of plusElements) {
-            plus.addEventListener("click", e => {
-                const groupName = e.currentTarget.parentElement.dataset.name;
-                addDialogElement.shown = true;
-                addDialogElement.dialogOptions.requestMethod = viewData.id;
-                addDialogElement.extraRequestParameters = [
-                    new requestParameter_1.RequestParameter("groupName", groupName)
-                ];
-                const item = e.currentTarget.parentElement;
-                const taskListId = [...item.parentElement.children].indexOf(item);
-                this._currentTasklist = document
-                    .getElementsByTagName("tasklist")[taskListId];
-            });
-        }
         const shareButton = document.getElementById("shareButton");
         shareButton.addEventListener("click", e => shareDialogElement.shown = true);
         // Websockets
         new boardHubConnection_1.BoardHubConnection(viewData.id);
     }
-    addTask(tasklist, name, description) {
+    addGroup(id, name) {
+        const listhead = document.getElementById("list-head");
+        listhead.insertAdjacentHTML("beforeend", `<div class="item" data-id="${id}">
+                ${name}
+                <span class="plus"><span>+</span></span>
+            </div>`);
+        const tasklists = document.getElementById("tasklists");
+        const tasklistElement = document.createElement("tasklist");
+        tasklistElement.dataset.id = id;
+        tasklists.appendChild(tasklistElement);
+        // Events
+        const plusElements = listhead.getElementsByClassName("plus");
+        for (let plus of plusElements) {
+            plus.addEventListener("click", e => {
+                const groupId = e.currentTarget.parentElement.dataset.id;
+                this.addDialogElement.shown = true;
+                this.addDialogElement.dialogOptions.requestMethod = viewData.id;
+                this.addDialogElement.extraRequestParameters = [
+                    new requestParameter_1.RequestParameter("groupId", groupId)
+                ];
+                this.currentTasklistId = groupId;
+            });
+        }
+    }
+    addTask(tasklistId, name, description, toTop = true) {
+        const tasklist = document.querySelector(`#tasklists tasklist[data-id='${tasklistId}']`);
         const tasklistController = new tasklistController_1.TasklistController(tasklist);
-        tasklistController.addTask(name, description);
+        if (toTop)
+            tasklistController.addTask(name, description);
+        else
+            tasklistController.addTaskToBottom(name, description);
     }
     handleUserAdded(username) {
         const requestParameters = [new requestParameter_1.RequestParameter("username", username)];
@@ -213,12 +238,26 @@ class Board {
         new apiRequester_1.ApiRequester().send("Boards", `${viewData.id}/Users`, "DELETE", requestParameters);
     }
     loadBoard() {
-        new apiRequester_1.ApiRequester().send("Board", viewData.id, "GET").then(result => {
-            const boards = JSON.parse(result.toString());
-            for (const item of boards) {
-                this.addTask(item.board.group, item.board.name, item.board.description);
+        new apiRequester_1.ApiRequester().send("Boards", viewData.id, "GET").then(result => {
+            const boards = JSON.parse(result);
+            console.log(boards);
+            // If the request returns nothing, the board hasn't been set up yet. Display the setup dialog.
+            if (boards.length == 0) {
+                this.setupDialogElement.shown = true;
             }
-        });
+            else {
+                const tasklists = document.getElementById("tasklists");
+                for (const item of boards) {
+                    // Add group if it doesn't exist
+                    if (!tasklists.querySelector(`tasklist[data-id="${item.group.id}"]`)) {
+                        this.addGroup(item.group.id, item.group.name);
+                    }
+                    // Add board if it isn't null
+                    if (item.board)
+                        this.addTask(item.group.id, item.board.name, item.board.description, false);
+                }
+            }
+        }).catch((err) => console.log(err));
     }
 }
 
@@ -311,10 +350,10 @@ let DialogBox = class DialogBox extends lit_element_1.LitElement {
                 ...this.extraRequestParameters];
             const request = new apiRequester_1.ApiRequester().send(this.dialogOptions.requestAction, this.dialogOptions.requestMethod, this.dialogOptions.requestType, requestParameters);
             request.then(output => {
-                const outputJson = JSON.parse(output);
+                const outputObject = JSON.parse(output);
                 // Fire event
                 this.dispatchEvent(new CustomEvent("submitDialog", {
-                    detail: Object.assign(Object.assign({}, outputJson), formData["inputValues"])
+                    detail: { output: outputObject, input: formData["inputValues"] }
                 }));
             });
         }
@@ -464,7 +503,7 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
             X: e.clientX - this.getBoundingClientRect().left,
             Y: e.clientY - this.getBoundingClientRect().top
         };
-        this.currentTaskList = this.parentElement;
+        this.currentTasklist = this.parentElement;
         this.currentIndex = this.getArrayItemIndex(this.parentElement.children, this);
     }
     onClick(e) {
@@ -487,17 +526,17 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
         element.style.top = "";
         element.style.left = "";
         // Move to placeholder
-        const placeholder = this.currentTaskList.parentElement.querySelector(this.placeholder);
-        const targetTaskList = placeholder.parentElement;
+        const placeholder = this.currentTasklist.parentElement.querySelector(this.placeholder);
+        const targetTasklist = placeholder.parentElement;
         const targetIndex = this.getArrayItemIndex(placeholder.parentElement.children, placeholder);
         placeholder.parentElement.insertBefore(element, placeholder);
         placeholder.style.display = "none";
         element.detached = false;
-        if (this.currentTaskList != targetTaskList) { // If moved to another tasklist
+        if (this.currentTasklist != targetTasklist) { // If moved to another tasklist
             this.dispatchEvent(new CustomEvent("taskExternalMove", {
                 "detail": {
-                    fromTaskList: this.currentTaskList,
-                    toTaskList: targetTaskList,
+                    fromTasklist: this.currentTasklist,
+                    toTasklist: targetTasklist,
                     toIndex: targetIndex,
                     toItem: this.previousElementSibling
                 }
@@ -567,17 +606,17 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
         }
         else if (this.getMiddlePoint().Y > lastRect.top + lastRect.height) { // If at bottom
             elementsUnder.tasklist.appendChild(placeholder);
-        }
-    }
+        }Tasklist
+    }Tasklist
     /**
      * Get <draggable> element under the element currently being dragged, and
      * also the hovered tasklist.
      */
-    getRelatedElementsUnder() {
+    getRelatedElementsUnTasklistTasklist
         const middlePoint = this.getMiddlePoint();
         const elementsOnPoint = document.elementsFromPoint(middlePoint.X, middlePoint.Y);
-        let closestDraggable = elementsOnPoint.filter(x => x.tagName == "DRAGGABLE-ELEMENT")[1];
-        const tasklist = elementsOnPoint.filter(x => x.tagName == "TASKLIST")[0];
+        let closestDraggTasklistlementsOnPointTasklistx => x.tagName == "DRAGGABLE-ELEMENT")[1];
+        const tasklistTasklistntsOnPoiTasklistr(x => x.tagName == "TASKLIST")[0];
         if (tasklist != undefined && closestDraggable == undefined) {
             const under = document.elementsFromPoint(middlePoint.X, middlePoint.Y + 40)
                 .filter(x => x.tagName == "DRAGGABLE-ELEMENT");
@@ -752,12 +791,14 @@ exports.InputList = InputList;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const draggableElement_1 = __webpack_require__(/*! ../components/draggableElement */ "./Kolan/wwwroot/js/components/draggableElement.js");
+const requestParameter_1 = __webpack_require__(/*! ../requestParameter */ "./Kolan/wwwroot/js/requestParameter.js");
+const apiRequester_1 = __webpack_require__(/*! ../apiRequester */ "./Kolan/wwwroot/js/apiRequester.js");
 /**
  * Controller to add/remove/edit/etc. tasks in a tasklist.
  */
 class TasklistController {
     constructor(tasklist) {
-        this._tasklist = tasklist;
+        this.tasklist = tasklist;
     }
     /**
      * Add a task to the tasklist.
@@ -766,8 +807,22 @@ class TasklistController {
      * @param   color       {string} Task background color as HEX value.
      */
     addTask(name, description, color = "") {
+        const item = this.createTaskItem(name, description, color);
+        this.tasklist.insertBefore(item, this.tasklist.firstElementChild);
+    }
+    /**
+     * Add a task to bottom of the tasklist.
+     * @param   name        {string} Task title.
+     * @param   description {string} Task description.
+     * @param   color       {string} Task background color as HEX value.
+     */
+    addTaskToBottom(name, description, color = "") {
+        const item = this.createTaskItem(name, description, color);
+        this.tasklist.appendChild(item);
+    }
+    createTaskItem(name, description, color) {
         const item = new draggableElement_1.Draggable();
-        item.insertAdjacentHTML("beforeend", `
+        item.insertAdjacentHTML("afterbegin", `
          <h2>${name}</h2><p>${description}</p>
          <div class="edit-layer">
             <input type="text" /><br />
@@ -781,25 +836,37 @@ class TasklistController {
          `);
         if (color != "")
             item.style.backgroundColor = color;
-        this._tasklist.appendChild(item);
         item.addEventListener("draggableClick", e => this.onClickEvent(e));
         item.addEventListener("mouseover", () => this.onHoverEvent(item));
         item.addEventListener("mouseleave", () => this.onMouseLeaveEvent(item));
+        item.addEventListener("taskInternalMove", e => this.onInternalMove(e.target, e["detail"]["toItem"]));
         item.querySelector(".edit").addEventListener("click", () => this.onEditClick(item));
         item.querySelector(".save").addEventListener("click", () => this.onSaveClick(item));
+        return item;
     }
     /**
      * Fires when the board item is clicked, ends if the clicked part was the dragger.
      */
     onClickEvent(e) {
-        if (!this._inEditMode)
+        if (!this.inEditMode)
             console.log("clicked");
+    }
+    onInternalMove(item, toItem) {
+        var target;
+        if (toItem)
+            target = toItem.boardId;
+        else
+            target = this.tasklist.id;
+        new apiRequester_1.ApiRequester().send("Boards", viewData.id + "/ChangeOrder", "POST", [
+            new requestParameter_1.RequestParameter("boardId", item.dataset.id),
+            new requestParameter_1.RequestParameter("targetId", target),
+        ]);
     }
     /**
      * Fires when the board item is hovered
      */
     onHoverEvent(item) {
-        if (!this._inEditMode)
+        if (!this.inEditMode)
             item.querySelector(".overlay").style.display = "block";
     }
     /**
@@ -819,14 +886,14 @@ class TasklistController {
         const editLayer = item.querySelector(".edit-layer");
         const name = item.querySelector("h2");
         const text = item.querySelector("p");
-        editLayer.style.display = this._inEditMode ? "none" : "block"; // Hide if in edit mode
-        name.style.display = this._inEditMode ? "block" : "none"; // Show if in edit mode
-        text.style.display = this._inEditMode ? "block" : "none";
+        editLayer.style.display = this.inEditMode ? "none" : "block"; // Hide if in edit mode
+        name.style.display = this.inEditMode ? "block" : "none"; // Show if in edit mode
+        text.style.display = this.inEditMode ? "block" : "none";
         // Update text
         const nameEdit = editLayer.querySelector("input");
         const textEdit = editLayer.querySelector("textarea");
         const itemStyle = window.getComputedStyle(item, null);
-        if (this._inEditMode) {
+        if (this.inEditMode) {
             name.innerHTML = nameEdit.value;
             text.innerHTML = textEdit.value;
         }
@@ -835,8 +902,8 @@ class TasklistController {
             textEdit.value = text.innerHTML;
         }
         this.onMouseLeaveEvent(item);
-        item.movable = this._inEditMode;
-        this._inEditMode = !this._inEditMode;
+        item.movable = this.inEditMode;
+        this.inEditMode = !this.inEditMode;
     }
 }
 exports.TasklistController = TasklistController;
@@ -854,7 +921,7 @@ exports.TasklistController = TasklistController;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const inputType_1 = __webpack_require__(/*! ../enums/inputType */ "./Kolan/wwwroot/js/enums/inputType.js");
+const inputType_1 = __webpack_require__(/*! ../enums/inputType */ "./Kolan/wwwroot/js/enums/inputType.js");Tasklist
 /** add task dialog schematic
  */
 exports.addTaskDialog = {
@@ -875,6 +942,30 @@ exports.addTaskDialog = {
             inputType: inputType_1.InputType.Text
         }
     ]
+};
+
+
+/***/ }),
+
+/***/ "./Kolan/wwwroot/js/dialogs/setupDialog.js":
+/*!*************************************************!*\
+  !*** ./Kolan/wwwroot/js/dialogs/setupDialog.js ***!
+  \*************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+/** setup board dialog schematic
+ */
+exports.setupDialog = {
+    requestAction: "Boards",
+    requestMethod: "Setup",
+    requestType: "POST",
+    title: "Setup Board",
+    primaryButton: "Continue",
+    inputs: []
 };
 
 

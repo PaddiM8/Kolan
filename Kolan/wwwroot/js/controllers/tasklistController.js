@@ -1,12 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const draggableElement_1 = require("../components/draggableElement");
+const requestParameter_1 = require("../communication/requestParameter");
+const apiRequester_1 = require("../communication/apiRequester");
 /**
  * Controller to add/remove/edit/etc. tasks in a tasklist.
  */
 class TasklistController {
     constructor(tasklist) {
-        this._tasklist = tasklist;
+        this.tasklist = tasklist;
     }
     /**
      * Add a task to the tasklist.
@@ -14,9 +16,24 @@ class TasklistController {
      * @param   description {string} Task description.
      * @param   color       {string} Task background color as HEX value.
      */
-    addTask(name, description, color = "") {
+    addTask(id, name, description, color = "") {
+        const item = this.createTaskItem(id, name, description, color);
+        this.tasklist.insertBefore(item, this.tasklist.firstElementChild);
+    }
+    /**
+     * Add a task to bottom of the tasklist.
+     * @param   name        {string} Task title.
+     * @param   description {string} Task description.
+     * @param   color       {string} Task background color as HEX value.
+     */
+    addTaskToBottom(id, name, description, color = "") {
+        const item = this.createTaskItem(id, name, description, color);
+        this.tasklist.appendChild(item);
+    }
+    createTaskItem(id, name, description, color) {
         const item = new draggableElement_1.Draggable();
-        item.insertAdjacentHTML("beforeend", `
+        item.dataset.id = id;
+        item.insertAdjacentHTML("afterbegin", `
          <h2>${name}</h2><p>${description}</p>
          <div class="edit-layer">
             <input type="text" /><br />
@@ -30,25 +47,49 @@ class TasklistController {
          `);
         if (color != "")
             item.style.backgroundColor = color;
-        this._tasklist.appendChild(item);
         item.addEventListener("draggableClick", e => this.onClickEvent(e));
         item.addEventListener("mouseover", () => this.onHoverEvent(item));
         item.addEventListener("mouseleave", () => this.onMouseLeaveEvent(item));
+        item.addEventListener("taskInternalMove", e => this.onInternalMove(e.target, e["detail"]["toItem"]));
+        item.addEventListener("taskExternalMove", e => this.onExternalMove(e.target, e["detail"]["toItem"], e["detail"]["toTasklist"]));
         item.querySelector(".edit").addEventListener("click", () => this.onEditClick(item));
         item.querySelector(".save").addEventListener("click", () => this.onSaveClick(item));
+        return item;
     }
     /**
      * Fires when the board item is clicked, ends if the clicked part was the dragger.
      */
     onClickEvent(e) {
-        if (!this._inEditMode)
+        if (!this.inEditMode)
             console.log("clicked");
+    }
+    onInternalMove(item, toItem) {
+        var target;
+        if (toItem)
+            target = toItem.dataset.id;
+        else
+            target = this.tasklist.dataset.id;
+        this.sendMoveRequest(item.dataset.id, target);
+    }
+    onExternalMove(item, toItem, toTasklist) {
+        var target;
+        if (toItem)
+            target = toItem.dataset.id;
+        else
+            target = toTasklist.dataset.id;
+        this.sendMoveRequest(item.dataset.id, target);
+    }
+    sendMoveRequest(boardId, targetId) {
+        new apiRequester_1.ApiRequester().send("Boards", viewData.id + "/ChangeOrder", "POST", [
+            new requestParameter_1.RequestParameter("boardId", boardId),
+            new requestParameter_1.RequestParameter("targetId", targetId),
+        ]);
     }
     /**
      * Fires when the board item is hovered
      */
     onHoverEvent(item) {
-        if (!this._inEditMode)
+        if (!this.inEditMode)
             item.querySelector(".overlay").style.display = "block";
     }
     /**
@@ -68,14 +109,14 @@ class TasklistController {
         const editLayer = item.querySelector(".edit-layer");
         const name = item.querySelector("h2");
         const text = item.querySelector("p");
-        editLayer.style.display = this._inEditMode ? "none" : "block"; // Hide if in edit mode
-        name.style.display = this._inEditMode ? "block" : "none"; // Show if in edit mode
-        text.style.display = this._inEditMode ? "block" : "none";
+        editLayer.style.display = this.inEditMode ? "none" : "block"; // Hide if in edit mode
+        name.style.display = this.inEditMode ? "block" : "none"; // Show if in edit mode
+        text.style.display = this.inEditMode ? "block" : "none";
         // Update text
         const nameEdit = editLayer.querySelector("input");
         const textEdit = editLayer.querySelector("textarea");
         const itemStyle = window.getComputedStyle(item, null);
-        if (this._inEditMode) {
+        if (this.inEditMode) {
             name.innerHTML = nameEdit.value;
             text.innerHTML = textEdit.value;
         }
@@ -84,8 +125,8 @@ class TasklistController {
             textEdit.value = text.innerHTML;
         }
         this.onMouseLeaveEvent(item);
-        item.movable = this._inEditMode;
-        this._inEditMode = !this._inEditMode;
+        item.movable = this.inEditMode;
+        this.inEditMode = !this.inEditMode;
     }
 }
 exports.TasklistController = TasklistController;

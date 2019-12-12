@@ -1,7 +1,7 @@
 import { LitElement, html, css, property, customElement } from "lit-element";
 import { IDialogTemplate } from "../dialogs/IDialogTemplate";
-import { ApiRequester } from "../apiRequester";
-import { RequestParameter } from "../requestParameter";
+import { ApiRequester } from "../communication/apiRequester";
+import { RequestParameter } from "../communication/requestParameter";
 import { InputType } from "../enums/inputType"
 import { InputList } from "./inputList"
 
@@ -56,21 +56,21 @@ export class DialogBox extends LitElement {
                 requestParameters
             );
 
+            // Fire the event after the request was successful, and include the returned information
             request.then(output => {
-                const outputJson = JSON.parse(output as string);
+                const outputObject = JSON.parse(output as string);
 
                 // Fire event
                 this.dispatchEvent(new CustomEvent("submitDialog", {
-                    detail: { ...outputJson, ...formData["inputValues"] }
+                    detail: { output: outputObject, input: formData["inputValues"] }
                 }));
             });
         } else {
             // Fire event
             this.dispatchEvent(new CustomEvent("submitDialog", {
-                detail: formData["inputValues"]
+                detail: { output: formData["inputValues"] }
             }));
         }
-
 
         this.hide();
     }
@@ -116,6 +116,11 @@ export class DialogBox extends LitElement {
         this.shown = false;
     }
 
+    /**
+     * Create the HTML for a given input type.
+     * @param inputType Type of input element
+     * @param value Value (if any) the element should start with
+     */
     private getComponentHtml(inputType: InputType, value: string) {
         switch (inputType) {
             case InputType.Text:

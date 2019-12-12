@@ -1,7 +1,7 @@
 declare const viewData;
 
-import { ApiRequester } from "../apiRequester";
-import { RequestParameter } from "../requestParameter";
+import { ApiRequester } from "../communication/apiRequester";
+import { RequestParameter } from "../communication/requestParameter";
 
 /**
  * Controller to add/remove/edit/etc. items in a board list.
@@ -36,16 +36,23 @@ export class BoardListController {
         this._boardlist.appendChild(item); // Insert at bottom
     }
 
+    /**
+     * Create a board item without placing it
+     * @param id Board id
+     * @param name Board name
+     * @param description Board description
+     * @param color Optional board color
+     */
     private createBoard(id: string, name: string, description: string, color: string = "") {
         const item = document.createElement("draggable-element");
-        item["boardId"] = id;
+        item.dataset.id = id;
         item.insertAdjacentHTML("beforeend",
             `<span class="dragger"></span><h2>${name}</h2><p>${description}</p>`);
         if (color != "") item.style.backgroundColor = color;
 
         item.addEventListener("draggableClick", e => this.onClickEvent(e));
         item.addEventListener("taskInternalMove", e  =>
-            this.onInternalMove(e.target, e["detail"]["toItem"]), false);
+            this.onInternalMove(e.target as HTMLElement, e["detail"]["toItem"]), false);
 
         return item;
     }
@@ -53,17 +60,23 @@ export class BoardListController {
     /**
      * Fires when the board item is clicked, ends if the clicked part was the dragger.
      */
-    onClickEvent(e) {
-        window.location.href = "../Board/" + e.target.boardId;
+    onClickEvent(e: Event) {
+        const target = e.target as HTMLElement;
+        window.location.href = "../Board/" + target.dataset.id;
     }
 
-    onInternalMove(item, toItem) {
+    /**
+     * Fires when the board item was moved in the list.
+     * @param item   {HTMLElement} Item being moved
+     * @param toItem {HTMLElement} The item above it in the new location
+     */
+    onInternalMove(item: HTMLElement, toItem: HTMLElement) {
         var target: string;
-        if (toItem) target = toItem.boardId;
-        else        target = viewData.username;
+        if (toItem) target = toItem.dataset.id;
+        else        target = viewData.username; // If there is no item above, set the target to the user's username.
 
         new ApiRequester().send("Boards", "ChangeOrder", "POST", [
-            new RequestParameter("boardId", item.boardId),
+            new RequestParameter("boardId", item.dataset.id),
             new RequestParameter("targetId", target)
         ]);
     }

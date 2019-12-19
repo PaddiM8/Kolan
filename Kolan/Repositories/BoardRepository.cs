@@ -64,6 +64,7 @@ namespace Kolan.Repositories
             await Client.Cypher
                 .Match("(user:User)-[:ChildGroup]->(previous)-[oldRel:Next]->(next)")
                 .Where((User user) => user.Username == username)
+                .Call("apoc.lock.nodes([user])")
                 .Create("(previous)-[:Next]->(board:Board {newBoard})-[:Next]->(next)")
                 .WithParam("newBoard", entity)
                 .Delete("oldRel")
@@ -84,6 +85,7 @@ namespace Kolan.Repositories
             await Client.Cypher
                 .Match("(:Board)-[:ChildGroup]->(previous:Group)-[oldRel:Next]->(next)")
                 .Where((Group previous) => previous.Id == groupId)
+                .Call("apoc.lock.nodes([previous])")
                 .Create("(previous)-[:Next]->(board:Board {newBoard})-[:Next]->(next)")
                 .WithParam("newBoard", entity)
                 .Delete("oldRel")
@@ -143,10 +145,13 @@ namespace Kolan.Repositories
         public async Task AddUserAsync(string boardId, string username)
         {
             await Client.Cypher
-                .Match("(board:Board), (user:User)-[:ChildGroup]->(group:Group)")
-                .Where((Board board) => board.Id == boardId)
-                .AndWhere((User user) => user.Username == username)
-                .Create("(group)-[:ChildBoard]->(board)")
+                .Match("(sharedBoard:Board)", "(user:User)-[:ChildGroup]->(previous)-[oldRel:Next]->(next)")
+                .Where((User user) => user.Username == username)
+                .AndWhere((Board sharedBoard) => sharedBoard.Id == boardId)
+                .Call("apoc.lock.nodes([user])")
+                .Create("(previous)-[:Next]->(link:Link)-[:Next]->(next)")
+                .Delete("oldRel")
+                .Create("(link)-[:SharedBoard]->(sharedBoard)")
                 .ExecuteWithoutResultsAsync();
         }
 
@@ -158,11 +163,13 @@ namespace Kolan.Repositories
         public async Task RemoveUserAsync(string boardId, string username)
         {
             await Client.Cypher
-                .Match("(board:Board)", 
-                       "(user:User)-[:ChildGroup]->(group:Group)-[rel:ChildBoard]->(board)")
-                .Where((Board board) => board.Id == boardId)
-                .AndWhere((User user) => user.Username == username)
-                .Delete("rel")
+                .Match("(user:User)-[:ChildGroup]->(:Group)-[:Next*]->(link:Link)-[sharedRel:SharedBoard]->(board:Board)")
+                .Where((User user) => user.Username == username)
+                .AndWhere((Board board) => board.Id == boardId)
+                .Match("(previous)-[previousRel:Next]->(link)-[nextRel:Next]->(next)")
+                .Call("apoc.lock.nodes([user])")
+                .Delete("previousRel, nextRel, sharedRel, link")
+                .Create("(previous)-[:Next]->(next)")
                 .ExecuteWithoutResultsAsync();
         }
 

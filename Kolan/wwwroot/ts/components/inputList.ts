@@ -3,13 +3,11 @@ import "fa-icons";
 
 @customElement("input-list")
 export class InputList extends LitElement {
-    @property({type: Array<String>()}) items;
+    @property({type: Array<String>()}) items = [];
     inputPlaceholder: string;
 
     constructor(inputPlaceholder: string) {
         super();
-
-        this.items = [ "Testing", "Hhuehueehu" ];
         this.inputPlaceholder = inputPlaceholder;
     }
 

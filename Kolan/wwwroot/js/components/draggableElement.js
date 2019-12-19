@@ -39,7 +39,7 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
         if (dragger == undefined)
             dragger = this;
         else
-            dragger.addEventListener("click", () => this.mouseIsDown = false); // otherwise it won't let go when you click
+            dragger.addEventListener("click", () => this.mouseIsDown = false); // Otherwise it won't let go when you click
         dragger.addEventListener('mousedown', e => this.onMouseDown(e));
         this.addEventListener('click', e => this.onClick(e));
         document.body.addEventListener('mouseup', (e) => {
@@ -139,7 +139,7 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
         };
         this.style.left = newPos.X + "px";
         this.style.top = newPos.Y + "px";
-        /// Show where item will be dropped ///
+        // Show where item will be dropped
         const elementsUnder = this.getRelatedElementsUnder();
         const placeholder = this.parentElement.parentElement.querySelector(this.placeholder);
         const tasklistElements = elementsUnder.tasklist.children;
@@ -177,7 +177,7 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
         const elementsOnPoint = document.elementsFromPoint(middlePoint.X, middlePoint.Y);
         let closestDraggable = elementsOnPoint.filter(x => x.tagName == "DRAGGABLE-ELEMENT")[1];
         const tasklist = elementsOnPoint.filter(x => x.tagName == "TASKLIST")[0];
-        if (tasklist != undefined && closestDraggable == undefined) {
+        if (tasklist && !closestDraggable) {
             const under = document.elementsFromPoint(middlePoint.X, middlePoint.Y + 40)
                 .filter(x => x.tagName == "DRAGGABLE-ELEMENT");
             if (under[1] == undefined)
@@ -198,6 +198,11 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
             Y: rect.height / 2 + rect.top
         };
     }
+    /**
+     * Get the index of a specific item in an array
+     * @param array Array containing the item
+     * @param item The item of which the index is being found
+     */
     getArrayItemIndex(array, item) {
         return Array.from(array).indexOf(item);
     }

@@ -2,6 +2,7 @@ declare const viewData;
 
 import { ApiRequester } from "../communication/apiRequester";
 import { RequestParameter } from "../communication/requestParameter";
+import { IBoard } from "../models/IBoard";
 
 /**
  * Controller to add/remove/edit/etc. items in a board list.
@@ -20,8 +21,8 @@ export class BoardListController {
      * @param   description {string} Board description.
      * @param   color       {string} Board background color as HEX value.
      */
-    public addBoard(id: string, name: string, description: string, color: string = "") {
-        const item = this.createBoard(id, name, description, color);
+    public addBoard(board: IBoard) {
+        const item = this.createBoard(board);
         this._boardlist.insertBefore(item, this._boardlist.firstElementChild); // Insert at top
     }
 
@@ -31,8 +32,8 @@ export class BoardListController {
      * @param   description {string} Board description.
      * @param   color       {string} Board background color as HEX value.
      */
-    public addBoardToBottom(id: string, name: string, description: string, color: string = "") {
-        const item = this.createBoard(id, name, description, color);
+    public addBoardToBottom(board: IBoard) {
+        const item = this.createBoard(board);
         this._boardlist.appendChild(item); // Insert at bottom
     }
 
@@ -43,12 +44,12 @@ export class BoardListController {
      * @param description Board description
      * @param color Optional board color
      */
-    private createBoard(id: string, name: string, description: string, color: string = "") {
+    private createBoard(board: IBoard) {
         const item = document.createElement("draggable-element");
-        item.dataset.id = id;
+        item.dataset.id = board.id;
         item.insertAdjacentHTML("beforeend",
-            `<span class="dragger"></span><h2>${name}</h2><p>${description}</p>`);
-        if (color != "") item.style.backgroundColor = color;
+            `<span class="dragger"></span><h2>${board.name}</h2><p>${board.description}</p>`);
+        if (board.color != "") item.style.backgroundColor = board.color;
 
         item.addEventListener("draggableClick", e => this.onClickEvent(e));
         item.addEventListener("taskInternalMove", e  =>

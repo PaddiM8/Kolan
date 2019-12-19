@@ -13,9 +13,9 @@ namespace Kolan.Hubs
             return Groups.AddToGroupAsync(Context.ConnectionId, boardId);
         }
 
-        public Task AddBoard(string parentId, string groupName, Board board)
+        public Task AddBoard(string parentId, string groupId, Board board)
         {
-            return Clients.Group(parentId).ReceiveNewBoard(board, groupName);
+            return Clients.Group(parentId).ReceiveNewBoard(board, groupId);
         }
     }
 }

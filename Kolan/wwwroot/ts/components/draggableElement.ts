@@ -34,7 +34,7 @@ export class Draggable extends LitElement {
     firstUpdated(changedProperties) {
         let dragger = this.querySelector(".dragger");
         if (dragger == undefined) dragger = this;
-        else dragger.addEventListener("click", () => this.mouseIsDown = false); // otherwise it won't let go when you click
+        else dragger.addEventListener("click", () => this.mouseIsDown = false); // Otherwise it won't let go when you click
 
         dragger.addEventListener('mousedown', e => this.onMouseDown(e));
         this.addEventListener('click', e => this.onClick(e));
@@ -162,10 +162,10 @@ export class Draggable extends LitElement {
             // If over the top half of the element
             if  (overTopHalf && this.lastHoveredDraggable != elementsUnder.closestDraggable) {
                 elementsUnder.tasklist.insertBefore(placeholder, elementsUnder.closestDraggable);
-                this.lastHoveredDraggable = elementsUnder.closestDraggable; // Remember last placement
+                this.lastHoveredDraggable = elementsUnder.closestDraggable as Draggable; // Remember last placement
             } else if (this.lastHoveredDraggable != elementsUnder.closestDraggable.nextSibling) { // If over the bottom half of the element
                 elementsUnder.tasklist.insertBefore(placeholder, elementsUnder.closestDraggable.nextSibling);
-                this.lastHoveredDraggable = elementsUnder.closestDraggable.nextSibling;
+                this.lastHoveredDraggable = elementsUnder.closestDraggable.nextSibling as Draggable;
             }
         } else if (lastRect == undefined) { // If empty tasklist
             elementsUnder.tasklist.appendChild(placeholder);

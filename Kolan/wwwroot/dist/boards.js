@@ -81,124 +81,10 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = "./Kolan/wwwroot/js/boards.js");
+/******/ 	return __webpack_require__(__webpack_require__.s = "./Kolan/wwwroot/js/views/boards.js");
 /******/ })
 /************************************************************************/
 /******/ ({
-
-/***/ "./Kolan/wwwroot/js/apiRequester.js":
-/*!******************************************!*\
-  !*** ./Kolan/wwwroot/js/apiRequester.js ***!
-  \******************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const es6_promise_1 = __webpack_require__(/*! es6-promise */ "./node_modules/es6-promise/dist/es6-promise.js");
-/** Do an API request
- * @param action - Api action (controller)
- * @param method - Api method (additional route, often empty)
- * @param requestType - HTTP request type, eg. GET, POST, PUT, etc.
- * @param requestParameters - A list of parameters to be pushed with the request.
- */
-class ApiRequester {
-    /* Do a HTTP request
-     */
-    send(action, method, requestType, requestParameters = null) {
-        return new es6_promise_1.Promise((resolve, reject) => {
-            const req = new XMLHttpRequest();
-            let url = "/api/" + action;
-            if (method)
-                url += "/" + method;
-            req.open(requestType, url);
-            req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-            req.onerror = (e) => reject(Error(`Network Error: ${e}`));
-            req.onload = () => {
-                if (req.status === 200)
-                    resolve(req.response);
-                else
-                    reject(Error(req.statusText));
-            };
-            // Send data
-            if (requestParameters != null) {
-                req.send(this.createURLSearchParams(requestParameters));
-            }
-            else {
-                req.send();
-            }
-        });
-    }
-    /* Convert the request parameters to URLSearchParams,
-     * which can be read by the server.
-     */
-    createURLSearchParams(requestParameters) {
-        let params = new URLSearchParams();
-        for (let parameter of requestParameters) {
-            params.append(parameter.key, parameter.value);
-        }
-        return params;
-    }
-}
-exports.ApiRequester = ApiRequester;
-
-
-/***/ }),
-
-/***/ "./Kolan/wwwroot/js/boards.js":
-/*!************************************!*\
-  !*** ./Kolan/wwwroot/js/boards.js ***!
-  \************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-__webpack_require__(/*! ./components/components */ "./Kolan/wwwroot/js/components/components.js");
-const boardListController_1 = __webpack_require__(/*! ./controllers/boardListController */ "./Kolan/wwwroot/js/controllers/boardListController.js");
-const addBoardDialog_1 = __webpack_require__(/*! ./dialogs/addBoardDialog */ "./Kolan/wwwroot/js/dialogs/addBoardDialog.js");
-const dialogBox_1 = __webpack_require__(/*! ./components/dialogBox */ "./Kolan/wwwroot/js/components/dialogBox.js");
-const apiRequester_1 = __webpack_require__(/*! ./apiRequester */ "./Kolan/wwwroot/js/apiRequester.js");
-window.addEventListener("load", () => new Boards());
-class Boards {
-    /**
-     * Add event listeners, dialogs that will be used, and more (on page load)
-     */
-    constructor() {
-        // Prepare dialog
-        let addDialog = new dialogBox_1.DialogBox(addBoardDialog_1.addBoardDialog, "addBoardDialog");
-        document.body.appendChild(addDialog);
-        addDialog.addEventListener("submitDialog", (e) => this.addBoardItem(e.detail.output.id, e.detail.input.name, e.detail.input.description));
-        // Load boards
-        this.loadBoards();
-        // Events
-        document.getElementById("addBoard").addEventListener("click", () => addDialog.shown = true);
-    }
-    /** Adds a board item
-     * @param   name        {string} Board name.
-     * @param   description {string} Board description.
-     */
-    addBoardItem(id, name, description) {
-        const boardListController = new boardListController_1.BoardListController(document
-            .querySelector(".board-list tasklist"));
-        boardListController.addBoard(id, name, description);
-    }
-    loadBoards() {
-        const boardListController = new boardListController_1.BoardListController(document
-            .querySelector(".board-list tasklist"));
-        new apiRequester_1.ApiRequester().send("Boards", "", "GET").then(result => {
-            const boards = JSON.parse(result);
-            for (const item of boards) {
-                boardListController.addBoardToBottom(item.id, item.name, item.description);
-            }
-        });
-    }
-}
-
-
-/***/ }),
 
 /***/ "./Kolan/wwwroot/js/communication/apiRequester.js":
 /*!********************************************************!*\
@@ -358,6 +244,7 @@ let DialogBox = class DialogBox extends lit_element_1.LitElement {
             let requestParameters = [...formData["requestParameters"],
                 ...this.extraRequestParameters];
             const request = new apiRequester_1.ApiRequester().send(this.dialogOptions.requestAction, this.dialogOptions.requestMethod, this.dialogOptions.requestType, requestParameters);
+            // Fire the event after the request was successful, and include the returned information
             request.then(output => {
                 const outputObject = JSON.parse(output);
                 // Fire event
@@ -369,7 +256,7 @@ let DialogBox = class DialogBox extends lit_element_1.LitElement {
         else {
             // Fire event
             this.dispatchEvent(new CustomEvent("submitDialog", {
-                detail: formData["inputValues"]
+                detail: { output: formData["inputValues"] }
             }));
         }
         this.hide();
@@ -410,6 +297,11 @@ let DialogBox = class DialogBox extends lit_element_1.LitElement {
         }
         this.shown = false;
     }
+    /**
+     * Create the HTML for a given input type.
+     * @param inputType Type of input element
+     * @param value Value (if any) the element should start with
+     */
     getComponentHtml(inputType, value) {
         switch (inputType) {
             case inputType_1.InputType.Text:
@@ -488,7 +380,7 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
         if (dragger == undefined)
             dragger = this;
         else
-            dragger.addEventListener("click", () => this.mouseIsDown = false); // otherwise it won't let go when you click
+            dragger.addEventListener("click", () => this.mouseIsDown = false); // Otherwise it won't let go when you click
         dragger.addEventListener('mousedown', e => this.onMouseDown(e));
         this.addEventListener('click', e => this.onClick(e));
         document.body.addEventListener('mouseup', (e) => {
@@ -588,7 +480,7 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
         };
         this.style.left = newPos.X + "px";
         this.style.top = newPos.Y + "px";
-        /// Show where item will be dropped ///
+        // Show where item will be dropped
         const elementsUnder = this.getRelatedElementsUnder();
         const placeholder = this.parentElement.parentElement.querySelector(this.placeholder);
         const tasklistElements = elementsUnder.tasklist.children;
@@ -626,7 +518,7 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
         const elementsOnPoint = document.elementsFromPoint(middlePoint.X, middlePoint.Y);
         let closestDraggable = elementsOnPoint.filter(x => x.tagName == "DRAGGABLE-ELEMENT")[1];
         const tasklist = elementsOnPoint.filter(x => x.tagName == "TASKLIST")[0];
-        if (tasklist != undefined && closestDraggable == undefined) {
+        if (tasklist && !closestDraggable) {
             const under = document.elementsFromPoint(middlePoint.X, middlePoint.Y + 40)
                 .filter(x => x.tagName == "DRAGGABLE-ELEMENT");
             if (under[1] == undefined)
@@ -647,6 +539,11 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
             Y: rect.height / 2 + rect.top
         };
     }
+    /**
+     * Get the index of a specific item in an array
+     * @param array Array containing the item
+     * @param item The item of which the index is being found
+     */
     getArrayItemIndex(array, item) {
         return Array.from(array).indexOf(item);
     }
@@ -729,14 +626,18 @@ let InputList = class InputList extends lit_element_1.LitElement {
         </style>
         <section class="inputBlock">
             <input id="textInput" type="text" placeholder="${this.inputPlaceholder}" />
-            <button @click="${(e) => this.addItem(e.srcElement.parentElement.querySelector("input"))}">Add</button>
+            <button @click="${(e) => this.addItem(e.target.parentElement.querySelector("input"))}">Add</button>
         </section>
         <ul>
-            ${this.items.map((item, index) => this.createItem(item, index))}
+            ${this.items.map((item) => this.createItem(item))}
         </ul>
         `;
     }
-    createItem(value, index) {
+    /**
+     * Create the html for a list item
+     * @param value Text that will appear on the item
+     */
+    createItem(value) {
         return lit_element_1.html `
             <li data-value="${value}">
                 <span class="itemValue">${value}</span>
@@ -749,6 +650,10 @@ let InputList = class InputList extends lit_element_1.LitElement {
                          </fa-icon>
             </li>`;
     }
+    /**
+     * Add a new item to the list and fire an event.
+     * @param inputElement Input element containing the item's value
+     */
     addItem(inputElement) {
         const value = inputElement.value;
         if (value.length == 0)
@@ -762,15 +667,15 @@ let InputList = class InputList extends lit_element_1.LitElement {
         }));
     }
     handleIconMouseOver(e) {
-        e.srcElement.color = "red";
+        e.target.color = "red";
     }
     handleIconMouseOut(e) {
-        e.srcElement.color = "black";
+        e.target.color = "black";
     }
     handleIconClick(e) {
-        const itemElement = e.srcElement.parentElement;
+        const itemElement = e.target.parentElement;
         const itemValue = itemElement.dataset.value;
-        this.items = this.items.filter((item, index) => item != itemValue); // Remove from list, give back a list without the item. Needs optimization.
+        this.items = this.items.filter((item) => item != itemValue); // Remove from list, give back a list without the item. Needs optimization.
         this.dispatchEvent(new CustomEvent("itemRemoved", {
             bubbles: true,
             composed: true,
@@ -814,8 +719,8 @@ class BoardListController {
      * @param   description {string} Board description.
      * @param   color       {string} Board background color as HEX value.
      */
-    addBoard(id, name, description, color = "") {
-        const item = this.createBoard(id, name, description, color);
+    addBoard(board) {
+        const item = this.createBoard(board);
         this._boardlist.insertBefore(item, this._boardlist.firstElementChild); // Insert at top
     }
     /**
@@ -824,16 +729,23 @@ class BoardListController {
      * @param   description {string} Board description.
      * @param   color       {string} Board background color as HEX value.
      */
-    addBoardToBottom(id, name, description, color = "") {
-        const item = this.createBoard(id, name, description, color);
+    addBoardToBottom(board) {
+        const item = this.createBoard(board);
         this._boardlist.appendChild(item); // Insert at bottom
     }
-    createBoard(id, name, description, color = "") {
+    /**
+     * Create a board item without placing it
+     * @param id Board id
+     * @param name Board name
+     * @param description Board description
+     * @param color Optional board color
+     */
+    createBoard(board) {
         const item = document.createElement("draggable-element");
-        item.dataset.id = id;
-        item.insertAdjacentHTML("beforeend", `<span class="dragger"></span><h2>${name}</h2><p>${description}</p>`);
-        if (color != "")
-            item.style.backgroundColor = color;
+        item.dataset.id = board.id;
+        item.insertAdjacentHTML("beforeend", `<span class="dragger"></span><h2>${board.name}</h2><p>${board.description}</p>`);
+        if (board.color != "")
+            item.style.backgroundColor = board.color;
         item.addEventListener("draggableClick", e => this.onClickEvent(e));
         item.addEventListener("taskInternalMove", e => this.onInternalMove(e.target, e["detail"]["toItem"]), false);
         return item;
@@ -842,8 +754,14 @@ class BoardListController {
      * Fires when the board item is clicked, ends if the clicked part was the dragger.
      */
     onClickEvent(e) {
-        window.location.href = "../Board/" + e.target.dataset.id;
+        const target = e.target;
+        window.location.href = "../Board/" + target.dataset.id;
     }
+    /**
+     * Fires when the board item was moved in the list.
+     * @param item   {HTMLElement} Item being moved
+     * @param toItem {HTMLElement} The item above it in the new location
+     */
     onInternalMove(item, toItem) {
         var target;
         if (toItem)
@@ -912,6 +830,70 @@ var InputType;
     InputType[InputType["Text"] = 0] = "Text";
     InputType[InputType["InputList"] = 1] = "InputList";
 })(InputType = exports.InputType || (exports.InputType = {}));
+
+
+/***/ }),
+
+/***/ "./Kolan/wwwroot/js/views/boards.js":
+/*!******************************************!*\
+  !*** ./Kolan/wwwroot/js/views/boards.js ***!
+  \******************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+__webpack_require__(/*! ../components/components */ "./Kolan/wwwroot/js/components/components.js");
+const boardListController_1 = __webpack_require__(/*! ../controllers/boardListController */ "./Kolan/wwwroot/js/controllers/boardListController.js");
+const addBoardDialog_1 = __webpack_require__(/*! ../dialogs/addBoardDialog */ "./Kolan/wwwroot/js/dialogs/addBoardDialog.js");
+const dialogBox_1 = __webpack_require__(/*! ../components/dialogBox */ "./Kolan/wwwroot/js/components/dialogBox.js");
+const apiRequester_1 = __webpack_require__(/*! ../communication/apiRequester */ "./Kolan/wwwroot/js/communication/apiRequester.js");
+window.addEventListener("load", () => new Boards());
+class Boards {
+    /**
+     * Add event listeners, dialogs that will be used, and more (on page load)
+     */
+    constructor() {
+        // Prepare dialog
+        let addDialog = new dialogBox_1.DialogBox(addBoardDialog_1.addBoardDialog, "addBoardDialog");
+        document.body.appendChild(addDialog);
+        addDialog.addEventListener("submitDialog", (e) => {
+            const board = {
+                id: e.detail.output.id,
+                name: e.detail.input.name,
+                description: e.detail.input.description
+            };
+            this.addBoardItem(board);
+        });
+        // Load boards
+        this.loadBoards();
+        // Events
+        document.getElementById("addBoard").addEventListener("click", () => addDialog.shown = true);
+    }
+    /** Adds a board item
+     * @param   name        {string} Board name.
+     * @param   description {string} Board description.
+     */
+    addBoardItem(board) {
+        const boardListController = new boardListController_1.BoardListController(document
+            .querySelector(".board-list tasklist"));
+        boardListController.addBoard(board);
+    }
+    /**
+     * Load the list of boards from the backend.
+     */
+    loadBoards() {
+        const boardListController = new boardListController_1.BoardListController(document
+            .querySelector(".board-list tasklist"));
+        new apiRequester_1.ApiRequester().send("Boards", "", "GET").then(result => {
+            const boards = JSON.parse(result);
+            for (const item of boards) {
+                boardListController.addBoardToBottom(item);
+            }
+        });
+    }
+}
 
 
 /***/ }),

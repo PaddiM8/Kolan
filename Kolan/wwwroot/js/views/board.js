@@ -16,23 +16,29 @@ class Board {
         this.addDialogElement.dialogOptions.requestMethod = viewData.id + "/" +
             this.addDialogElement.dialogOptions.requestMethod;
         document.body.appendChild(this.addDialogElement);
-        this.addDialogElement.addEventListener("submitDialog", (e) => this.addTask(this.currentTasklistId, e.detail.output.id, e.detail.input.name, e.detail.input.description));
+        this.addDialogElement.addEventListener("submitDialog", (e) => {
+            const task = {
+                id: e.detail.output.id,
+                name: e.detail.input.name,
+                description: e.detail.input.description
+            };
+            this.addTask(this.currentTasklistId, task);
+        });
         // Prepare shareDialog
         let shareDialogElement = new dialogBox_1.DialogBox(shareDialog_1.shareDialog, "shareDialog");
         document.body.appendChild(shareDialogElement);
         shareDialogElement.addEventListener("itemAdded", (e) => // User added in the share dialog
-         this.handleUserAdded(e.detail));
+         this.onUserAdded(e.detail));
         shareDialogElement.addEventListener("itemRemoved", (e) => // User removed in the share dialog
-         this.handleUserRemoved(e.detail));
+         this.onUserRemoved(e.detail));
         // Prepare setupDialog
         this.setupDialogElement = new dialogBox_1.DialogBox(setupDialog_1.setupDialog, "setupDialog");
         this.setupDialogElement.dialogOptions.requestMethod = viewData.id + "/" +
             this.setupDialogElement.dialogOptions.requestMethod;
         document.body.appendChild(this.setupDialogElement);
         this.setupDialogElement.addEventListener("submitDialog", (e) => {
-            for (const group of e.detail.output) {
-                this.addGroup(group.id, group.name);
-            }
+            for (const group of e.detail.output)
+                this.addGroup(group);
         });
         // Load board
         this.loadBoard();
@@ -41,15 +47,21 @@ class Board {
         // Websockets
         new boardHubConnection_1.BoardHubConnection(viewData.id);
     }
-    addGroup(id, name) {
+    /**
+     * Add a group to the client side.
+     * @param id Group id
+     * @param name Group name
+     */
+    addGroup(group) {
         const listhead = document.getElementById("list-head");
-        listhead.insertAdjacentHTML("beforeend", `<div class="item" data-id="${id}">
-                ${name}
+        listhead.insertAdjacentHTML("beforeend", `<div class="item" data-id="${group.id}">
+                ${group.name}
                 <span class="plus"><span>+</span></span>
             </div>`);
         const tasklists = document.getElementById("tasklists");
         const tasklistElement = document.createElement("tasklist");
-        tasklistElement.dataset.id = id;
+        tasklistElement.dataset.id = group.id;
+        tasklistElement.dataset.controller = new tasklistController_1.TasklistController(tasklistElement);
         tasklists.appendChild(tasklistElement);
         // Events
         const plusElements = listhead.getElementsByClassName("plus");
@@ -65,22 +77,33 @@ class Board {
             });
         }
     }
-    addTask(tasklistId, id, name, description, toTop = true) {
+    /**
+     * Add a task (board) to the client side.
+     * @param tasklistId Id of group
+     * @param id Board id
+     * @param name Board name
+     * @param description Board description
+     * @param toTop Add to the top of the list or not
+     */
+    addTask(tasklistId, task, toTop = true) {
         const tasklist = document.querySelector(`#tasklists tasklist[data-id='${tasklistId}']`);
         const tasklistController = new tasklistController_1.TasklistController(tasklist);
         if (toTop)
-            tasklistController.addTask(id, name, description);
+            tasklistController.addTask(task);
         else
-            tasklistController.addTaskToBottom(id, name, description);
+            tasklistController.addTaskToBottom(task);
     }
-    handleUserAdded(username) {
+    onUserAdded(username) {
         const requestParameters = [new requestParameter_1.RequestParameter("username", username)];
         new apiRequester_1.ApiRequester().send("Boards", `${viewData.id}/Users`, "POST", requestParameters);
     }
-    handleUserRemoved(username) {
+    onUserRemoved(username) {
         const requestParameters = [new requestParameter_1.RequestParameter("username", username)];
         new apiRequester_1.ApiRequester().send("Boards", `${viewData.id}/Users`, "DELETE", requestParameters);
     }
+    /**
+     * Load the contents of the board from the backend.
+     */
     loadBoard() {
         new apiRequester_1.ApiRequester().send("Boards", viewData.id, "GET").then(result => {
             const boards = JSON.parse(result);
@@ -93,11 +116,11 @@ class Board {
                 for (const item of boards) {
                     // Add group if it doesn't exist
                     if (!tasklists.querySelector(`tasklist[data-id="${item.group.id}"]`)) {
-                        this.addGroup(item.group.id, item.group.name);
+                        this.addGroup(item.group);
                     }
                     // Add board if it isn't null
                     if (item.board)
-                        this.addTask(item.group.id, item.board.id, item.board.name, item.board.description, false);
+                        this.addTask(item.group.id, item.board, false);
                 }
             }
         }).catch((err) => console.log(err));

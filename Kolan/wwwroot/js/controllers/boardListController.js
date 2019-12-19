@@ -15,8 +15,8 @@ class BoardListController {
      * @param   description {string} Board description.
      * @param   color       {string} Board background color as HEX value.
      */
-    addBoard(id, name, description, color = "") {
-        const item = this.createBoard(id, name, description, color);
+    addBoard(board) {
+        const item = this.createBoard(board);
         this._boardlist.insertBefore(item, this._boardlist.firstElementChild); // Insert at top
     }
     /**
@@ -25,16 +25,23 @@ class BoardListController {
      * @param   description {string} Board description.
      * @param   color       {string} Board background color as HEX value.
      */
-    addBoardToBottom(id, name, description, color = "") {
-        const item = this.createBoard(id, name, description, color);
+    addBoardToBottom(board) {
+        const item = this.createBoard(board);
         this._boardlist.appendChild(item); // Insert at bottom
     }
-    createBoard(id, name, description, color = "") {
+    /**
+     * Create a board item without placing it
+     * @param id Board id
+     * @param name Board name
+     * @param description Board description
+     * @param color Optional board color
+     */
+    createBoard(board) {
         const item = document.createElement("draggable-element");
-        item.dataset.id = id;
-        item.insertAdjacentHTML("beforeend", `<span class="dragger"></span><h2>${name}</h2><p>${description}</p>`);
-        if (color != "")
-            item.style.backgroundColor = color;
+        item.dataset.id = board.id;
+        item.insertAdjacentHTML("beforeend", `<span class="dragger"></span><h2>${board.name}</h2><p>${board.description}</p>`);
+        if (board.color != "")
+            item.style.backgroundColor = board.color;
         item.addEventListener("draggableClick", e => this.onClickEvent(e));
         item.addEventListener("taskInternalMove", e => this.onInternalMove(e.target, e["detail"]["toItem"]), false);
         return item;
@@ -43,8 +50,14 @@ class BoardListController {
      * Fires when the board item is clicked, ends if the clicked part was the dragger.
      */
     onClickEvent(e) {
-        window.location.href = "../Board/" + e.target.dataset.id;
+        const target = e.target;
+        window.location.href = "../Board/" + target.dataset.id;
     }
+    /**
+     * Fires when the board item was moved in the list.
+     * @param item   {HTMLElement} Item being moved
+     * @param toItem {HTMLElement} The item above it in the new location
+     */
     onInternalMove(item, toItem) {
         var target;
         if (toItem)

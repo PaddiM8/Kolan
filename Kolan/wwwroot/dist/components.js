@@ -244,6 +244,7 @@ let DialogBox = class DialogBox extends lit_element_1.LitElement {
             let requestParameters = [...formData["requestParameters"],
                 ...this.extraRequestParameters];
             const request = new apiRequester_1.ApiRequester().send(this.dialogOptions.requestAction, this.dialogOptions.requestMethod, this.dialogOptions.requestType, requestParameters);
+            // Fire the event after the request was successful, and include the returned information
             request.then(output => {
                 const outputObject = JSON.parse(output);
                 // Fire event
@@ -255,7 +256,7 @@ let DialogBox = class DialogBox extends lit_element_1.LitElement {
         else {
             // Fire event
             this.dispatchEvent(new CustomEvent("submitDialog", {
-                detail: formData["inputValues"]
+                detail: { output: formData["inputValues"] }
             }));
         }
         this.hide();
@@ -296,6 +297,11 @@ let DialogBox = class DialogBox extends lit_element_1.LitElement {
         }
         this.shown = false;
     }
+    /**
+     * Create the HTML for a given input type.
+     * @param inputType Type of input element
+     * @param value Value (if any) the element should start with
+     */
     getComponentHtml(inputType, value) {
         switch (inputType) {
             case inputType_1.InputType.Text:
@@ -374,7 +380,7 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
         if (dragger == undefined)
             dragger = this;
         else
-            dragger.addEventListener("click", () => this.mouseIsDown = false); // otherwise it won't let go when you click
+            dragger.addEventListener("click", () => this.mouseIsDown = false); // Otherwise it won't let go when you click
         dragger.addEventListener('mousedown', e => this.onMouseDown(e));
         this.addEventListener('click', e => this.onClick(e));
         document.body.addEventListener('mouseup', (e) => {
@@ -474,7 +480,7 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
         };
         this.style.left = newPos.X + "px";
         this.style.top = newPos.Y + "px";
-        /// Show where item will be dropped ///
+        // Show where item will be dropped
         const elementsUnder = this.getRelatedElementsUnder();
         const placeholder = this.parentElement.parentElement.querySelector(this.placeholder);
         const tasklistElements = elementsUnder.tasklist.children;
@@ -512,7 +518,7 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
         const elementsOnPoint = document.elementsFromPoint(middlePoint.X, middlePoint.Y);
         let closestDraggable = elementsOnPoint.filter(x => x.tagName == "DRAGGABLE-ELEMENT")[1];
         const tasklist = elementsOnPoint.filter(x => x.tagName == "TASKLIST")[0];
-        if (tasklist != undefined && closestDraggable == undefined) {
+        if (tasklist && !closestDraggable) {
             const under = document.elementsFromPoint(middlePoint.X, middlePoint.Y + 40)
                 .filter(x => x.tagName == "DRAGGABLE-ELEMENT");
             if (under[1] == undefined)
@@ -533,6 +539,11 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
             Y: rect.height / 2 + rect.top
         };
     }
+    /**
+     * Get the index of a specific item in an array
+     * @param array Array containing the item
+     * @param item The item of which the index is being found
+     */
     getArrayItemIndex(array, item) {
         return Array.from(array).indexOf(item);
     }
@@ -615,14 +626,18 @@ let InputList = class InputList extends lit_element_1.LitElement {
         </style>
         <section class="inputBlock">
             <input id="textInput" type="text" placeholder="${this.inputPlaceholder}" />
-            <button @click="${(e) => this.addItem(e.srcElement.parentElement.querySelector("input"))}">Add</button>
+            <button @click="${(e) => this.addItem(e.target.parentElement.querySelector("input"))}">Add</button>
         </section>
         <ul>
-            ${this.items.map((item, index) => this.createItem(item, index))}
+            ${this.items.map((item) => this.createItem(item))}
         </ul>
         `;
     }
-    createItem(value, index) {
+    /**
+     * Create the html for a list item
+     * @param value Text that will appear on the item
+     */
+    createItem(value) {
         return lit_element_1.html `
             <li data-value="${value}">
                 <span class="itemValue">${value}</span>
@@ -635,6 +650,10 @@ let InputList = class InputList extends lit_element_1.LitElement {
                          </fa-icon>
             </li>`;
     }
+    /**
+     * Add a new item to the list and fire an event.
+     * @param inputElement Input element containing the item's value
+     */
     addItem(inputElement) {
         const value = inputElement.value;
         if (value.length == 0)
@@ -648,15 +667,15 @@ let InputList = class InputList extends lit_element_1.LitElement {
         }));
     }
     handleIconMouseOver(e) {
-        e.srcElement.color = "red";
+        e.target.color = "red";
     }
     handleIconMouseOut(e) {
-        e.srcElement.color = "black";
+        e.target.color = "black";
     }
     handleIconClick(e) {
-        const itemElement = e.srcElement.parentElement;
+        const itemElement = e.target.parentElement;
         const itemValue = itemElement.dataset.value;
-        this.items = this.items.filter((item, index) => item != itemValue); // Remove from list, give back a list without the item. Needs optimization.
+        this.items = this.items.filter((item) => item != itemValue); // Remove from list, give back a list without the item. Needs optimization.
         this.dispatchEvent(new CustomEvent("itemRemoved", {
             bubbles: true,
             composed: true,
@@ -2924,7 +2943,7 @@ UpdatingElement[_a] = true;
 /*!*************************************************!*\
   !*** ./node_modules/lit-element/lit-element.js ***!
   \*************************************************/
-/*! exports provided: defaultConverter, notEqual, UpdatingElement, customElement, property, query, queryAll, eventOptions, html, svg, TemplateResult, SVGTemplateResult, supportsAdoptingStyleSheets, CSSResult, unsafeCSS, css, LitElement */
+/*! exports provided: html, svg, TemplateResult, SVGTemplateResult, LitElement, defaultConverter, notEqual, UpdatingElement, customElement, property, query, queryAll, eventOptions, supportsAdoptingStyleSheets, CSSResult, unsafeCSS, css */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";

@@ -8,6 +8,8 @@ import { TasklistController } from "../controllers/tasklistController";
 import { ApiRequester } from "../communication/apiRequester";
 import { RequestParameter } from "../communication/requestParameter"
 import { BoardHubConnection } from "../communication/boardHubConnection";
+import { ITask } from "../models/ITask";
+import { IGroup } from "../models/IGroup";
 
 window.addEventListener("load", () => new Board());
 
@@ -23,11 +25,15 @@ class Board {
         this.addDialogElement.dialogOptions.requestMethod = viewData.id + "/" +
             this.addDialogElement.dialogOptions.requestMethod;
         document.body.appendChild(this.addDialogElement);
-        this.addDialogElement.addEventListener("submitDialog", (e: CustomEvent) =>
-            this.addTask(this.currentTasklistId,
-                e.detail.output.id,
-                e.detail.input.name,
-                e.detail.input.description));
+        this.addDialogElement.addEventListener("submitDialog", (e: CustomEvent) => {
+            const task: ITask = {
+                id: e.detail.output.id,
+                name: e.detail.input.name,
+                description: e.detail.input.description
+            };
+
+            this.addTask(this.currentTasklistId, task);
+        });
 
         // Prepare shareDialog
         let shareDialogElement = new DialogBox(shareDialog, "shareDialog");
@@ -44,11 +50,10 @@ class Board {
         this.setupDialogElement.dialogOptions.requestMethod = viewData.id + "/" +
             this.setupDialogElement.dialogOptions.requestMethod;
         document.body.appendChild(this.setupDialogElement);
+
         this.setupDialogElement.addEventListener("submitDialog", (e: CustomEvent) => {
             for (const group of e.detail.output)
-            {
-                this.addGroup(group.id, group.name);
-            }
+                this.addGroup(group);
         });
 
         // Load board
@@ -66,18 +71,19 @@ class Board {
      * @param id Group id
      * @param name Group name
      */
-    addGroup(id: string, name: string)
+    addGroup(group: IGroup)
     {
         const listhead = document.getElementById("list-head");
         listhead.insertAdjacentHTML("beforeend",
-            `<div class="item" data-id="${id}">
-                ${name}
+            `<div class="item" data-id="${group.id}">
+                ${group.name}
                 <span class="plus"><span>+</span></span>
             </div>`);
 
         const tasklists = document.getElementById("tasklists");
         const tasklistElement = document.createElement("tasklist");
-        tasklistElement.dataset.id = id;
+        tasklistElement.dataset.id = group.id;
+        tasklistElement.dataset.controller = new TasklistController(tasklistElement);
         tasklists.appendChild(tasklistElement);
 
         // Events
@@ -105,11 +111,11 @@ class Board {
      * @param description Board description
      * @param toTop Add to the top of the list or not
      */
-    addTask(tasklistId: string, id: string, name: string, description: string, toTop = true) {
+    addTask(tasklistId: string, task: ITask, toTop = true) {
         const tasklist: HTMLElement = document.querySelector(`#tasklists tasklist[data-id='${tasklistId}']`);
         const tasklistController = new TasklistController(tasklist);
-        if (toTop) tasklistController.addTask(id, name, description);
-        else       tasklistController.addTaskToBottom(id, name, description);
+        if (toTop) tasklistController.addTask(task);
+        else       tasklistController.addTaskToBottom(task);
     }
 
     onUserAdded(username: string) {
@@ -138,12 +144,11 @@ class Board {
                 for (const item of boards) {
                     // Add group if it doesn't exist
                     if (!tasklists.querySelector(`tasklist[data-id="${item.group.id}"]`)) {
-                        this.addGroup(item.group.id, item.group.name);
+                        this.addGroup(item.group);
                     }
 
                     // Add board if it isn't null
-                    if (item.board) this.addTask(item.group.id, item.board.id,
-                            item.board.name, item.board.description, false);
+                    if (item.board) this.addTask(item.group.id, item.board, false);
                 }
             }
 

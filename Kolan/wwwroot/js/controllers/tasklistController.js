@@ -16,8 +16,8 @@ class TasklistController {
      * @param   description {string} Task description.
      * @param   color       {string} Task background color as HEX value.
      */
-    addTask(id, name, description, color = "") {
-        const item = this.createTaskItem(id, name, description, color);
+    addTask(task) {
+        const item = this.createTaskItem(task);
         this.tasklist.insertBefore(item, this.tasklist.firstElementChild);
     }
     /**
@@ -26,15 +26,22 @@ class TasklistController {
      * @param   description {string} Task description.
      * @param   color       {string} Task background color as HEX value.
      */
-    addTaskToBottom(id, name, description, color = "") {
-        const item = this.createTaskItem(id, name, description, color);
+    addTaskToBottom(task) {
+        const item = this.createTaskItem(task);
         this.tasklist.appendChild(item);
     }
-    createTaskItem(id, name, description, color) {
+    /**
+     * Create the HTML element of a task item.
+     * @param id Board id
+     * @param name Board name
+     * @param description Board description
+     * @param color Board color
+     */
+    createTaskItem(task) {
         const item = new draggableElement_1.Draggable();
-        item.dataset.id = id;
+        item.dataset.id = task.id;
         item.insertAdjacentHTML("afterbegin", `
-         <h2>${name}</h2><p>${description}</p>
+         <h2>${task.name}</h2><p>${task.description}</p>
          <div class="edit-layer">
             <input type="text" /><br />
             <textarea></textarea>
@@ -45,8 +52,8 @@ class TasklistController {
             <span class="options overlay-button"></span>
          </div>
          `);
-        if (color != "")
-            item.style.backgroundColor = color;
+        if (task.color != "")
+            item.style.backgroundColor = task.color;
         item.addEventListener("draggableClick", e => this.onClickEvent(e));
         item.addEventListener("mouseover", () => this.onHoverEvent(item));
         item.addEventListener("mouseleave", () => this.onMouseLeaveEvent(item));
@@ -89,14 +96,17 @@ class TasklistController {
      * Fires when the board item is hovered
      */
     onHoverEvent(item) {
-        if (!this.inEditMode)
-            item.querySelector(".overlay").style.display = "block";
+        if (!this.inEditMode) {
+            const overlay = item.querySelector(".overlay");
+            overlay.style.display = "block";
+        }
     }
     /**
      * Fires when the mouse leaves the board item
      */
     onMouseLeaveEvent(item) {
-        item.querySelector(".overlay").style.display = "";
+        const overlay = item.querySelector(".overlay");
+        overlay.style.display = "";
     }
     onEditClick(item) {
         this.toggleEditMode(item);
@@ -104,6 +114,12 @@ class TasklistController {
     onSaveClick(item) {
         this.toggleEditMode(item);
     }
+    /**
+     * Toggle the edit mode on a specific task item.
+     * If it isn't already in edit mode it will change to it
+     * and let the user change the contents of the task.
+     * @param item Task item to do it on
+     */
     toggleEditMode(item) {
         // Hide/show original text
         const editLayer = item.querySelector(".edit-layer");

@@ -81,15 +81,15 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = "./Kolan/wwwroot/js/board.js");
+/******/ 	return __webpack_require__(__webpack_require__.s = "./Kolan/wwwroot/js/views/board.js");
 /******/ })
 /************************************************************************/
 /******/ ({
 
-/***/ "./Kolan/wwwroot/js/apiRequester.js":
-/*!******************************************!*\
-  !*** ./Kolan/wwwroot/js/apiRequester.js ***!
-  \******************************************/
+/***/ "./Kolan/wwwroot/js/communication/apiRequester.js":
+/*!********************************************************!*\
+  !*** ./Kolan/wwwroot/js/communication/apiRequester.js ***!
+  \********************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -146,124 +146,6 @@ exports.ApiRequester = ApiRequester;
 
 /***/ }),
 
-/***/ "./Kolan/wwwroot/js/board.js":
-/*!***********************************!*\
-  !*** ./Kolan/wwwroot/js/board.js ***!
-  \***********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const dialogBox_1 = __webpack_require__(/*! ./components/dialogBox */ "./Kolan/wwwroot/js/components/dialogBox.js");
-const addTaskDialog_1 = __webpack_require__(/*! ./dialogs/addTaskDialog */ "./Kolan/wwwroot/js/dialogs/addTaskDialog.js");
-const shareDialog_1 = __webpack_require__(/*! ./dialogs/shareDialog */ "./Kolan/wwwroot/js/dialogs/shareDialog.js");
-const setupDialog_1 = __webpack_require__(/*! ./dialogs/setupDialog */ "./Kolan/wwwroot/js/dialogs/setupDialog.js");
-const tasklistController_1 = __webpack_require__(/*! ./controllers/tasklistController */ "./Kolan/wwwroot/js/controllers/tasklistController.js");
-const apiRequester_1 = __webpack_require__(/*! ./apiRequester */ "./Kolan/wwwroot/js/apiRequester.js");
-const requestParameter_1 = __webpack_require__(/*! ./requestParameter */ "./Kolan/wwwroot/js/requestParameter.js");
-const boardHubConnection_1 = __webpack_require__(/*! ./communication/boardHubConnection */ "./Kolan/wwwroot/js/communication/boardHubConnection.js");
-window.addEventListener("load", () => new Board());
-class Board {
-    constructor() {
-        // Prepare addTaskDialog
-        this.addDialogElement = new dialogBox_1.DialogBox(addTaskDialog_1.addTaskDialog, "addTaskDialog");
-        this.addDialogElement.dialogOptions.requestMethod = viewData.id + "/" +
-            this.addDialogElement.dialogOptions.requestMethod;
-        document.body.appendChild(this.addDialogElement);
-        this.addDialogElement.addEventListener("submitDialog", (e) => this.addTask(this.currentTasklistId, e.detail.input.name, e.detail.input.description));
-        // Prepare shareDialog
-        let shareDialogElement = new dialogBox_1.DialogBox(shareDialog_1.shareDialog, "shareDialog");
-        document.body.appendChild(shareDialogElement);
-        shareDialogElement.addEventListener("itemAdded", (e) => // User added in the share dialog
-         this.handleUserAdded(e.detail));
-        shareDialogElement.addEventListener("itemRemoved", (e) => // User removed in the share dialog
-         this.handleUserRemoved(e.detail));
-        // Prepare setupDialog
-        this.setupDialogElement = new dialogBox_1.DialogBox(setupDialog_1.setupDialog, "setupDialog");
-        this.setupDialogElement.dialogOptions.requestMethod = viewData.id + "/" +
-            this.setupDialogElement.dialogOptions.requestMethod;
-        document.body.appendChild(this.setupDialogElement);
-        this.setupDialogElement.addEventListener("submitDialog", (e) => {
-            for (const group of e.detail.output) {
-                this.addGroup(group.id, group.name);
-            }
-        });
-        // Load board
-        this.loadBoard();
-        const shareButton = document.getElementById("shareButton");
-        shareButton.addEventListener("click", e => shareDialogElement.shown = true);
-        // Websockets
-        new boardHubConnection_1.BoardHubConnection(viewData.id);
-    }
-    addGroup(id, name) {
-        const listhead = document.getElementById("list-head");
-        listhead.insertAdjacentHTML("beforeend", `<div class="item" data-id="${id}">
-                ${name}
-                <span class="plus"><span>+</span></span>
-            </div>`);
-        const tasklists = document.getElementById("tasklists");
-        const tasklistElement = document.createElement("tasklist");
-        tasklistElement.dataset.id = id;
-        tasklists.appendChild(tasklistElement);
-        // Events
-        const plusElements = listhead.getElementsByClassName("plus");
-        for (let plus of plusElements) {
-            plus.addEventListener("click", e => {
-                const groupId = e.currentTarget.parentElement.dataset.id;
-                this.addDialogElement.shown = true;
-                this.addDialogElement.dialogOptions.requestMethod = viewData.id;
-                this.addDialogElement.extraRequestParameters = [
-                    new requestParameter_1.RequestParameter("groupId", groupId)
-                ];
-                this.currentTasklistId = groupId;
-            });
-        }
-    }
-    addTask(tasklistId, name, description, toTop = true) {
-        const tasklist = document.querySelector(`#tasklists tasklist[data-id='${tasklistId}']`);
-        const tasklistController = new tasklistController_1.TasklistController(tasklist);
-        if (toTop)
-            tasklistController.addTask(name, description);
-        else
-            tasklistController.addTaskToBottom(name, description);
-    }
-    handleUserAdded(username) {
-        const requestParameters = [new requestParameter_1.RequestParameter("username", username)];
-        new apiRequester_1.ApiRequester().send("Boards", `${viewData.id}/Users`, "POST", requestParameters);
-    }
-    handleUserRemoved(username) {
-        const requestParameters = [new requestParameter_1.RequestParameter("username", username)];
-        new apiRequester_1.ApiRequester().send("Boards", `${viewData.id}/Users`, "DELETE", requestParameters);
-    }
-    loadBoard() {
-        new apiRequester_1.ApiRequester().send("Boards", viewData.id, "GET").then(result => {
-            const boards = JSON.parse(result);
-            console.log(boards);
-            // If the request returns nothing, the board hasn't been set up yet. Display the setup dialog.
-            if (boards.length == 0) {
-                this.setupDialogElement.shown = true;
-            }
-            else {
-                const tasklists = document.getElementById("tasklists");
-                for (const item of boards) {
-                    // Add group if it doesn't exist
-                    if (!tasklists.querySelector(`tasklist[data-id="${item.group.id}"]`)) {
-                        this.addGroup(item.group.id, item.group.name);
-                    }
-                    // Add board if it isn't null
-                    if (item.board)
-                        this.addTask(item.group.id, item.board.name, item.board.description, false);
-                }
-            }
-        }).catch((err) => console.log(err));
-    }
-}
-
-
-/***/ }),
-
 /***/ "./Kolan/wwwroot/js/communication/boardHubConnection.js":
 /*!**************************************************************!*\
   !*** ./Kolan/wwwroot/js/communication/boardHubConnection.js ***!
@@ -279,13 +161,37 @@ class BoardHubConnection {
     constructor(boardId) {
         this.connection = new signalR.HubConnectionBuilder()
             .withUrl("/hub")
+            .withAutomaticReconnect()
+            .configureLogging(signalR.LogLevel.Information)
             .build();
-        this.connection.on("receiveNewBoard", (board, groupName) => console.log(board));
-        this.connection.invoke("join", boardId);
-        this.connection.start();
+        this.connection.start().then(() => {
+            this.connection.invoke("join", boardId).catch(err => console.log(err));
+        });
+        this.connection.on("receiveNewBoard", (board, groupId) => console.log(board));
     }
 }
 exports.BoardHubConnection = BoardHubConnection;
+
+
+/***/ }),
+
+/***/ "./Kolan/wwwroot/js/communication/requestParameter.js":
+/*!************************************************************!*\
+  !*** ./Kolan/wwwroot/js/communication/requestParameter.js ***!
+  \************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+class RequestParameter {
+    constructor(key, value) {
+        this.key = key;
+        this.value = value;
+    }
+}
+exports.RequestParameter = RequestParameter;
 
 
 /***/ }),
@@ -307,8 +213,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const lit_element_1 = __webpack_require__(/*! lit-element */ "./node_modules/lit-element/lit-element.js");
-const apiRequester_1 = __webpack_require__(/*! ../apiRequester */ "./Kolan/wwwroot/js/apiRequester.js");
-const requestParameter_1 = __webpack_require__(/*! ../requestParameter */ "./Kolan/wwwroot/js/requestParameter.js");
+const apiRequester_1 = __webpack_require__(/*! ../communication/apiRequester */ "./Kolan/wwwroot/js/communication/apiRequester.js");
+const requestParameter_1 = __webpack_require__(/*! ../communication/requestParameter */ "./Kolan/wwwroot/js/communication/requestParameter.js");
 const inputType_1 = __webpack_require__(/*! ../enums/inputType */ "./Kolan/wwwroot/js/enums/inputType.js");
 const inputList_1 = __webpack_require__(/*! ./inputList */ "./Kolan/wwwroot/js/components/inputList.js");
 /**
@@ -349,6 +255,7 @@ let DialogBox = class DialogBox extends lit_element_1.LitElement {
             let requestParameters = [...formData["requestParameters"],
                 ...this.extraRequestParameters];
             const request = new apiRequester_1.ApiRequester().send(this.dialogOptions.requestAction, this.dialogOptions.requestMethod, this.dialogOptions.requestType, requestParameters);
+            // Fire the event after the request was successful, and include the returned information
             request.then(output => {
                 const outputObject = JSON.parse(output);
                 // Fire event
@@ -360,7 +267,7 @@ let DialogBox = class DialogBox extends lit_element_1.LitElement {
         else {
             // Fire event
             this.dispatchEvent(new CustomEvent("submitDialog", {
-                detail: formData["inputValues"]
+                detail: { output: formData["inputValues"] }
             }));
         }
         this.hide();
@@ -401,6 +308,11 @@ let DialogBox = class DialogBox extends lit_element_1.LitElement {
         }
         this.shown = false;
     }
+    /**
+     * Create the HTML for a given input type.
+     * @param inputType Type of input element
+     * @param value Value (if any) the element should start with
+     */
     getComponentHtml(inputType, value) {
         switch (inputType) {
             case inputType_1.InputType.Text:
@@ -479,7 +391,7 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
         if (dragger == undefined)
             dragger = this;
         else
-            dragger.addEventListener("click", () => this.mouseIsDown = false); // otherwise it won't let go when you click
+            dragger.addEventListener("click", () => this.mouseIsDown = false); // Otherwise it won't let go when you click
         dragger.addEventListener('mousedown', e => this.onMouseDown(e));
         this.addEventListener('click', e => this.onClick(e));
         document.body.addEventListener('mouseup', (e) => {
@@ -579,7 +491,7 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
         };
         this.style.left = newPos.X + "px";
         this.style.top = newPos.Y + "px";
-        /// Show where item will be dropped ///
+        // Show where item will be dropped
         const elementsUnder = this.getRelatedElementsUnder();
         const placeholder = this.parentElement.parentElement.querySelector(this.placeholder);
         const tasklistElements = elementsUnder.tasklist.children;
@@ -606,18 +518,18 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
         }
         else if (this.getMiddlePoint().Y > lastRect.top + lastRect.height) { // If at bottom
             elementsUnder.tasklist.appendChild(placeholder);
-        }Tasklist
-    }Tasklist
+        }
+    }
     /**
      * Get <draggable> element under the element currently being dragged, and
      * also the hovered tasklist.
      */
-    getRelatedElementsUnTasklistTasklist
+    getRelatedElementsUnder() {
         const middlePoint = this.getMiddlePoint();
         const elementsOnPoint = document.elementsFromPoint(middlePoint.X, middlePoint.Y);
-        let closestDraggTasklistlementsOnPointTasklistx => x.tagName == "DRAGGABLE-ELEMENT")[1];
-        const tasklistTasklistntsOnPoiTasklistr(x => x.tagName == "TASKLIST")[0];
-        if (tasklist != undefined && closestDraggable == undefined) {
+        let closestDraggable = elementsOnPoint.filter(x => x.tagName == "DRAGGABLE-ELEMENT")[1];
+        const tasklist = elementsOnPoint.filter(x => x.tagName == "TASKLIST")[0];
+        if (tasklist && !closestDraggable) {
             const under = document.elementsFromPoint(middlePoint.X, middlePoint.Y + 40)
                 .filter(x => x.tagName == "DRAGGABLE-ELEMENT");
             if (under[1] == undefined)
@@ -638,6 +550,11 @@ let Draggable = class Draggable extends lit_element_1.LitElement {
             Y: rect.height / 2 + rect.top
         };
     }
+    /**
+     * Get the index of a specific item in an array
+     * @param array Array containing the item
+     * @param item The item of which the index is being found
+     */
     getArrayItemIndex(array, item) {
         return Array.from(array).indexOf(item);
     }
@@ -720,14 +637,18 @@ let InputList = class InputList extends lit_element_1.LitElement {
         </style>
         <section class="inputBlock">
             <input id="textInput" type="text" placeholder="${this.inputPlaceholder}" />
-            <button @click="${(e) => this.addItem(e.srcElement.parentElement.querySelector("input"))}">Add</button>
+            <button @click="${(e) => this.addItem(e.target.parentElement.querySelector("input"))}">Add</button>
         </section>
         <ul>
-            ${this.items.map((item, index) => this.createItem(item, index))}
+            ${this.items.map((item) => this.createItem(item))}
         </ul>
         `;
     }
-    createItem(value, index) {
+    /**
+     * Create the html for a list item
+     * @param value Text that will appear on the item
+     */
+    createItem(value) {
         return lit_element_1.html `
             <li data-value="${value}">
                 <span class="itemValue">${value}</span>
@@ -740,6 +661,10 @@ let InputList = class InputList extends lit_element_1.LitElement {
                          </fa-icon>
             </li>`;
     }
+    /**
+     * Add a new item to the list and fire an event.
+     * @param inputElement Input element containing the item's value
+     */
     addItem(inputElement) {
         const value = inputElement.value;
         if (value.length == 0)
@@ -753,15 +678,15 @@ let InputList = class InputList extends lit_element_1.LitElement {
         }));
     }
     handleIconMouseOver(e) {
-        e.srcElement.color = "red";
+        e.target.color = "red";
     }
     handleIconMouseOut(e) {
-        e.srcElement.color = "black";
+        e.target.color = "black";
     }
     handleIconClick(e) {
-        const itemElement = e.srcElement.parentElement;
+        const itemElement = e.target.parentElement;
         const itemValue = itemElement.dataset.value;
-        this.items = this.items.filter((item, index) => item != itemValue); // Remove from list, give back a list without the item. Needs optimization.
+        this.items = this.items.filter((item) => item != itemValue); // Remove from list, give back a list without the item. Needs optimization.
         this.dispatchEvent(new CustomEvent("itemRemoved", {
             bubbles: true,
             composed: true,
@@ -791,8 +716,8 @@ exports.InputList = InputList;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const draggableElement_1 = __webpack_require__(/*! ../components/draggableElement */ "./Kolan/wwwroot/js/components/draggableElement.js");
-const requestParameter_1 = __webpack_require__(/*! ../requestParameter */ "./Kolan/wwwroot/js/requestParameter.js");
-const apiRequester_1 = __webpack_require__(/*! ../apiRequester */ "./Kolan/wwwroot/js/apiRequester.js");
+const requestParameter_1 = __webpack_require__(/*! ../communication/requestParameter */ "./Kolan/wwwroot/js/communication/requestParameter.js");
+const apiRequester_1 = __webpack_require__(/*! ../communication/apiRequester */ "./Kolan/wwwroot/js/communication/apiRequester.js");
 /**
  * Controller to add/remove/edit/etc. tasks in a tasklist.
  */
@@ -806,8 +731,8 @@ class TasklistController {
      * @param   description {string} Task description.
      * @param   color       {string} Task background color as HEX value.
      */
-    addTask(name, description, color = "") {
-        const item = this.createTaskItem(name, description, color);
+    addTask(task) {
+        const item = this.createTaskItem(task);
         this.tasklist.insertBefore(item, this.tasklist.firstElementChild);
     }
     /**
@@ -816,14 +741,22 @@ class TasklistController {
      * @param   description {string} Task description.
      * @param   color       {string} Task background color as HEX value.
      */
-    addTaskToBottom(name, description, color = "") {
-        const item = this.createTaskItem(name, description, color);
+    addTaskToBottom(task) {
+        const item = this.createTaskItem(task);
         this.tasklist.appendChild(item);
     }
-    createTaskItem(name, description, color) {
+    /**
+     * Create the HTML element of a task item.
+     * @param id Board id
+     * @param name Board name
+     * @param description Board description
+     * @param color Board color
+     */
+    createTaskItem(task) {
         const item = new draggableElement_1.Draggable();
+        item.dataset.id = task.id;
         item.insertAdjacentHTML("afterbegin", `
-         <h2>${name}</h2><p>${description}</p>
+         <h2>${task.name}</h2><p>${task.description}</p>
          <div class="edit-layer">
             <input type="text" /><br />
             <textarea></textarea>
@@ -834,12 +767,13 @@ class TasklistController {
             <span class="options overlay-button"></span>
          </div>
          `);
-        if (color != "")
-            item.style.backgroundColor = color;
+        if (task.color != "")
+            item.style.backgroundColor = task.color;
         item.addEventListener("draggableClick", e => this.onClickEvent(e));
         item.addEventListener("mouseover", () => this.onHoverEvent(item));
         item.addEventListener("mouseleave", () => this.onMouseLeaveEvent(item));
         item.addEventListener("taskInternalMove", e => this.onInternalMove(e.target, e["detail"]["toItem"]));
+        item.addEventListener("taskExternalMove", e => this.onExternalMove(e.target, e["detail"]["toItem"], e["detail"]["toTasklist"]));
         item.querySelector(".edit").addEventListener("click", () => this.onEditClick(item));
         item.querySelector(".save").addEventListener("click", () => this.onSaveClick(item));
         return item;
@@ -854,26 +788,40 @@ class TasklistController {
     onInternalMove(item, toItem) {
         var target;
         if (toItem)
-            target = toItem.boardId;
+            target = toItem.dataset.id;
         else
-            target = this.tasklist.id;
+            target = this.tasklist.dataset.id;
+        this.sendMoveRequest(item.dataset.id, target);
+    }
+    onExternalMove(item, toItem, toTasklist) {
+        var target;
+        if (toItem)
+            target = toItem.dataset.id;
+        else
+            target = toTasklist.dataset.id;
+        this.sendMoveRequest(item.dataset.id, target);
+    }
+    sendMoveRequest(boardId, targetId) {
         new apiRequester_1.ApiRequester().send("Boards", viewData.id + "/ChangeOrder", "POST", [
-            new requestParameter_1.RequestParameter("boardId", item.dataset.id),
-            new requestParameter_1.RequestParameter("targetId", target),
+            new requestParameter_1.RequestParameter("boardId", boardId),
+            new requestParameter_1.RequestParameter("targetId", targetId),
         ]);
     }
     /**
      * Fires when the board item is hovered
      */
     onHoverEvent(item) {
-        if (!this.inEditMode)
-            item.querySelector(".overlay").style.display = "block";
+        if (!this.inEditMode) {
+            const overlay = item.querySelector(".overlay");
+            overlay.style.display = "block";
+        }
     }
     /**
      * Fires when the mouse leaves the board item
      */
     onMouseLeaveEvent(item) {
-        item.querySelector(".overlay").style.display = "";
+        const overlay = item.querySelector(".overlay");
+        overlay.style.display = "";
     }
     onEditClick(item) {
         this.toggleEditMode(item);
@@ -881,6 +829,12 @@ class TasklistController {
     onSaveClick(item) {
         this.toggleEditMode(item);
     }
+    /**
+     * Toggle the edit mode on a specific task item.
+     * If it isn't already in edit mode it will change to it
+     * and let the user change the contents of the task.
+     * @param item Task item to do it on
+     */
     toggleEditMode(item) {
         // Hide/show original text
         const editLayer = item.querySelector(".edit-layer");
@@ -921,7 +875,7 @@ exports.TasklistController = TasklistController;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const inputType_1 = __webpack_require__(/*! ../enums/inputType */ "./Kolan/wwwroot/js/enums/inputType.js");Tasklist
+const inputType_1 = __webpack_require__(/*! ../enums/inputType */ "./Kolan/wwwroot/js/enums/inputType.js");
 /** add task dialog schematic
  */
 exports.addTaskDialog = {
@@ -1021,23 +975,142 @@ var InputType;
 
 /***/ }),
 
-/***/ "./Kolan/wwwroot/js/requestParameter.js":
-/*!**********************************************!*\
-  !*** ./Kolan/wwwroot/js/requestParameter.js ***!
-  \**********************************************/
+/***/ "./Kolan/wwwroot/js/views/board.js":
+/*!*****************************************!*\
+  !*** ./Kolan/wwwroot/js/views/board.js ***!
+  \*****************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-class RequestParameter {
-    constructor(key, value) {
-        this.key = key;
-        this.value = value;
+const dialogBox_1 = __webpack_require__(/*! ../components/dialogBox */ "./Kolan/wwwroot/js/components/dialogBox.js");
+const addTaskDialog_1 = __webpack_require__(/*! ../dialogs/addTaskDialog */ "./Kolan/wwwroot/js/dialogs/addTaskDialog.js");
+const shareDialog_1 = __webpack_require__(/*! ../dialogs/shareDialog */ "./Kolan/wwwroot/js/dialogs/shareDialog.js");
+const setupDialog_1 = __webpack_require__(/*! ../dialogs/setupDialog */ "./Kolan/wwwroot/js/dialogs/setupDialog.js");
+const tasklistController_1 = __webpack_require__(/*! ../controllers/tasklistController */ "./Kolan/wwwroot/js/controllers/tasklistController.js");
+const apiRequester_1 = __webpack_require__(/*! ../communication/apiRequester */ "./Kolan/wwwroot/js/communication/apiRequester.js");
+const requestParameter_1 = __webpack_require__(/*! ../communication/requestParameter */ "./Kolan/wwwroot/js/communication/requestParameter.js");
+const boardHubConnection_1 = __webpack_require__(/*! ../communication/boardHubConnection */ "./Kolan/wwwroot/js/communication/boardHubConnection.js");
+window.addEventListener("load", () => new Board());
+class Board {
+    constructor() {
+        // Prepare addTaskDialog
+        this.addDialogElement = new dialogBox_1.DialogBox(addTaskDialog_1.addTaskDialog, "addTaskDialog");
+        this.addDialogElement.dialogOptions.requestMethod = viewData.id + "/" +
+            this.addDialogElement.dialogOptions.requestMethod;
+        document.body.appendChild(this.addDialogElement);
+        this.addDialogElement.addEventListener("submitDialog", (e) => {
+            const task = {
+                id: e.detail.output.id,
+                name: e.detail.input.name,
+                description: e.detail.input.description
+            };
+            this.addTask(this.currentTasklistId, task);
+        });
+        // Prepare shareDialog
+        let shareDialogElement = new dialogBox_1.DialogBox(shareDialog_1.shareDialog, "shareDialog");
+        document.body.appendChild(shareDialogElement);
+        shareDialogElement.addEventListener("itemAdded", (e) => // User added in the share dialog
+         this.onUserAdded(e.detail));
+        shareDialogElement.addEventListener("itemRemoved", (e) => // User removed in the share dialog
+         this.onUserRemoved(e.detail));
+        // Prepare setupDialog
+        this.setupDialogElement = new dialogBox_1.DialogBox(setupDialog_1.setupDialog, "setupDialog");
+        this.setupDialogElement.dialogOptions.requestMethod = viewData.id + "/" +
+            this.setupDialogElement.dialogOptions.requestMethod;
+        document.body.appendChild(this.setupDialogElement);
+        this.setupDialogElement.addEventListener("submitDialog", (e) => {
+            for (const group of e.detail.output)
+                this.addGroup(group);
+        });
+        // Load board
+        this.loadBoard();
+        const shareButton = document.getElementById("shareButton");
+        shareButton.addEventListener("click", e => shareDialogElement.shown = true);
+        // Websockets
+        new boardHubConnection_1.BoardHubConnection(viewData.id);
+    }
+    /**
+     * Add a group to the client side.
+     * @param id Group id
+     * @param name Group name
+     */
+    addGroup(group) {
+        const listhead = document.getElementById("list-head");
+        listhead.insertAdjacentHTML("beforeend", `<div class="item" data-id="${group.id}">
+                ${group.name}
+                <span class="plus"><span>+</span></span>
+            </div>`);
+        const tasklists = document.getElementById("tasklists");
+        const tasklistElement = document.createElement("tasklist");
+        tasklistElement.dataset.id = group.id;
+        tasklistElement.dataset.controller = new tasklistController_1.TasklistController(tasklistElement);
+        tasklists.appendChild(tasklistElement);
+        // Events
+        const plusElements = listhead.getElementsByClassName("plus");
+        for (let plus of plusElements) {
+            plus.addEventListener("click", e => {
+                const groupId = e.currentTarget.parentElement.dataset.id;
+                this.addDialogElement.shown = true;
+                this.addDialogElement.dialogOptions.requestMethod = viewData.id;
+                this.addDialogElement.extraRequestParameters = [
+                    new requestParameter_1.RequestParameter("groupId", groupId)
+                ];
+                this.currentTasklistId = groupId;
+            });
+        }
+    }
+    /**
+     * Add a task (board) to the client side.
+     * @param tasklistId Id of group
+     * @param id Board id
+     * @param name Board name
+     * @param description Board description
+     * @param toTop Add to the top of the list or not
+     */
+    addTask(tasklistId, task, toTop = true) {
+        const tasklist = document.querySelector(`#tasklists tasklist[data-id='${tasklistId}']`);
+        const tasklistController = new tasklistController_1.TasklistController(tasklist);
+        if (toTop)
+            tasklistController.addTask(task);
+        else
+            tasklistController.addTaskToBottom(task);
+    }
+    onUserAdded(username) {
+        const requestParameters = [new requestParameter_1.RequestParameter("username", username)];
+        new apiRequester_1.ApiRequester().send("Boards", `${viewData.id}/Users`, "POST", requestParameters);
+    }
+    onUserRemoved(username) {
+        const requestParameters = [new requestParameter_1.RequestParameter("username", username)];
+        new apiRequester_1.ApiRequester().send("Boards", `${viewData.id}/Users`, "DELETE", requestParameters);
+    }
+    /**
+     * Load the contents of the board from the backend.
+     */
+    loadBoard() {
+        new apiRequester_1.ApiRequester().send("Boards", viewData.id, "GET").then(result => {
+            const boards = JSON.parse(result);
+            // If the request returns nothing, the board hasn't been set up yet. Display the setup dialog.
+            if (boards.length == 0) {
+                this.setupDialogElement.shown = true;
+            }
+            else {
+                const tasklists = document.getElementById("tasklists");
+                for (const item of boards) {
+                    // Add group if it doesn't exist
+                    if (!tasklists.querySelector(`tasklist[data-id="${item.group.id}"]`)) {
+                        this.addGroup(item.group);
+                    }
+                    // Add board if it isn't null
+                    if (item.board)
+                        this.addTask(item.group.id, item.board, false);
+                }
+            }
+        }).catch((err) => console.log(err));
     }
 }
-exports.RequestParameter = RequestParameter;
 
 
 /***/ }),

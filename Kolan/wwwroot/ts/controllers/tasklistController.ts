@@ -3,6 +3,7 @@ declare const viewData;
 import { Draggable } from "../components/draggableElement";
 import { RequestParameter } from "../communication/requestParameter";
 import { ApiRequester } from "../communication/apiRequester";
+import { ITask } from "../models/ITask";
 
 /**
  * Controller to add/remove/edit/etc. tasks in a tasklist.
@@ -22,8 +23,8 @@ export class TasklistController {
      * @param   description {string} Task description.
      * @param   color       {string} Task background color as HEX value.
      */
-    public addTask(id: string, name: string, description: string, color: string = "") {
-        const item = this.createTaskItem(id, name, description, color);
+    public addTask(task: ITask) {
+        const item = this.createTaskItem(task);
         this.tasklist.insertBefore(item, this.tasklist.firstElementChild);
     }
 
@@ -33,8 +34,8 @@ export class TasklistController {
      * @param   description {string} Task description.
      * @param   color       {string} Task background color as HEX value.
      */
-    public addTaskToBottom(id: string, name: string, description: string, color: string = "") {
-        const item = this.createTaskItem(id, name, description, color);
+    public addTaskToBottom(task: ITask) {
+        const item = this.createTaskItem(task);
         this.tasklist.appendChild(item);
     }
 
@@ -45,12 +46,12 @@ export class TasklistController {
      * @param description Board description
      * @param color Board color
      */
-    public createTaskItem(id: string, name: string, description: string, color: string) {
+    public createTaskItem(task: ITask) {
         const item = new Draggable();
-        item.dataset.id = id;
+        item.dataset.id = task.id;
         item.insertAdjacentHTML("afterbegin",
             `
-         <h2>${name}</h2><p>${description}</p>
+         <h2>${task.name}</h2><p>${task.description}</p>
          <div class="edit-layer">
             <input type="text" /><br />
             <textarea></textarea>
@@ -62,7 +63,7 @@ export class TasklistController {
          </div>
          `);
 
-        if (color != "") item.style.backgroundColor = color;
+        if (task.color != "") item.style.backgroundColor = task.color;
 
         item.addEventListener("draggableClick", e => this.onClickEvent(e));
         item.addEventListener("mouseover", () => this.onHoverEvent(item));

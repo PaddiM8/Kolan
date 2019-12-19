@@ -14,7 +14,14 @@ class Boards {
         // Prepare dialog
         let addDialog = new dialogBox_1.DialogBox(addBoardDialog_1.addBoardDialog, "addBoardDialog");
         document.body.appendChild(addDialog);
-        addDialog.addEventListener("submitDialog", (e) => this.addBoardItem(e.detail.output.id, e.detail.input.name, e.detail.input.description));
+        addDialog.addEventListener("submitDialog", (e) => {
+            const board = {
+                id: e.detail.output.id,
+                name: e.detail.input.name,
+                description: e.detail.input.description
+            };
+            this.addBoardItem(board);
+        });
         // Load boards
         this.loadBoards();
         // Events
@@ -24,18 +31,21 @@ class Boards {
      * @param   name        {string} Board name.
      * @param   description {string} Board description.
      */
-    addBoardItem(id, name, description) {
+    addBoardItem(board) {
         const boardListController = new boardListController_1.BoardListController(document
             .querySelector(".board-list tasklist"));
-        boardListController.addBoard(id, name, description);
+        boardListController.addBoard(board);
     }
+    /**
+     * Load the list of boards from the backend.
+     */
     loadBoards() {
         const boardListController = new boardListController_1.BoardListController(document
             .querySelector(".board-list tasklist"));
         new apiRequester_1.ApiRequester().send("Boards", "", "GET").then(result => {
             const boards = JSON.parse(result);
             for (const item of boards) {
-                boardListController.addBoardToBottom(item.id, item.name, item.description);
+                boardListController.addBoardToBottom(item);
             }
         });
     }

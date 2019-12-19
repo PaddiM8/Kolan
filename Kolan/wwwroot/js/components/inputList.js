@@ -57,14 +57,18 @@ let InputList = class InputList extends lit_element_1.LitElement {
         </style>
         <section class="inputBlock">
             <input id="textInput" type="text" placeholder="${this.inputPlaceholder}" />
-            <button @click="${(e) => this.addItem(e.srcElement.parentElement.querySelector("input"))}">Add</button>
+            <button @click="${(e) => this.addItem(e.target.parentElement.querySelector("input"))}">Add</button>
         </section>
         <ul>
-            ${this.items.map((item, index) => this.createItem(item, index))}
+            ${this.items.map((item) => this.createItem(item))}
         </ul>
         `;
     }
-    createItem(value, index) {
+    /**
+     * Create the html for a list item
+     * @param value Text that will appear on the item
+     */
+    createItem(value) {
         return lit_element_1.html `
             <li data-value="${value}">
                 <span class="itemValue">${value}</span>
@@ -77,6 +81,10 @@ let InputList = class InputList extends lit_element_1.LitElement {
                          </fa-icon>
             </li>`;
     }
+    /**
+     * Add a new item to the list and fire an event.
+     * @param inputElement Input element containing the item's value
+     */
     addItem(inputElement) {
         const value = inputElement.value;
         if (value.length == 0)
@@ -90,15 +98,15 @@ let InputList = class InputList extends lit_element_1.LitElement {
         }));
     }
     handleIconMouseOver(e) {
-        e.srcElement.color = "red";
+        e.target.color = "red";
     }
     handleIconMouseOut(e) {
-        e.srcElement.color = "black";
+        e.target.color = "black";
     }
     handleIconClick(e) {
-        const itemElement = e.srcElement.parentElement;
+        const itemElement = e.target.parentElement;
         const itemValue = itemElement.dataset.value;
-        this.items = this.items.filter((item, index) => item != itemValue); // Remove from list, give back a list without the item. Needs optimization.
+        this.items = this.items.filter((item) => item != itemValue); // Remove from list, give back a list without the item. Needs optimization.
         this.dispatchEvent(new CustomEvent("itemRemoved", {
             bubbles: true,
             composed: true,

@@ -3,6 +3,7 @@ import { BoardListController } from "../controllers/boardListController";
 import { addBoardDialog } from "../dialogs/addBoardDialog";
 import { DialogBox } from "../components/dialogBox";
 import { ApiRequester } from "../communication/apiRequester";
+import { IBoard } from "../models/IBoard";
 
 window.addEventListener("load", () => new Boards());
 
@@ -14,8 +15,15 @@ class Boards {
         // Prepare dialog
         let addDialog = new DialogBox(addBoardDialog, "addBoardDialog");
         document.body.appendChild(addDialog);
-        addDialog.addEventListener("submitDialog", (e: CustomEvent) =>
-            this.addBoardItem(e.detail.output.id, e.detail.input.name, e.detail.input.description));
+        addDialog.addEventListener("submitDialog", (e: CustomEvent) => {
+            const board: IBoard = {
+                id: e.detail.output.id,
+                name: e.detail.input.name,
+                description: e.detail.input.description
+            };
+
+            this.addBoardItem(board);
+        });
 
         // Load boards
         this.loadBoards();
@@ -29,10 +37,10 @@ class Boards {
      * @param   name        {string} Board name.
      * @param   description {string} Board description.
      */
-    private addBoardItem(id: string, name: string, description: string) {
+    private addBoardItem(board: IBoard) {
         const boardListController = new BoardListController(document
             .querySelector(".board-list tasklist"));
-        boardListController.addBoard(id, name, description);
+        boardListController.addBoard(board);
     }
 
     /**
@@ -46,7 +54,7 @@ class Boards {
         new ApiRequester().send("Boards", "", "GET").then(result => {
             const boards = JSON.parse(result as string);
             for (const item of boards) {
-                boardListController.addBoardToBottom(item.id, item.name, item.description);
+                boardListController.addBoardToBottom(item);
             }
         });
     }

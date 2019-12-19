@@ -49,6 +49,7 @@ let DialogBox = class DialogBox extends lit_element_1.LitElement {
             let requestParameters = [...formData["requestParameters"],
                 ...this.extraRequestParameters];
             const request = new apiRequester_1.ApiRequester().send(this.dialogOptions.requestAction, this.dialogOptions.requestMethod, this.dialogOptions.requestType, requestParameters);
+            // Fire the event after the request was successful, and include the returned information
             request.then(output => {
                 const outputObject = JSON.parse(output);
                 // Fire event
@@ -60,7 +61,7 @@ let DialogBox = class DialogBox extends lit_element_1.LitElement {
         else {
             // Fire event
             this.dispatchEvent(new CustomEvent("submitDialog", {
-                detail: formData["inputValues"]
+                detail: { output: formData["inputValues"] }
             }));
         }
         this.hide();
@@ -101,6 +102,11 @@ let DialogBox = class DialogBox extends lit_element_1.LitElement {
         }
         this.shown = false;
     }
+    /**
+     * Create the HTML for a given input type.
+     * @param inputType Type of input element
+     * @param value Value (if any) the element should start with
+     */
     getComponentHtml(inputType, value) {
         switch (inputType) {
             case inputType_1.InputType.Text:

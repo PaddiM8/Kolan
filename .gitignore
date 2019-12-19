@@ -3,6 +3,10 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+Kolan/wwwroot/js
+Kolan/wwwroot/css
+Kolan/wwwroot/dist
+
 # User-specific files
 *.suo
 *.user

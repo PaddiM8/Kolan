@@ -1,4 +1,5 @@
 import * as signalR from "@microsoft/signalr";
+import { tasklistControllers } from "../views/board";
 
 export class BoardHubConnection {
     connection;
@@ -14,6 +15,8 @@ export class BoardHubConnection {
             this.connection.invoke("join", boardId).catch(err => console.log(err));
         });
 
-        this.connection.on("receiveNewBoard", (board, groupId) => console.log(board));
+        this.connection.on("receiveNewBoard", (board, groupId) => {
+            tasklistControllers[groupId].addTask(board);
+        });
     }
 }

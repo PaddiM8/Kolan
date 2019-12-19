@@ -13,6 +13,8 @@ import { IGroup } from "../models/IGroup";
 
 window.addEventListener("load", () => new Board());
 
+export let tasklistControllers = {};
+
 class Board {
     private currentTasklistId: string;
     private setupDialogElement: DialogBox;
@@ -25,15 +27,6 @@ class Board {
         this.addDialogElement.dialogOptions.requestMethod = viewData.id + "/" +
             this.addDialogElement.dialogOptions.requestMethod;
         document.body.appendChild(this.addDialogElement);
-        this.addDialogElement.addEventListener("submitDialog", (e: CustomEvent) => {
-            const task: ITask = {
-                id: e.detail.output.id,
-                name: e.detail.input.name,
-                description: e.detail.input.description
-            };
-
-            this.addTask(this.currentTasklistId, task);
-        });
 
         // Prepare shareDialog
         let shareDialogElement = new DialogBox(shareDialog, "shareDialog");
@@ -83,8 +76,8 @@ class Board {
         const tasklists = document.getElementById("tasklists");
         const tasklistElement = document.createElement("tasklist");
         tasklistElement.dataset.id = group.id;
-        tasklistElement.dataset.controller = new TasklistController(tasklistElement);
         tasklists.appendChild(tasklistElement);
+        tasklistControllers[group.id] = new TasklistController(tasklistElement);
 
         // Events
         const plusElements = listhead.getElementsByClassName("plus");
@@ -113,7 +106,7 @@ class Board {
      */
     addTask(tasklistId: string, task: ITask, toTop = true) {
         const tasklist: HTMLElement = document.querySelector(`#tasklists tasklist[data-id='${tasklistId}']`);
-        const tasklistController = new TasklistController(tasklist);
+        const tasklistController: TasklistController = tasklistControllers[tasklistId];
         if (toTop) tasklistController.addTask(task);
         else       tasklistController.addTaskToBottom(task);
     }

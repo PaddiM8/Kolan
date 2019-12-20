@@ -150,7 +150,7 @@ class Board {
                 const tasklists = document.getElementById("tasklists");
                 for (const item of boards) {
                     // Add group if it doesn't exist
-                    if (!tasklists.querySelector(`tasklist [data-id="${item.group.id}"]`)) {
+                    if (!tasklists.querySelector(`tasklist[data-id="${item.group.id}"]`)) {
                         this.addGroup(item.group);
                     }
 

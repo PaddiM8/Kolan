@@ -46,7 +46,7 @@ namespace Kolan.Repositories
             var result = await Client.Cypher
                 .Match("(parentBoard:Board)-[:ChildGroup]->(group:Group)")
                 .Where((Board parentBoard) => parentBoard.Id == id)
-                .OptionalMatch("(group)-[:Next*]->(board:Board)-[:Next]->(:End)")
+                .OptionalMatch("(group)-[:Next*]->(board:Board)-[:Next*]->(:End)")
                 .Return((board, group) => new
                         {
                             Board = board.As<Board>(),

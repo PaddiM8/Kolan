@@ -3,7 +3,7 @@ import "fa-icons";
 
 @customElement("input-list")
 export class InputList extends LitElement {
-    @property({type: Array<String>()}) items = [];
+    @property({type: Array }) items = [];
     inputPlaceholder: string;
 
     constructor(inputPlaceholder: string) {
@@ -54,7 +54,7 @@ export class InputList extends LitElement {
         </style>
         <section class="inputBlock">
             <input id="textInput" type="text" placeholder="${this.inputPlaceholder}" />
-            <button @click="${(e) => this.addItem(e.target.parentElement.querySelector("input"))}">Add</button>
+            <button @click="${(e) => this.addItem()}">Add</button>
         </section>
         <ul>
             ${this.items.map((item: string) => this.createItem(item))}
@@ -81,21 +81,24 @@ export class InputList extends LitElement {
     }
 
     /**
-     * Add a new item to the list and fire an event.
-     * @param inputElement Input element containing the item's value
+     * Adds a new item to the list and fires an event.
      */
-    addItem(inputElement: HTMLInputElement) {
+    addItem() {
+        const inputElement: HTMLInputElement = this.shadowRoot.getElementById("textInput") as HTMLInputElement;
         const value = inputElement.value;
+
         if (value.length == 0) return; // Don't add it if the input is empty
 
         this.items = [...this.items, value];
         inputElement.value = "";
 
-        this.dispatchEvent(new CustomEvent("itemAdded", {
-            bubbles: true,  // Let the event be listened to from outside a web component, eg. dialog-box
-            composed: true,
-            detail: value
-        }));
+        if (dispatchEvent) {
+            this.dispatchEvent(new CustomEvent("itemAdded", {
+                bubbles: true,  // Let the event be listened to from outside a web component, eg. dialog-box
+                composed: true,
+                detail: value
+            }));
+        }
     }
 
     handleIconMouseOver(e) {

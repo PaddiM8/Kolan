@@ -26,9 +26,14 @@ namespace Kolan.Repositories
         public async Task<object> GetAllAsync(string username)
         {
             return await Client.Cypher
-                .Match("(user:User)-[:ChildGroup]->(:Group)-[:Next*]->(board:Board)-[:Next]->(:End)")
+                .Match("(user:User)-[:ChildGroup]->(:Group)-[:Next*]->(board)-[:Next]->(:End)")
                 .Where((User user) => user.Username == username)
-                .Return((board) => board.As<Board>())
+                .OptionalMatch("(board)-[:SharedBoard]->(shared:Board)")
+                .Return((board, shared) => new
+                        {
+                            Board = board.As<Board>(),
+                            Shared = shared.As<Board>()
+                        })
                 .ResultsAsync;
         }
 
@@ -171,6 +176,20 @@ namespace Kolan.Repositories
                 .Delete("previousRel, nextRel, sharedRel, link")
                 .Create("(previous)-[:Next]->(next)")
                 .ExecuteWithoutResultsAsync();
+        }
+
+        /// <summary>
+        /// Return the users the board is shared to (excluding the owner).
+        /// </summary>
+        /// <param name="boardId">Id of board that is being shared</param>
+        public async Task<object> GetUsersAsync(string boardId)
+        {
+            return await Client.Cypher
+                .Match("(board:Board)")
+                .Where((Board board) => board.Id == boardId)
+                .Match("(user:User)-[:ChildGroup]->(:Group)-[:Next]->(:Link)-[:SharedBoard]->(board)")
+                .Return<string>("user.username")
+                .ResultsAsync;
         }
 
         // This is all temporary ok

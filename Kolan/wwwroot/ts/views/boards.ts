@@ -54,7 +54,11 @@ class Boards {
         new ApiRequester().send("Boards", "", "GET").then(result => {
             const boards = JSON.parse(result as string);
             for (const item of boards) {
-                boardListController.addBoardToBottom(item);
+                if (item.board.id) {
+                    boardListController.addBoardToBottom(item);
+                } else if (item.shared.id) {
+                    boardListController.addBoardToBottom(item.shared);
+                }
             }
         });
     }

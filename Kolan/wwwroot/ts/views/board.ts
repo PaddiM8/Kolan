@@ -17,43 +17,17 @@ export let tasklistControllers = {};
 
 class Board {
     private currentTasklistId: string;
-    private setupDialogElement: DialogBox;
-    private addDialogElement: DialogBox;
+    private dialogs: any; // eek, fix this.
 
     constructor() {
-        // Prepare addTaskDialog
-        this.addDialogElement = new DialogBox(addTaskDialog, "addTaskDialog");
-
-        this.addDialogElement.dialogOptions.requestMethod = viewData.id + "/" +
-            this.addDialogElement.dialogOptions.requestMethod;
-        document.body.appendChild(this.addDialogElement);
-
-        // Prepare shareDialog
-        let shareDialogElement = new DialogBox(shareDialog, "shareDialog");
-
-        document.body.appendChild(shareDialogElement);
-        shareDialogElement.addEventListener("itemAdded", (e: CustomEvent) => // User added in the share dialog
-            this.onUserAdded(e.detail));
-        shareDialogElement.addEventListener("itemRemoved", (e: CustomEvent) => // User removed in the share dialog
-            this.onUserRemoved(e.detail));
-
-        // Prepare setupDialog
-        this.setupDialogElement = new DialogBox(setupDialog, "setupDialog");
-
-        this.setupDialogElement.dialogOptions.requestMethod = viewData.id + "/" +
-            this.setupDialogElement.dialogOptions.requestMethod;
-        document.body.appendChild(this.setupDialogElement);
-
-        this.setupDialogElement.addEventListener("submitDialog", (e: CustomEvent) => {
-            for (const group of e.detail.output)
-                this.addGroup(group);
-        });
+        // Load dialogs
+        this.loadDialogs();
 
         // Load board
         this.loadBoard();
 
         const shareButton = document.getElementById("shareButton");
-        shareButton.addEventListener("click", e => shareDialogElement.shown = true)
+        shareButton.addEventListener("click", e => this.dialogs.share.shown = true)
 
         // Websockets
         new BoardHubConnection(viewData.id);
@@ -85,9 +59,9 @@ class Board {
             plus.addEventListener("click", e => {
                 const groupId = e.currentTarget.parentElement.dataset.id;
 
-                this.addDialogElement.shown = true;
-                this.addDialogElement.dialogOptions.requestMethod = viewData.id;
-                this.addDialogElement.extraRequestParameters = [ 
+                this.dialogs.addTask.shown = true;
+                this.dialogs.addTask.dialogOptions.requestMethod = viewData.id;
+                this.dialogs.addTask.extraRequestParameters = [ 
                     new RequestParameter("groupId", groupId)
                 ];
 
@@ -121,22 +95,62 @@ class Board {
         new ApiRequester().send("Boards", `${viewData.id}/Users`, "DELETE", requestParameters);
     }
 
+    loadDialogs() {
+        const dialogs = {
+            "addTask": new DialogBox(addTaskDialog, "addTaskDialog"),
+            "share": new DialogBox(shareDialog, "shareDialog"),
+            "setup": new DialogBox(setupDialog, "setupDialog"),
+        }
+
+        // addTaskDialog
+        dialogs.addTask.dialogOptions.requestMethod = viewData.id + "/" +
+            dialogs.addTask.dialogOptions.requestMethod;
+        document.body.appendChild(dialogs.addTask);
+
+        // Prepare shareDialog
+        document.body.appendChild(dialogs.share);
+        dialogs.share.addEventListener("itemAdded", (e: CustomEvent) => // User added in the share dialog
+            this.onUserAdded(e.detail));
+        dialogs.share.addEventListener("itemRemoved", (e: CustomEvent) => // User removed in the share dialog
+            this.onUserRemoved(e.detail));
+        dialogs.share.addEventListener("openDialog", () => {
+            // Get collaborators
+            new ApiRequester().send("Boards", viewData.id + "/Users", "GET").then(result => {
+                const users: string[] = JSON.parse(result as string);
+                dialogs.share.list.items = users;
+            });
+        });
+
+        // Prepare setupDialog
+        dialogs.setup.dialogOptions.requestMethod = viewData.id + "/" +
+            dialogs.setup.dialogOptions.requestMethod;
+        document.body.appendChild(dialogs.setup);
+
+        dialogs.setup.addEventListener("submitDialog", (e: CustomEvent) => {
+            for (const group of e.detail.output)
+                this.addGroup(group);
+        });
+
+        this.dialogs = dialogs;
+    }
+
     /**
      * Load the contents of the board from the backend.
      */
     loadBoard()
     {
+        // Get tasks
         new ApiRequester().send("Boards", viewData.id, "GET").then(result => {
             const boards = JSON.parse(result as string);
 
             // If the request returns nothing, the board hasn't been set up yet. Display the setup dialog.
             if (boards.length == 0) {
-                this.setupDialogElement.shown = true;
+                this.dialogs.setup.shown = true;
             } else {
                 const tasklists = document.getElementById("tasklists");
                 for (const item of boards) {
                     // Add group if it doesn't exist
-                    if (!tasklists.querySelector(`tasklist[data-id="${item.group.id}"]`)) {
+                    if (!tasklists.querySelector(`tasklist [data-id="${item.group.id}"]`)) {
                         this.addGroup(item.group);
                     }
 

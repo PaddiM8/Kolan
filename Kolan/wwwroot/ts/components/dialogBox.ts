@@ -14,6 +14,7 @@ export class DialogBox extends LitElement {
     @property({type: Boolean}) shown = false;
     @property({type: Array<RequestParameter>()}) extraRequestParameters = [];
     @property({type: Object}) dialogOptions: IDialogTemplate
+    list: InputList;
 
     constructor(dialogOptions, id) {
         super();
@@ -35,6 +36,11 @@ export class DialogBox extends LitElement {
 
     updated() {
         this.style.display = this.shown ? "block" : "none";
+
+        // Fire event
+        if (this.shown) {
+            this.dispatchEvent(new CustomEvent("openDialog"));
+        }
     }
 
     /**
@@ -48,7 +54,7 @@ export class DialogBox extends LitElement {
         if (this.dialogOptions.requestAction != undefined) // Not all dialogs do requests
         {
             let requestParameters: RequestParameter[] = [...formData["requestParameters"], 
-                                                         ...this.extraRequestParameters];
+                ...this.extraRequestParameters];
             const request = new ApiRequester().send(
                 this.dialogOptions.requestAction,
                 this.dialogOptions.requestMethod,
@@ -127,7 +133,8 @@ export class DialogBox extends LitElement {
                 return html`<p>${value}:</p>
                             <input type="text" placeholder="${value}..." /><br />`;
             case InputType.InputList:
-                return new InputList(value);
+                this.list = new InputList(value);
+                return this.list;
             default:
                 return "";
         }

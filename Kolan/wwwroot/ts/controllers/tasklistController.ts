@@ -10,7 +10,7 @@ import { ITask } from "../models/ITask";
  */
 
 export class TasklistController {
-    private tasklist: HTMLElement;
+    public tasklist: HTMLElement;
     private inEditMode: boolean;
 
     constructor(tasklist: HTMLElement) {

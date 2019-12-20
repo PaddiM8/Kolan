@@ -27,7 +27,10 @@ namespace Kolan.Controllers.Api
         [HttpGet]
         public async Task<object> GetAll()
         {
-            return await _uow.Boards.GetAllAsync(User.Identity.Name);
+            var result = await _uow.Boards.GetAllAsync(User.Identity.Name);
+            Console.WriteLine(JsonConvert.SerializeObject(result));
+
+            return result;
         }
 
         [HttpGet("{id}")]
@@ -77,6 +80,7 @@ namespace Kolan.Controllers.Api
         public async Task<IActionResult> ChangeOrder(string parentId, [FromForm]string boardId, [FromForm]string targetId)
         {
             await _uow.Boards.MoveAsync(parentId, boardId, targetId, false);
+            await _boardHubContext.Clients.Group(parentId).MoveBoard(boardId, targetId); // Send to client
 
             return new EmptyResult();
         }
@@ -88,6 +92,13 @@ namespace Kolan.Controllers.Api
             await _uow.Boards.MoveAsync(User.Identity.Name, boardId, targetId, true);
 
             return new EmptyResult();
+        }
+
+        [Route("{id}/Users")]
+        [HttpGet]
+        public async Task<object> GetUsers(string id)
+        {
+            return await _uow.Boards.GetUsersAsync(id);
         }
 
         [Route("{id}/Users")]

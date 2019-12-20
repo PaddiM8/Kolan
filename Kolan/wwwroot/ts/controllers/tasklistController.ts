@@ -89,7 +89,10 @@ export class TasklistController {
      */
     onClickEvent(e) {
         if (!this.inEditMode)
-            console.log("clicked");
+        {
+            const id = e.target.dataset.id;
+            window.location.href = "./" + id;
+        }
     }
 
     onInternalMove(item: HTMLElement, toItem: HTMLElement) {

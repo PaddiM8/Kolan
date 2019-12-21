@@ -21,7 +21,7 @@ export class ApiRequester {
             req.onerror = (e) => reject(Error(`Network Error: ${e}`));
             req.onload = () => {
                 if (req.status === 200) resolve(req.response);
-                else                    reject(Error(req.statusText));
+                else                    reject(req);
             }
 
             // Send data

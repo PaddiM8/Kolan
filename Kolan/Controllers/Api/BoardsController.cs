@@ -27,7 +27,7 @@ namespace Kolan.Controllers.Api
         [HttpGet]
         public async Task<object> GetAll()
         {
-            return await _uow.Boards.GetAllAsync(User.Identity.Name);
+             return await _uow.Boards.GetAllAsync(User.Identity.Name);
         }
 
         [HttpGet("{id}")]

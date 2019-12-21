@@ -159,6 +159,8 @@ class Board {
                 for (const board of groupObject.boards)
                     this.addTask(groupObject.group.id, board, false);
             }
-        }).catch((err) => console.log(err));
+        }).catch((req) => {
+            if (req.status == 204) this.dialogs.setup.shown = true; // If no content
+        });
     }
 }

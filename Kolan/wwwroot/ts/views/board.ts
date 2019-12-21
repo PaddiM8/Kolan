@@ -159,8 +159,6 @@ class Board {
                 for (const board of groupObject.boards)
                     this.addTask(groupObject.group.id, board, false);
             }
-        }).catch((err) => {
-            console.log(err)
-        });
+        }).catch((err) => console.log(err));
     }
 }

@@ -27,7 +27,7 @@ namespace Kolan.Repositories
         public async Task<object> GetAllAsync(string username)
         {
             return await Client.Cypher
-                .Match("(user:User)-[:ChildGroup]->(:Group)-[:Next*]->(board)-[:Next]->(:End)")
+                .Match("(user:User)-[:ChildGroup]->(:Group)-[:Next*]->(board)-[:Next*]->(:End)")
                 .Where((User user) => user.Username == username)
                 .OptionalMatch("(board)-[:SharedBoard]->(shared:Board)")
                 .Return((board, shared) => new

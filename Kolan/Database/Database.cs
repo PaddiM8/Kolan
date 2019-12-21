@@ -29,6 +29,8 @@ namespace Kolan
 
             // Debugging users
             new UserController(new UnitOfWork(Client)).Create("bakk", "pass");
+            new UserController(new UnitOfWork(Client)).Create("domi", "pass");
+            new UserController(new UnitOfWork(Client)).Create("liv", "pass");
             new UserController(new UnitOfWork(Client)).Create("bakk2", "pass");
         }
 

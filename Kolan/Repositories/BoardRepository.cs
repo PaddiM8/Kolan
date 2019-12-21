@@ -223,10 +223,14 @@ namespace Kolan.Repositories
             await Client.Cypher
                 .Match("(board:Board)")
                 .Where((Board board) => board.Id == id)
-                .Create("(board)-[:ChildGroup { order: 0 }]->(:Group { name: 'Backlog', id: 'a' })-[:Next]->(:End)")
-                .Create("(board)-[:ChildGroup { order: 1 }]->(:Group { name: 'Ready', id: 'b' })-[:Next]->(:End)")
-                .Create("(board)-[:ChildGroup { order: 2 }]->(:Group { name: 'In Progress',  id: 'c' })-[:Next]->(:End)")
-                .Create("(board)-[:ChildGroup { order: 3 }]->(:Group { name: 'Done', id: 'd' })-[:Next]->(:End)")
+                .Create("(board)-[:ChildGroup { order: 0 }]->(g1:Group { name: 'Backlog' })-[:Next]->(:End)")
+                .Set("g1.id = '" + _generator.NewId(id + "1") + "'")
+                .Create("(board)-[:ChildGroup { order: 1 }]->(g2:Group { name: 'Ready' })-[:Next]->(:End)")
+                .Set("g2.id = '" + _generator.NewId(id + "2") + "'")
+                .Create("(board)-[:ChildGroup { order: 2 }]->(g3:Group { name: 'In Progress' })-[:Next]->(:End)")
+                .Set("g3.id = '" + _generator.NewId(id + "3") + "'")
+                .Create("(board)-[:ChildGroup { order: 3 }]->(g4:Group { name: 'Done' })-[:Next]->(:End)")
+                .Set("g4.id = '" + _generator.NewId(id + "4") + "'")
                 .ExecuteWithoutResultsAsync();
 
             return await Client.Cypher

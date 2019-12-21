@@ -101,6 +101,17 @@ namespace Kolan.Repositories
             return id;
         }
 
+        public async Task EditAsync(Board newBoardContents)
+        {
+            await Client.Cypher
+                .Match("(board:Board)")
+                .Where("board.id = {id}")
+                .WithParam("id", newBoardContents.Id)
+                .Set("board = {newBoardContents}")
+                .WithParam("newBoardContents", newBoardContents)
+                .ExecuteWithoutResultsAsync();
+        }
+
         /// <summary>
         /// Add board groups
         /// </summary>

@@ -22,5 +22,10 @@ namespace Kolan.Hubs
         {
             return Clients.Group(parentId).MoveBoard(boardId, targetId);
         }
+
+        public Task EditBoard(string parentId, Board newBoardContents)
+        {
+            return Clients.Group(parentId).EditBoard(newBoardContents);
+        }
     }
 }

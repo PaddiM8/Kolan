@@ -75,6 +75,17 @@ namespace Kolan.Controllers.Api
             return Ok(new { id = id });
         }
 
+        [HttpPut("{parentId}")]
+        public async Task<IActionResult> Edit(string parentId, [FromForm]string newBoardContent)
+        {
+            Board board = JsonConvert.DeserializeObject<Board>(newBoardContent);
+
+            await _uow.Boards.EditAsync(board);
+            await _boardHubContext.Clients.Group(parentId).EditBoard(board);
+
+            return new EmptyResult();
+        }
+
         [Route("ChangeOrder")]
         [HttpPost("{parentId}/ChangeOrder")]
         public async Task<IActionResult> ChangeOrder(string parentId, [FromForm]string boardId, [FromForm]string targetId)

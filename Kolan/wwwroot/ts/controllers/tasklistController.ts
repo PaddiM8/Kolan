@@ -4,6 +4,7 @@ import { Draggable } from "../components/draggableElement";
 import { RequestParameter } from "../communication/requestParameter";
 import { ApiRequester } from "../communication/apiRequester";
 import { ITask } from "../models/ITask";
+import { IBoard } from "../models/IBoard";
 
 /**
  * Controller to add/remove/edit/etc. tasks in a tasklist.
@@ -130,7 +131,7 @@ export class TasklistController {
         new ApiRequester().send("Boards", viewData.id + "/ChangeOrder", "POST", [
             new RequestParameter("boardId", boardId),
             new RequestParameter("targetId", targetId),
-        ])
+        ]);
     }
 
     /**
@@ -156,7 +157,11 @@ export class TasklistController {
     }
 
     onSaveClick(item: Draggable) {
-        this.toggleEditMode(item)
+        let newContent: IBoard = this.toggleEditMode(item)
+
+        new ApiRequester().send("Boards", viewData.id, "PUT", [
+            new RequestParameter("newBoardContent", JSON.stringify(newContent))
+        ]);
     }
 
     /**
@@ -165,7 +170,7 @@ export class TasklistController {
      * and let the user change the contents of the task.
      * @param item Task item to do it on
      */
-    toggleEditMode(item: Draggable) {
+    toggleEditMode(item: Draggable): IBoard {
         // Hide/show original text
         const editLayer = item.querySelector(".edit-layer") as HTMLElement;
         const name      = item.querySelector("h2") as HTMLElement;
@@ -190,5 +195,11 @@ export class TasklistController {
         this.onMouseLeaveEvent(item);
         item.movable = this.inEditMode;
         this.inEditMode = !this.inEditMode;
+
+        return {
+            "id": item.dataset.id,
+            "name": name.innerHTML,
+            "description": text.innerHTML
+        }
     }
 }

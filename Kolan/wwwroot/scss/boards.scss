@@ -83,6 +83,7 @@ draggable-element {
    border-radius: 9px;
    position: relative;
    cursor: pointer;
+   font-family: "Inter", sans-serif;
    background-color: $primary;
    transition: .3s ease background-color;
    @extend .shadow;

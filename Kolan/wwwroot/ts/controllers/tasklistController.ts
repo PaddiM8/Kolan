@@ -55,11 +55,26 @@ export class TasklistController {
          <div class="edit-layer">
             <input type="text" /><br />
             <textarea></textarea>
-            <span class="save"></span>
+            <fa-icon class="fas fa-check save"
+                     size="21px"
+                     role="button"
+                     color="#fff"
+                     path-prefix="/node_modules">
+                     </fa-icon>
          </div>
          <div class="overlay">
-            <span class="edit overlay-button"></span>
-            <span class="options overlay-button"></span>
+            <fa-icon class="fas fa-pen top-right edit overlay-button"
+                     size="21px"
+                     role="button"
+                     color="#fff"
+                     path-prefix="/node_modules">
+                     </fa-icon>
+            <fa-icon class="fas fa-trash bottom-right remove overlay-button"
+                     size="21px"
+                     role="button"
+                     color="#fff"
+                     path-prefix="/node_modules">
+                     </fa-icon>
          </div>
          `);
 

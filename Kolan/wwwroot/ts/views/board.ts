@@ -139,26 +139,27 @@ class Board {
      */
     loadBoard()
     {
-        // Get tasks
+
+        // Get board content
         new ApiRequester().send("Boards", viewData.id, "GET").then(result => {
-            const boards = JSON.parse(result as string);
+            const boardContent = JSON.parse(result as string);
+
+            // Set title
+            document.getElementById("boardName").innerHTML = boardContent.board.name;
 
             // If the request returns nothing, the board hasn't been set up yet. Display the setup dialog.
-            if (boards.length == 0) {
+            if (boardContent.groups.length == 0) {
                 this.dialogs.setup.shown = true;
-            } else {
-                const tasklists = document.getElementById("tasklists");
-                for (const item of boards) {
-                    // Add group if it doesn't exist
-                    if (!tasklists.querySelector(`tasklist[data-id="${item.group.id}"]`)) {
-                        this.addGroup(item.group);
-                    }
-
-                    // Add board if it isn't null
-                    if (item.board) this.addTask(item.group.id, item.board, false);
-                }
+                return;
             }
 
+            const tasklists = document.getElementById("tasklists");
+            for (const groupObject of boardContent.groups) {
+                this.addGroup(groupObject.group);
+
+                for (const board of groupObject.boards)
+                    this.addTask(groupObject.group.id, board, false);
+            }
         }).catch((err) => console.log(err));
     }
 }

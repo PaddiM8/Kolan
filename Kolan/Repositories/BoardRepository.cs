@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Neo4jClient;
+using Neo4jClient.Cypher;
 using Kolan.Models;
 
 namespace Kolan.Repositories
@@ -47,14 +48,15 @@ namespace Kolan.Repositories
                 .Match("(parentBoard:Board)-[:ChildGroup]->(group:Group)")
                 .Where((Board parentBoard) => parentBoard.Id == id)
                 .OptionalMatch("(group)-[:Next*]->(board:Board)-[:Next*]->(:End)")
-                .Return((board, group) => new
+                .With("parentBoard, {group: group, boards: collect(board)} AS groups")
+                .Return((parentBoard, groups) => new
                         {
-                            Board = board.As<Board>(),
-                            Group = group.As<Group>()
+                            Board = parentBoard.As<Board>(),
+                            Groups = groups.CollectAs<GroupsObject>()
                         })
                 .ResultsAsync;
 
-            return result;
+            return result.Single();
         }
 
         /// <summary>

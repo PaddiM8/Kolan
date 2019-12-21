@@ -37,6 +37,7 @@ header {
 
 .tasklists, .list-head {
     display: grid;
+    font-family: "Inter", sans-serif;
     width: 100%;
     grid-template-columns: repeat(4, 1fr);
 }
@@ -54,6 +55,7 @@ header {
 .plus {
     display: inline;
     float: right;
+    font-family: sans-serif;
     margin-right: 10px;
     font-size: 30px;
     font-weight: 100;
@@ -70,7 +72,6 @@ tasklist {
     min-height: calc(100vh - 144px);
     border-right: 2px solid $gray;
     box-sizing: border-box;
-
 }
 
 placeholder {
@@ -85,6 +86,7 @@ placeholder {
 draggable-element {
     display: block;
     position: relative;
+    font-family: "Inter", sans-serif;
     padding: 20px;
     background-color: $primary;
     border-radius: 9px;
@@ -110,20 +112,18 @@ draggable-element {
         position: absolute;
         width: 21px;
         height: 21px;
-        margin: 10px;
+        margin: 16px;
         cursor: pointer;
     }
 
-    .edit {
+    .top-right {
         display: block;
         right: 0;
-        background-color: black;
     }
 
-    .options {
+    .bottom-right {
         right: 0;
         bottom: 0;
-        background-color: black;
     }
 
     .edit-layer {
@@ -137,7 +137,6 @@ draggable-element {
             height: 21px;
             right: 15px;
             bottom: 20px;
-            background-color: black;
         }
     }
 

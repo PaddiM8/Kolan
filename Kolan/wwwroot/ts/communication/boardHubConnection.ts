@@ -19,6 +19,7 @@ export class BoardHubConnection {
         this.connection.on("receiveNewBoard", this.onReceiveNewBoard);
         this.connection.on("moveBoard", this.onMoveBoard);
         this.connection.on("editBoard", this.onEditBoard);
+        this.connection.on("deleteBoard", this.onDeleteBoard);
     }
 
     private onReceiveNewBoard(board: IBoard, groupId: string) {
@@ -49,5 +50,10 @@ export class BoardHubConnection {
 
         name.innerHTML = newBoardContent.name;
         text.innerHTML = newBoardContent.description;
+    }
+
+    private onDeleteBoard(boardId: string) {
+        const item = document.querySelector(`#tasklists [data-id="${boardId}"]`)
+        if (item) item.parentNode.removeChild(item);
     }
 }

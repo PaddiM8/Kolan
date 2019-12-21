@@ -112,6 +112,18 @@ namespace Kolan.Repositories
                 .ExecuteWithoutResultsAsync();
         }
 
+        public async Task DeleteAsync(string id)
+        {
+            await Client.Cypher
+                .Match("(prev)-[prevRel:Next]->(board:Board)-[nextRel:Next]->(next)")
+                .Where("board.id = {id}")
+                .WithParam("id", id)
+                .Call("apoc.lock.nodes([prev])")
+                .Create("(prev)-[:Next]->(next)")
+                .Delete("prevRel, nextRel, board")
+                .ExecuteWithoutResultsAsync();
+        }
+
         /// <summary>
         /// Add board groups
         /// </summary>

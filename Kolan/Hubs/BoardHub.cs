@@ -27,5 +27,10 @@ namespace Kolan.Hubs
         {
             return Clients.Group(parentId).EditBoard(newBoardContents);
         }
+
+        public Task DeleteBoard(string parentId, string id)
+        {
+            return Clients.Group(parentId).DeleteBoard(id);
+        }
     }
 }

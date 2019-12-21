@@ -86,6 +86,15 @@ namespace Kolan.Controllers.Api
             return new EmptyResult();
         }
 
+        [HttpDelete("{parentId}")]
+        public async Task<IActionResult> Delete(string parentId, [FromForm]string boardId)
+        {
+            await _uow.Boards.DeleteAsync(boardId);
+            await _boardHubContext.Clients.Group(parentId).DeleteBoard(boardId);
+
+            return new EmptyResult();
+        }
+
         [Route("ChangeOrder")]
         [HttpPost("{parentId}/ChangeOrder")]
         public async Task<IActionResult> ChangeOrder(string parentId, [FromForm]string boardId, [FromForm]string targetId)

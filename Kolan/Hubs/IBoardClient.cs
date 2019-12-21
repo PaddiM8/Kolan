@@ -10,5 +10,6 @@ namespace Kolan.Hubs
         Task ReceiveNewBoard(Board board, string groupName);
         Task MoveBoard(string boardId, string targetId);
         Task EditBoard(Board newBoardContents);
+        Task DeleteBoard(string id);
     }
 }

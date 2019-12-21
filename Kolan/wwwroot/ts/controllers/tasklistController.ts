@@ -70,7 +70,7 @@ export class TasklistController {
                      color="#fff"
                      path-prefix="/node_modules">
                      </fa-icon>
-            <fa-icon class="fas fa-trash bottom-right remove overlay-button"
+            <fa-icon class="fas fa-trash bottom-right delete overlay-button"
                      size="21px"
                      role="button"
                      color="#fff"
@@ -96,6 +96,9 @@ export class TasklistController {
 
         item.querySelector(".save").addEventListener("click", () =>
             this.onSaveClick(item));
+
+        item.querySelector(".delete").addEventListener("click", () =>
+            this.onDeleteClick(item));
 
         return item;
     }
@@ -161,6 +164,14 @@ export class TasklistController {
 
         new ApiRequester().send("Boards", viewData.id, "PUT", [
             new RequestParameter("newBoardContent", JSON.stringify(newContent))
+        ]);
+    }
+
+    onDeleteClick(item: Draggable) {
+        item.parentNode.removeChild(item);
+
+        new ApiRequester().send("Boards", viewData.id, "DELETE", [
+            new RequestParameter("boardId", item.dataset.id)
         ]);
     }
 

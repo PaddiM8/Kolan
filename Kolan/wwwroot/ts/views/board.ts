@@ -139,19 +139,18 @@ class Board {
      */
     loadBoard()
     {
-
         // Get board content
         new ApiRequester().send("Boards", viewData.id, "GET").then(result => {
             const boardContent = JSON.parse(result as string);
 
-            // Set title
-            document.getElementById("boardName").innerHTML = boardContent.board.name;
-
             // If the request returns nothing, the board hasn't been set up yet. Display the setup dialog.
-            if (boardContent.groups.length == 0) {
+            if (!boardContent || boardContent.length == 0) {
                 this.dialogs.setup.shown = true;
                 return;
             }
+
+            // Set title
+            document.getElementById("boardName").innerHTML = boardContent.board.name;
 
             const tasklists = document.getElementById("tasklists");
             for (const groupObject of boardContent.groups) {
@@ -160,6 +159,8 @@ class Board {
                 for (const board of groupObject.boards)
                     this.addTask(groupObject.group.id, board, false);
             }
-        }).catch((err) => console.log(err));
+        }).catch((err) => {
+            console.log(err)
+        });
     }
 }

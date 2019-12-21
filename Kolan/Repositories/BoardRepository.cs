@@ -56,7 +56,7 @@ namespace Kolan.Repositories
                         })
                 .ResultsAsync;
 
-            return result.Single();
+            return result;
         }
 
         /// <summary>

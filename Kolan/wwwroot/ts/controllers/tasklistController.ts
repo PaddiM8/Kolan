@@ -1,4 +1,4 @@
-import { Draggable } from "../components/draggableElement";
+import { DraggableItem } from "../components/draggableItem";
 import { RequestParameter } from "../communication/requestParameter";
 import { ApiRequester } from "../communication/apiRequester";
 import { ITask } from "../models/ITask";
@@ -73,7 +73,7 @@ export class TasklistController {
      * @param color Board color
      */
     public createTaskItem(task: ITask): HTMLElement {
-        const item = new Draggable();
+        const item = new DraggableItem();
         item.dataset.id = task.id;
         item.dataset.description = task.description;
         task.name = ContentFormatter.format(task.name);
@@ -156,7 +156,7 @@ export class TasklistController {
     /**
      * Fires when the board item is hovered
      */
-    private onHoverEvent(item: Draggable): void {
+    private onHoverEvent(item: DraggableItem): void {
         if (!this.inEditMode) {
             const overlay = item.querySelector(".overlay") as HTMLElement;
             overlay.style.display = "block";
@@ -166,12 +166,12 @@ export class TasklistController {
     /**
      * Fires when the mouse leaves the board item
      */
-    private onMouseLeaveEvent(item: Draggable): void {
+    private onMouseLeaveEvent(item: DraggableItem): void {
         const overlay = item.querySelector(".overlay") as HTMLElement;
         overlay.style.display = "";
     }
 
-    private onEditClick(item: Draggable): void {
+    private onEditClick(item: DraggableItem): void {
         Board.dialogs.editTask.shown = true;
         Board.dialogs.editTask.extraRequestParameters = [ new RequestParameter("id", item.dataset.id) ];
         Board.dialogs.editTask.setValues({
@@ -180,7 +180,7 @@ export class TasklistController {
         });
     }
 
-    private onDeleteClick(item: Draggable) {
+    private onDeleteClick(item: DraggableItem) {
         item.parentNode.removeChild(item);
 
         new ApiRequester().send("Boards", Board.viewData.id, "DELETE", [

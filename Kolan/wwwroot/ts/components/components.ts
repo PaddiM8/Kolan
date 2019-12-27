@@ -1,4 +1,4 @@
 import "./dialogBox";
-import "./draggableElement";
+import "./draggableItem";
 import "./inputList";
 import "fa-icons";

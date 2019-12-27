@@ -6,11 +6,9 @@ import { LitElement, html, css, property, customElement } from 'lit-element';
  *
  * @name customElement
  * @function
- * @param 'draggable-element'
- * @returns {undefined}
  */
-@customElement('draggable-element')
-export class Draggable extends LitElement {
+@customElement('draggable-item')
+export class DraggableItem extends LitElement {
     @property() movable = true;
     private placeholder = "placeholder";
     private mouseIsDown = false;
@@ -188,12 +186,12 @@ export class Draggable extends LitElement {
     private getRelatedElementsUnder() {
         const middlePoint = this.getMiddlePoint();
         const elementsOnPoint = document.elementsFromPoint(middlePoint.X, middlePoint.Y);
-        let   closestDraggable = elementsOnPoint.filter(x => x.tagName == "DRAGGABLE-ELEMENT")[1];
+        let   closestDraggable = elementsOnPoint.filter(x => x.tagName == "DRAGGABLE-ITEM")[1];
         const tasklist = elementsOnPoint.filter(x => x.tagName == "TASKLIST")[0];
 
         if (tasklist && !closestDraggable) {
             const under = document.elementsFromPoint(middlePoint.X, middlePoint.Y + 40)
-                .filter(x => x.tagName == "DRAGGABLE-ELEMENT");
+                .filter(x => x.tagName == "DRAGGABLE-ITEM");
 
             if (under[1] == undefined) closestDraggable = under[0];
             else closestDraggable = under[1];

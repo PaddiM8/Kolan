@@ -3,6 +3,7 @@ declare const viewData;
 import { ApiRequester } from "../communication/apiRequester";
 import { RequestParameter } from "../communication/requestParameter";
 import { IBoard } from "../models/IBoard";
+import { DraggableItem } from "../components/draggableItem";
 
 /**
  * Controller to add/remove/edit/etc. items in a board list.
@@ -45,7 +46,7 @@ export class BoardListController {
      * @param color Optional board color
      */
     private createBoard(board: IBoard): HTMLElement {
-        const item = document.createElement("draggable-element");
+        const item = new DraggableItem();
         item.dataset.id = board.id;
         item.insertAdjacentHTML("beforeend",
             `<span class="dragger"></span><h2>${board.name}</h2><p>${board.description}</p>`);

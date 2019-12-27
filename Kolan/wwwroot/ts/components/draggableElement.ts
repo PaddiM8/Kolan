@@ -52,7 +52,7 @@ export class Draggable extends LitElement {
         });
     }
 
-    onMouseDown(e) {
+    private onMouseDown(e): void {
         this.mouseIsDown = true && this.movable;
         this.startPos = {
             X: e.clientX - this.getBoundingClientRect().left,
@@ -63,7 +63,7 @@ export class Draggable extends LitElement {
         this.currentIndex = this.getArrayItemIndex(this.parentElement.children, this);
     }
 
-    onClick(e) {
+    private onClick(e): void {
         this.mouseIsDown = false;
         if (e.target != this && e.target.parentElement != this) // Ignore if it's a grand-child
             return;
@@ -77,7 +77,7 @@ export class Draggable extends LitElement {
         }
     }
 
-    onMouseUp(element: Draggable, e) {
+    private onMouseUp(element: Draggable, e): void {
         element.mouseIsDown = false;
 
         // Attach element
@@ -115,7 +115,7 @@ export class Draggable extends LitElement {
         }
     }
 
-    onMouseMove(e) {
+    private onMouseMove(e): void {
         if (e.buttons != 1) return; // If left-click mouse button is not being held down, return
 
         // Detach from list
@@ -212,7 +212,7 @@ export class Draggable extends LitElement {
      * @param array Array containing the item
      * @param item The item of which the index is being found
      */
-    private getArrayItemIndex(array, item) {
+    private getArrayItemIndex(array, item): number {
         return Array.from(array).indexOf(item);
     }
 }

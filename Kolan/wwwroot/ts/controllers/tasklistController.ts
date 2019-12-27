@@ -123,14 +123,14 @@ export class TasklistController {
     /**
      * Fires when the board item is clicked, ends if the clicked part was the dragger.
      */
-    onClickEvent(e): void {
+    private onClickEvent(e): void {
         if (!this.inEditMode) {
             const id = e.target.dataset.id;
             window.location.href = "./" + id;
         }
     }
 
-    onInternalMove(item: HTMLElement, toItem: HTMLElement): void {
+    private onInternalMove(item: HTMLElement, toItem: HTMLElement): void {
         var target: string;
         if (toItem) target = toItem.dataset.id;
         else        target = this.tasklist.dataset.id;
@@ -138,7 +138,7 @@ export class TasklistController {
         this.sendMoveRequest(item.dataset.id, target);
     }
 
-    onExternalMove(item: HTMLElement, toItem: HTMLElement, toTasklist: HTMLElement): void {
+    private onExternalMove(item: HTMLElement, toItem: HTMLElement, toTasklist: HTMLElement): void {
         var target: string;
         if (toItem) target = toItem.dataset.id;
         else        target = toTasklist.dataset.id;
@@ -146,7 +146,7 @@ export class TasklistController {
         this.sendMoveRequest(item.dataset.id, target);
     }
 
-    sendMoveRequest(boardId: string, targetId: string): void {
+    private sendMoveRequest(boardId: string, targetId: string): void {
         new ApiRequester().send("Boards", Board.viewData.id + "/ChangeOrder", "POST", [
             new RequestParameter("boardId", boardId),
             new RequestParameter("targetId", targetId),
@@ -156,7 +156,7 @@ export class TasklistController {
     /**
      * Fires when the board item is hovered
      */
-    onHoverEvent(item: Draggable): void {
+    private onHoverEvent(item: Draggable): void {
         if (!this.inEditMode) {
             const overlay = item.querySelector(".overlay") as HTMLElement;
             overlay.style.display = "block";
@@ -166,12 +166,12 @@ export class TasklistController {
     /**
      * Fires when the mouse leaves the board item
      */
-    onMouseLeaveEvent(item: Draggable): void {
+    private onMouseLeaveEvent(item: Draggable): void {
         const overlay = item.querySelector(".overlay") as HTMLElement;
         overlay.style.display = "";
     }
 
-    onEditClick(item: Draggable): void {
+    private onEditClick(item: Draggable): void {
         Board.dialogs.editTask.shown = true;
         Board.dialogs.editTask.extraRequestParameters = [ new RequestParameter("id", item.dataset.id) ];
         Board.dialogs.editTask.setValues({
@@ -180,7 +180,7 @@ export class TasklistController {
         });
     }
 
-    onDeleteClick(item: Draggable) {
+    private onDeleteClick(item: Draggable) {
         item.parentNode.removeChild(item);
 
         new ApiRequester().send("Boards", Board.viewData.id, "DELETE", [

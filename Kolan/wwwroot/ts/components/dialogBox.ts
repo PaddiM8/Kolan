@@ -1,4 +1,4 @@
-import { LitElement, html, css, property, customElement } from "lit-element";
+import { LitElement, html, css, property, customElement, TemplateResult } from "lit-element";
 import { IDialogTemplate } from "../dialogs/IDialogTemplate";
 import { ApiRequester } from "../communication/apiRequester";
 import { RequestParameter } from "../communication/requestParameter";
@@ -45,7 +45,7 @@ export class DialogBox extends LitElement {
         }
     }
 
-    setValues(values: object) {
+    public setValues(values: object): void {
         for (const name in values) {
             const element = this.shadowRoot.querySelector(`[name="${name}"]`);
 
@@ -61,7 +61,7 @@ export class DialogBox extends LitElement {
      * When the submit button in the dialog is clicked. Fires the event, hides
      * and clears the dialog
      */
-    submitHandler() {
+    private submitHandler(): void {
         let formData = this.getFormData();
 
         // Do request
@@ -98,13 +98,13 @@ export class DialogBox extends LitElement {
     /** When the cancel button in the dialog is clicked. Hides and clears
      * the dialog
      */
-    cancelHandler() {
+    private cancelHandler(): void {
         this.hide();
     }
 
     /** Get user input in the dialog
      */
-    private getFormData() {
+    private getFormData(): object {
         let input = {};
         let requestParameters: RequestParameter[] = [];
         const inputs = <any>this.shadowRoot.getElementById("inputs").children;
@@ -123,7 +123,7 @@ export class DialogBox extends LitElement {
 
     /** Hide the dialog and clear the values
      */
-    private hide() {
+    private hide(): void {
         let dialogItems = <any>this.shadowRoot.querySelector(".dialog").children;
         for (let element of dialogItems) {
             if (element.tagName == "INPUT")
@@ -138,7 +138,7 @@ export class DialogBox extends LitElement {
      * @param inputType Type of input element
      * @param value Value (if any) the element should start with
      */
-    private getComponentHtml(inputType: InputType, name: string, value: string) {
+    private getComponentHtml(inputType: InputType, name: string, value: string): TemplateResult {
         switch (inputType) {
             case InputType.Text:
                 return html`<p>${value}:</p>
@@ -148,11 +148,11 @@ export class DialogBox extends LitElement {
             <textarea name="${name}" placeholder="${value}"></textarea>`;
             case InputType.InputList:
                 this.list = new InputList(value);
-            let element = this.list as HTMLElement;
-            element.setAttribute("name", name);
-            return element;
+                let element = this.list as HTMLElement;
+                element.setAttribute("name", name);
+                return html`${element}`;
             default:
-                return "";
+                return html``;
         }
     }
 }

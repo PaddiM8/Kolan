@@ -21,7 +21,7 @@ export class BoardListController {
      * @param   description {string} Board description.
      * @param   color       {string} Board background color as HEX value.
      */
-    public addBoard(board: IBoard) {
+    public addBoard(board: IBoard): void {
         const item = this.createBoard(board);
         this._boardlist.insertBefore(item, this._boardlist.firstElementChild); // Insert at top
     }
@@ -32,7 +32,7 @@ export class BoardListController {
      * @param   description {string} Board description.
      * @param   color       {string} Board background color as HEX value.
      */
-    public addBoardToBottom(board: IBoard) {
+    public addBoardToBottom(board: IBoard): void {
         const item = this.createBoard(board);
         this._boardlist.appendChild(item); // Insert at bottom
     }
@@ -44,7 +44,7 @@ export class BoardListController {
      * @param description Board description
      * @param color Optional board color
      */
-    private createBoard(board: IBoard) {
+    private createBoard(board: IBoard): HTMLElement {
         const item = document.createElement("draggable-element");
         item.dataset.id = board.id;
         item.insertAdjacentHTML("beforeend",
@@ -61,7 +61,7 @@ export class BoardListController {
     /**
      * Fires when the board item is clicked, ends if the clicked part was the dragger.
      */
-    onClickEvent(e: Event) {
+    private onClickEvent(e: Event): void {
         const target = e.target as HTMLElement;
         window.location.href = "../Board/" + target.dataset.id;
     }
@@ -71,7 +71,7 @@ export class BoardListController {
      * @param item   {HTMLElement} Item being moved
      * @param toItem {HTMLElement} The item above it in the new location
      */
-    onInternalMove(item: HTMLElement, toItem: HTMLElement) {
+    private onInternalMove(item: HTMLElement, toItem: HTMLElement): void {
         var target: string;
         if (toItem) target = toItem.dataset.id;
         else        target = viewData.username; // If there is no item above, set the target to the user's username.

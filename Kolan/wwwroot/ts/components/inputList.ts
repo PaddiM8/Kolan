@@ -1,10 +1,10 @@
-import { LitElement, html, customElement, property } from 'lit-element';
+import { LitElement, html, customElement, property, TemplateResult } from 'lit-element';
 import "fa-icons";
 
 @customElement("input-list")
 export class InputList extends LitElement {
     @property({type: Array }) items = [];
-    inputPlaceholder: string;
+    private inputPlaceholder: string;
 
     constructor(inputPlaceholder: string) {
         super();
@@ -66,7 +66,7 @@ export class InputList extends LitElement {
      * Create the html for a list item
      * @param value Text that will appear on the item
      */
-    createItem(value: string) {
+    private createItem(value: string): TemplateResult {
         return html`
             <li data-value="${value}">
                 <span class="itemValue">${value}</span>
@@ -83,7 +83,7 @@ export class InputList extends LitElement {
     /**
      * Adds a new item to the list and fires an event.
      */
-    addItem() {
+    private addItem(): void {
         const inputElement: HTMLInputElement = this.shadowRoot.getElementById("textInput") as HTMLInputElement;
         const value = inputElement.value;
 
@@ -101,15 +101,15 @@ export class InputList extends LitElement {
         }
     }
 
-    handleIconMouseOver(e) {
+    private handleIconMouseOver(e): void {
         e.target.color = "red";
     }
 
-    handleIconMouseOut(e) {
+    private handleIconMouseOut(e): void {
         e.target.color = "black";
     }
 
-    handleIconClick(e: Event) {
+    private handleIconClick(e: Event): void {
         const itemElement = (e.target as HTMLElement).parentElement;
         const itemValue = itemElement.dataset.value;
         this.items = this.items.filter((item: string) => item != itemValue); // Remove from list, give back a list without the item. Needs optimization.

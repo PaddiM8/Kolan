@@ -37,7 +37,7 @@ class Boards {
      * @param   name        {string} Board name.
      * @param   description {string} Board description.
      */
-    private addBoardItem(board: IBoard) {
+    private addBoardItem(board: IBoard): void {
         const boardListController = new BoardListController(document
             .querySelector(".board-list tasklist"));
         boardListController.addBoard(board);
@@ -46,8 +46,7 @@ class Boards {
     /**
      * Load the list of boards from the backend.
      */
-    private loadBoards()
-    {
+    private loadBoards(): void {
         const boardListController = new BoardListController(document
             .querySelector(".board-list tasklist"));
 

@@ -40,8 +40,7 @@ export class Board {
      * @param id Group id
      * @param name Group name
      */
-    addGroup(group: IGroup)
-    {
+    private addGroup(group: IGroup): void {
         const listhead = document.getElementById("list-head");
         listhead.insertAdjacentHTML("afterbegin",
             `<div class="item" data-id="${group.id}">
@@ -80,24 +79,24 @@ export class Board {
      * @param description Board description
      * @param toTop Add to the top of the list or not
      */
-    addTask(tasklistId: string, task: ITask, toTop = true) {
+    private addTask(tasklistId: string, task: ITask, toTop = true): void {
         const tasklist: HTMLElement = document.querySelector(`#tasklists tasklist[data-id='${tasklistId}']`);
         const tasklistController: TasklistController = Board.tasklistControllers[tasklistId];
         if (toTop) tasklistController.addTask(task);
         else       tasklistController.addTaskToBottom(task);
     }
 
-    onUserAdded(username: string) {
+    private onUserAdded(username: string): void {
         const requestParameters: RequestParameter[] = [ new RequestParameter("username", username) ];
         new ApiRequester().send("Boards", `${Board.viewData.id}/Users`, "POST", requestParameters);
     }
 
-    onUserRemoved(username: string) {
+    private onUserRemoved(username: string): void {
         const requestParameters = [ new RequestParameter("username", username) ];
         new ApiRequester().send("Boards", `${Board.viewData.id}/Users`, "DELETE", requestParameters);
     }
 
-    loadDialogs() {
+    private loadDialogs(): void {
         const dialogs = {
             "addTask": new DialogBox(addTaskDialog, "addTaskDialog"),
             "editTask": new DialogBox(editTaskDialog, "editTaskDialog"),
@@ -145,8 +144,7 @@ export class Board {
     /**
      * Load the contents of the board from the backend.
      */
-    loadBoard()
-    {
+    private loadBoard(): void {
         // Get board content
         new ApiRequester().send("Boards", Board.viewData.id, "GET").then(result => {
             const boardContent = JSON.parse(result as string);

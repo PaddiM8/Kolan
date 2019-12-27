@@ -10,7 +10,7 @@ import { Promise } from "es6-promise";
 export class ApiRequester {
     /* Do a HTTP request
      */
-    send(action: string, method: string, requestType: string, requestParameters: RequestParameter[] = null) {
+    public send(action: string, method: string, requestType: string, requestParameters: RequestParameter[] = null) {
         return new Promise((resolve, reject) => {
             const req = new XMLHttpRequest();
             let url = "/api/" + action;
@@ -36,7 +36,7 @@ export class ApiRequester {
     /* Convert the request parameters to URLSearchParams,
      * which can be read by the server.
      */
-    createURLSearchParams(requestParameters: RequestParameter[]) {
+    private createURLSearchParams(requestParameters: RequestParameter[]): URLSearchParams {
         let params = new URLSearchParams();
         for (let parameter of requestParameters) {
             params.append(parameter.key, parameter.value);

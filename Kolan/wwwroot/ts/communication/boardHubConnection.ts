@@ -3,7 +3,7 @@ import { Board } from "../views/board";
 import { IBoard } from "../models/IBoard";
 
 export class BoardHubConnection {
-    connection;
+    private connection;
 
     constructor(boardId: string) {
         this.connection = new signalR.HubConnectionBuilder()
@@ -22,25 +22,25 @@ export class BoardHubConnection {
         this.connection.on("deleteBoard", this.onDeleteBoard);
     }
 
-    private onReceiveNewBoard(board: IBoard, groupId: string) {
+    private onReceiveNewBoard(board: IBoard, groupId: string): void {
         Board.tasklistControllers[groupId].addTask(board);
     }
 
-    private onMoveBoard(boardId: string, targetId: string) {
+    private onMoveBoard(boardId: string, targetId: string): void {
         const board = document.querySelector(`#tasklists [data-id="${boardId}"]`);
         const tasklistId = board.parentElement.dataset.id;
 
         Board.tasklistControllers[tasklistId].moveTask(boardId, targetId);
     }
 
-    private onEditBoard(newBoardContent: IBoard) {
+    private onEditBoard(newBoardContent: IBoard): void {
         const board = document.querySelector(`#tasklists [data-id="${newBoardContent.id}"]`);
         const tasklistId = board.parentElement.dataset.id;
 
         Board.tasklistControllers[tasklistId].editTask(newBoardContent);
     }
 
-    private onDeleteBoard(boardId: string) {
+    private onDeleteBoard(boardId: string): void {
         const item = document.querySelector(`#tasklists [data-id="${boardId}"]`)
         if (item) item.parentNode.removeChild(item);
     }

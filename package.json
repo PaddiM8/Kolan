@@ -20,6 +20,7 @@
   "homepage": "https://github.com/PaddiM8/Kolan#readme",
   "devDependencies": {
     "@types/es6-promise": "^3.3.0",
+    "better-docs": "^1.4.7",
     "fa-icons": "^0.1.7",
     "gulp": "^4.0.2",
     "gulp-autoprefixer": "^6.1.0",
@@ -30,8 +31,8 @@
     "gulp-terser": "^1.2.0",
     "gulp-typedoc": "^2.2.3",
     "gulp-typescript": "^5.0.1",
+    "jsdoc": "^3.6.3",
     "node-sass": "^4.13.0",
-    "typedoc": "^0.15.3",
     "typescript": "^3.7.3",
     "webpack-cli": "^3.3.10",
     "webpack-stream": "^5.2.1"

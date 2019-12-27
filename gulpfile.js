@@ -1,6 +1,6 @@
 const gulp    = require("gulp");
 const sass    = require("gulp-sass");
-const typedoc = require("gulp-typedoc");
+const jsdoc   = require("gulp-jsdoc3");
 const ts      = require("gulp-typescript");
 const terser  = require("gulp-terser");
 const webpack = require("webpack-stream");
@@ -44,33 +44,11 @@ gulp.task('webpack', function() {
         .pipe(notify({ title: "Webpack complete", onLast: true }));
 });
 
-gulp.task("typedoc", function() {
-    return gulp
-        .src(["Kolan/wwwroot/ts/*.ts"])
-        .pipe(typedoc({
-            // TypeScript options (see typescript docs)
-            module: "commonjs",
-            target: "es6",
-            includeDeclarations: true,
-            experimentalDecorators: true,
-
-            // Output options (see typedoc docs)
-            out: "./docs",
-            json: "./docs/documentation.json",
-
-            // TypeDoc options (see typedoc docs)
-            name: "Kolan",
-            //theme: "/path/to/my/theme",
-            //plugins: ["my", "plugins"],
-            ignoreCompilerErrors: false,
-            version: true,
-        }))
-    ;
+gulp.task('doc', function (cb) {
+    const config = require('./jsdoc.json');
+    gulp.src(['README.md'], {read: false})
+        .pipe(jsdoc(config, cb));
 });
-//gulp.task("doc", function() {
-//   return gulp.src(["README.md", "./Kolan/wwwroot/ts/**/*.ts"], {read: false})
-//      .pipe(jsdoc({out: "./docs"}));
-//});
 
 gulp.task("watch", function() {
     gulp.watch("./Kolan/wwwroot/scss/**/*.scss", gulp.series("sass"));
@@ -79,4 +57,4 @@ gulp.task("watch", function() {
 });
 
 gulp.task("default", gulp.series("sass", "ts", "webpack", "watch"));
-gulp.task("produce", gulp.series("sass", "ts", "compress", "typedoc", "webpack"));
+gulp.task("produce", gulp.series("sass", "ts", "compress", "doc", "webpack"));

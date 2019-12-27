@@ -1,0 +1,18 @@
+{
+    "tags": {
+        "allowUnknownTags": ["optional"]
+    },
+    "plugins": [
+        "node_modules/better-docs/typescript"
+    ],
+    "source": {
+        "include": [ "Kolan/wwwroot/ts" ],
+        "includePattern": "\\.(jsx|js|ts|tsx)$"
+    },
+    "opts": {
+        "template": "node_modules/better-docs",
+        "destination": "./docs/",
+        "recurse": true,
+        "readme": "README.md"
+    }
+}

@@ -6,8 +6,12 @@ import { InputType } from "../enums/inputType"
 import { InputList } from "./inputList"
 
 /**
- * Dialog element that takes an IDialogTemplate as input
- * and returns an object with the values as an event.
+ * Dialog element that takes an IDialogTemplate as input and returns an object with the values as an event.
+ *
+ * @name customElement
+ * @function
+ * @param 'dialog-box'
+ * @returns {undefined}
  */
 @customElement('dialog-box')
 export class DialogBox extends LitElement {
@@ -45,7 +49,15 @@ export class DialogBox extends LitElement {
         }
     }
 
-    public setValues(values: object): void {
+    /**
+     * Set the values of the input fields in the dialog.
+     *
+     * @name setValues
+     * @function
+     * @param {object} values
+     * @returns {void}
+     */
+    public setValues(values: object): void { // TODO: Type safety
         for (const name in values) {
             const element = this.shadowRoot.querySelector(`[name="${name}"]`);
 
@@ -58,8 +70,11 @@ export class DialogBox extends LitElement {
     }
 
     /**
-     * When the submit button in the dialog is clicked. Fires the event, hides
-     * and clears the dialog
+     * When the submit button in the dialog is clicked. Fires the event, hides and clears the dialog
+     *
+     * @name submitHandler
+     * @function
+     * @returns {void}
      */
     private submitHandler(): void {
         let formData = this.getFormData();
@@ -95,14 +110,23 @@ export class DialogBox extends LitElement {
         this.hide();
     }
 
-    /** When the cancel button in the dialog is clicked. Hides and clears
-     * the dialog
+    /**
+     * When the cancel button in the dialog is clicked. Hides and clears the dialog.
+     *
+     * @name cancelHandler
+     * @function
+     * @returns {void}
      */
     private cancelHandler(): void {
         this.hide();
     }
 
-    /** Get user input in the dialog
+    /**
+     * Get the user input values.
+     *
+     * @name getFormData
+     * @function
+     * @returns {object}
      */
     private getFormData(): object {
         let input = {};
@@ -121,7 +145,12 @@ export class DialogBox extends LitElement {
         };
     }
 
-    /** Hide the dialog and clear the values
+    /**
+     * Hide the dialog and clear the values.
+     *
+     * @name hide
+     * @function
+     * @returns {void}
      */
     private hide(): void {
         let dialogItems = <any>this.shadowRoot.querySelector(".dialog").children;
@@ -135,8 +164,13 @@ export class DialogBox extends LitElement {
 
     /**
      * Create the HTML for a given input type.
-     * @param inputType Type of input element
-     * @param value Value (if any) the element should start with
+     *
+     * @name getComponentHtml
+     * @function
+     * @param {InputType} inputType
+     * @param {string} name
+     * @param {string} value
+     * @returns {TemplateResult}
      */
     private getComponentHtml(inputType: InputType, name: string, value: string): TemplateResult {
         switch (inputType) {

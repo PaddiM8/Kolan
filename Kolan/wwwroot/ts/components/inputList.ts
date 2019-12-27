@@ -63,8 +63,12 @@ export class InputList extends LitElement {
     }
 
     /**
-     * Create the html for a list item
-     * @param value Text that will appear on the item
+     * Create the HTML for a list item.
+     *
+     * @name createItem
+     * @function
+     * @param {string} value
+     * @returns {TemplateResult}
      */
     private createItem(value: string): TemplateResult {
         return html`
@@ -81,7 +85,11 @@ export class InputList extends LitElement {
     }
 
     /**
-     * Adds a new item to the list and fires an event.
+     * Add a new item to the list and fire an event.
+     *
+     * @name addItem
+     * @function
+     * @returns {void}
      */
     private addItem(): void {
         const inputElement: HTMLInputElement = this.shadowRoot.getElementById("textInput") as HTMLInputElement;

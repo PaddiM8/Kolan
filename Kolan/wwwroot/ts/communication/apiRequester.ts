@@ -8,7 +8,16 @@ import { Promise } from "es6-promise";
  * @param requestParameters - A list of parameters to be pushed with the request.
  */
 export class ApiRequester {
-    /* Do a HTTP request
+    /**
+     * Performs an HTTP request to the backend server.
+     *
+     * @name send
+     * @function
+     * @param {string} action
+     * @param {string} method
+     * @param {string} requestType
+     * @param {RequestParameter[]} requestParameters=null
+     * @returns {undefined}
      */
     public send(action: string, method: string, requestType: string, requestParameters: RequestParameter[] = null) {
         return new Promise((resolve, reject) => {
@@ -33,8 +42,13 @@ export class ApiRequester {
         });
     }
 
-    /* Convert the request parameters to URLSearchParams,
-     * which can be read by the server.
+    /**
+     * Convert the RequestParameters to URLSearch params, which can be read by the server.
+     *
+     * @name createURLSearchParams
+     * @function
+     * @param {RequestParameter[]} requestParameters
+     * @returns {URLSearchParams}
      */
     private createURLSearchParams(requestParameters: RequestParameter[]): URLSearchParams {
         let params = new URLSearchParams();

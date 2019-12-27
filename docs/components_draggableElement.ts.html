@@ -1,13 +1,75 @@
-import { LitElement, html, css, property, customElement } from 'lit-element';
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>JSDoc: components/draggableElement.ts</title>
+
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="./build/entry.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link href="https://fonts.googleapis.com/css?family=Muli:100,400,700|Oswald:300|Inconsolata,700" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+    <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+    <link type="text/css" rel="stylesheet" href="styles/app.min.css">
+    <link type="text/css" rel="stylesheet" href="styles/iframe.css">
+</head>
+
+<body>
+    <div id="stickyNavbarOverlay"></div>
+    <div class="top-navbar">
+        <div class="container">
+            <nav class="navbar" role="navigation" aria-label="main navigation">
+                <div class="navbar-brand">
+                    
+                    
+                        <h1 class="navbar-item">Documentation</h1>
+                    
+                    <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+                        <span aria-hidden="true"></span>
+                        <span aria-hidden="true"></span>
+                        <span aria-hidden="true"></span>
+                    </a>
+                </div>
+                
+            </nav>
+        </div>
+    </div>
+    <div class="container">
+        <div class="columns">
+            <div class="column is-3" id="sidebarNav">
+                <div class="sidebar">
+                    <nav>
+                        <h2><a href="index.html">Home</a></h2><div class="category"><h3>Classes</h3><ul><li><a href="ApiRequester.html">ApiRequester</a></li><li><a href="BoardListController.html">BoardListController</a></li><li><a href="Boards.html">Boards</a></li><li><a href="ContentFormatter.html">ContentFormatter</a></li><li><a href="Draggable.html">Draggable</a></li><li><a href="TasklistController.html">TasklistController</a></li></ul><h3>Interfaces</h3><ul><li><a href="IDialogInputs.html">IDialogInputs</a></li><li><a href="IDialogTemplate.html">IDialogTemplate</a></li></ul><h3>Global</h3><ul><li><a href="global.html#addBoardDialog">addBoardDialog</a></li><li><a href="global.html#addTask">addTask</a></li><li><a href="global.html#addTaskDialog">addTaskDialog</a></li><li><a href="global.html#Board">Board</a></li><li><a href="global.html#BoardHubConnection">BoardHubConnection</a></li><li><a href="global.html#createURLSearchParams">createURLSearchParams</a></li><li><a href="global.html#customElement">customElement</a></li><li><a href="global.html#editTaskDialog">editTaskDialog</a></li><li><a href="global.html">format</a></li><li><a href="global.html">formatWithMarkdown</a></li><li><a href="global.html#loadBoard">loadBoard</a></li><li><a href="global.html#loadDialogs">loadDialogs</a></li><li><a href="global.html#RequestParameter">RequestParameter</a></li><li><a href="global.html#send">send</a></li><li><a href="global.html#setupDialog">setupDialog</a></li><li><a href="global.html#shareDialog">shareDialog</a></li></ul></div>
+                    </nav>
+                </div>
+            </div>
+            <div class="column is-9-desktop">
+                <div class="content" id="main-content-wrapper">
+                    <header class="page-title">
+                        <p>Source</p>
+                        <h1>components/draggableElement.ts</h1>
+                    </header>
+                    
+                    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import { LitElement, html, css, property, customElement } from 'lit-element';
 
 /**
- * Lit-element that can be dragged and dropped. needs a <tasklist> parent and a <section> grandparent.
- * Place a <placeholder> element inside the section and style it as you wish.
- *
- * @name customElement
- * @function
- * @param 'draggable-element'
- * @returns {undefined}
+ * Lit-element that can be dragged and dropped. Needs a &lt;tasklist> parent
+ * and a &lt;section> grandparent. Place a &lt;placeholder> element inside the section
+ * and style it as you wish.
  */
 @customElement('draggable-element')
 export class Draggable extends LitElement {
@@ -32,7 +94,7 @@ export class Draggable extends LitElement {
     }
 
     render() {
-        return html`<slot></slot>`;
+        return html`&lt;slot>&lt;/slot>`;
     }
 
     firstUpdated(changedProperties) {
@@ -57,7 +119,7 @@ export class Draggable extends LitElement {
     }
 
     private onMouseDown(e): void {
-        this.mouseIsDown = true && this.movable;
+        this.mouseIsDown = true &amp;&amp; this.movable;
         this.startPos = {
             X: e.clientX - this.getBoundingClientRect().left,
             Y: e.clientY - this.getBoundingClientRect().top
@@ -69,13 +131,13 @@ export class Draggable extends LitElement {
 
     private onClick(e): void {
         this.mouseIsDown = false;
-        if (e.target != this && e.target.parentElement != this) // Ignore if it's a grand-child
+        if (e.target != this &amp;&amp; e.target.parentElement != this) // Ignore if it's a grand-child
             return;
 
         // If mouse is at same position as before, it's just a click.
         // Fire the "draggableClick" event, since a normal click event also fires
         // even when the element has been dragged.
-        if (this.mouseDownPos.X == e.clientX &&
+        if (this.mouseDownPos.X == e.clientX &amp;&amp;
             this.mouseDownPos.Y == e.clientY) {
             this.dispatchEvent(new CustomEvent("draggableClick"));
         }
@@ -160,11 +222,11 @@ export class Draggable extends LitElement {
         if (elementsUnder.tasklist == undefined) return;
 
         // If a draggable is under, and the placeholder wasn't already inserted there
-        if (elementsUnder.closestDraggable != undefined && elementsUnder.closestDraggable != this) {
-            const overTopHalf = elementsUnder.middlePoint.Y <= this.getMiddlePoint(elementsUnder.closestDraggable).Y;
+        if (elementsUnder.closestDraggable != undefined &amp;&amp; elementsUnder.closestDraggable != this) {
+            const overTopHalf = elementsUnder.middlePoint.Y &lt;= this.getMiddlePoint(elementsUnder.closestDraggable).Y;
 
             // If over the top half of the element
-            if  (overTopHalf && this.lastHoveredDraggable != elementsUnder.closestDraggable) {
+            if  (overTopHalf &amp;&amp; this.lastHoveredDraggable != elementsUnder.closestDraggable) {
                 elementsUnder.tasklist.insertBefore(placeholder, elementsUnder.closestDraggable);
                 this.lastHoveredDraggable = elementsUnder.closestDraggable as Draggable; // Remember last placement
             } else if (this.lastHoveredDraggable != elementsUnder.closestDraggable.nextSibling) { // If over the bottom half of the element
@@ -179,11 +241,8 @@ export class Draggable extends LitElement {
     }
 
     /**
-     * Get draggable element under the element currently being dragged, and also the hovered tasklist.
-     *
-     * @name getRelatedElementsUnder
-     * @function
-     * @returns {undefined}
+     * Get &lt;draggable> element under the element currently being dragged, and 
+     * also the hovered tasklist.
      */
     private getRelatedElementsUnder() {
         const middlePoint = this.getMiddlePoint();
@@ -191,7 +250,7 @@ export class Draggable extends LitElement {
         let   closestDraggable = elementsOnPoint.filter(x => x.tagName == "DRAGGABLE-ELEMENT")[1];
         const tasklist = elementsOnPoint.filter(x => x.tagName == "TASKLIST")[0];
 
-        if (tasklist && !closestDraggable) {
+        if (tasklist &amp;&amp; !closestDraggable) {
             const under = document.elementsFromPoint(middlePoint.X, middlePoint.Y + 40)
                 .filter(x => x.tagName == "DRAGGABLE-ELEMENT");
 
@@ -203,12 +262,8 @@ export class Draggable extends LitElement {
     }
 
     /**
-     * Get the global coordinates of the element's middle point.
-     *
-     * @name getMiddlePoint
-     * @function
-     * @param {Element} element=this
-     * @returns {undefined}
+     * Get the global coordinates of the elements middle point.
+     * @param   {element} element The element to get the middle point of
      */
     private getMiddlePoint(element: Element = this) {
         const rect = element.getBoundingClientRect();
@@ -220,14 +275,38 @@ export class Draggable extends LitElement {
 
     /**
      * Get the index of a specific item in an array
-     *
-     * @name getArrayItemIndex
-     * @function
-     * @param array
-     * @param item
-     * @returns {number}
+     * @param array Array containing the item
+     * @param item The item of which the index is being found
      */
     private getArrayItemIndex(array, item): number {
         return Array.from(array).indexOf(item);
     }
 }
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<footer class="footer">
+    <div class="content has-text-centered">
+        <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Fri Dec 27 2019 22:43:06 GMT+0100 (Central European Standard Time)</p>
+        <p class="sidebar-created-by">
+            <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by 
+            <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>
+        </p>
+    </div>
+</footer>
+
+
+<script src="scripts/app.min.js"></script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

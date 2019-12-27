@@ -2,6 +2,11 @@ import * as signalR from "@microsoft/signalr";
 import { Board } from "../views/board";
 import { IBoard } from "../models/IBoard";
 
+/**
+ * Manages the websocket connection and acts on responses.
+ * @name BoardHubConnection
+ * @function
+ */
 export class BoardHubConnection {
     private connection;
 

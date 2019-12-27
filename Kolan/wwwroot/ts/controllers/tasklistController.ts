@@ -82,6 +82,7 @@ export class TasklistController {
         item.insertAdjacentHTML("afterbegin",
             `
          <h2 class="name">${task.name}</h2>
+         <br />
          <span class="description">${task.description}</span>
          <div class="overlay">
             <fa-icon class="fas fa-pen top-right edit overlay-button"

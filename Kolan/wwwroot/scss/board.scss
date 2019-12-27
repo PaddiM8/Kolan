@@ -96,10 +96,18 @@ draggable-item {
     color: white;
     margin: 20px;
     overflow: hidden;
-    user-select: none;
+
+    a {
+        color: white;
+    }
 
     h2 {
+        display: inline-block; // to force it to be only the size of the text
         font-size: 1.2em;
+    }
+
+    .description > * {
+        display: inline-block;
     }
 
     .overlay {

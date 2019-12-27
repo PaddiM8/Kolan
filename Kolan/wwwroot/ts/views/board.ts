@@ -55,6 +55,7 @@ export class Board {
 
         const tasklists = document.getElementById("tasklists");
         const tasklistElement = document.createElement("tasklist");
+        tasklistElement.className = "draggableContainer";
         tasklistElement.dataset.id = group.id;
         tasklists.appendChild(tasklistElement);
         Board.tasklistControllers[group.id] = new TasklistController(tasklistElement);

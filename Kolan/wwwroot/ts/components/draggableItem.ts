@@ -15,7 +15,7 @@ export class DraggableItem extends LitElement {
     private startPos = {X: 0, Y: 0};
     private mouseDownPos = {X: 0, Y: 0};
     private detached = false;
-    private lastHoveredDraggable: Draggable;
+    private lastHoveredDraggable: DraggableItem;
     private currentTasklist: HTMLElement;
     private currentIndex: number;
 
@@ -23,8 +23,6 @@ export class DraggableItem extends LitElement {
         return css`
       :host {
         display: block;
-        -moz-user-select: none;
-        user-select: none;
       }
     `;
     }
@@ -38,7 +36,10 @@ export class DraggableItem extends LitElement {
         if (dragger == undefined) dragger = this;
         else dragger.addEventListener("click", () => this.mouseIsDown = false); // Otherwise it won't let go when you click
 
-        dragger.addEventListener('mousedown', e => this.onMouseDown(e));
+        dragger.addEventListener('mousedown', e => {
+            if (e.target == dragger) this.onMouseDown(e); // Makes sure it isn't a child that was clicked.
+        });
+
         this.addEventListener('click', e => this.onClick(e));
         document.body.addEventListener('mouseup', (e) => {
             if (this.detached) this.onMouseUp(this, e);
@@ -63,6 +64,7 @@ export class DraggableItem extends LitElement {
 
         this.currentTasklist = this.parentElement;
         this.currentIndex = this.getArrayItemIndex(this.parentElement.children, this);
+        this.style.userSelect = "none";
     }
 
     private onClick(e): void {
@@ -79,8 +81,9 @@ export class DraggableItem extends LitElement {
         }
     }
 
-    private onMouseUp(element: Draggable, e): void {
+    private onMouseUp(element: DraggableItem, e): void {
         element.mouseIsDown = false;
+        this.style.userSelect = "";
 
         // Attach element
         element.style.position = "";
@@ -164,10 +167,10 @@ export class DraggableItem extends LitElement {
             // If over the top half of the element
             if  (overTopHalf && this.lastHoveredDraggable != elementsUnder.closestDraggable) {
                 elementsUnder.tasklist.insertBefore(placeholder, elementsUnder.closestDraggable);
-                this.lastHoveredDraggable = elementsUnder.closestDraggable as Draggable; // Remember last placement
+                this.lastHoveredDraggable = elementsUnder.closestDraggable as DraggableItem; // Remember last placement
             } else if (this.lastHoveredDraggable != elementsUnder.closestDraggable.nextSibling) { // If over the bottom half of the element
                 elementsUnder.tasklist.insertBefore(placeholder, elementsUnder.closestDraggable.nextSibling);
-                this.lastHoveredDraggable = elementsUnder.closestDraggable.nextSibling as Draggable;
+                this.lastHoveredDraggable = elementsUnder.closestDraggable.nextSibling as DraggableItem;
             }
         } else if (lastRect == undefined) { // If empty tasklist
             elementsUnder.tasklist.appendChild(placeholder);
@@ -187,7 +190,7 @@ export class DraggableItem extends LitElement {
         const middlePoint = this.getMiddlePoint();
         const elementsOnPoint = document.elementsFromPoint(middlePoint.X, middlePoint.Y);
         let   closestDraggable = elementsOnPoint.filter(x => x.tagName == "DRAGGABLE-ITEM")[1];
-        const tasklist = elementsOnPoint.filter(x => x.tagName == "TASKLIST")[0];
+        const tasklist = elementsOnPoint.filter(x => x.classList.contains("draggableContainer"))[0];
 
         if (tasklist && !closestDraggable) {
             const under = document.elementsFromPoint(middlePoint.X, middlePoint.Y + 40)

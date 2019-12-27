@@ -96,6 +96,7 @@ draggable-item {
     color: white;
     margin: 20px;
     overflow: hidden;
+    user-select: none;
 
     a {
         color: white;

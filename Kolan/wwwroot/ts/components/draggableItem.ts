@@ -137,7 +137,7 @@ export class DraggableItem extends LitElement {
 
             // Draggable
             this.parentElement.parentElement.appendChild(this); // Move task out from tasklists, then get position: fixed
-            this.style.width = computedStyle.width;
+            this.style.width = this.scrollWidth + "px";
             this.style.position = "fixed";
             this.detached = true;
         }

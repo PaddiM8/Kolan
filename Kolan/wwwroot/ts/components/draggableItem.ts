@@ -64,7 +64,7 @@ export class DraggableItem extends LitElement {
 
         this.currentTasklist = this.parentElement;
         this.currentIndex = this.getArrayItemIndex(this.parentElement.children, this);
-        this.style.userSelect = "none";
+        e.target.style.userSelect = "none";
     }
 
     private onClick(e): void {
@@ -83,11 +83,11 @@ export class DraggableItem extends LitElement {
 
     private onMouseUp(element: DraggableItem, e): void {
         element.mouseIsDown = false;
-        this.style.userSelect = "";
 
         // Attach element
         element.style.position = "";
         element.style.width = "";
+        element.style.userSelect = "";
         element.style.top = "";
         element.style.left = "";
 

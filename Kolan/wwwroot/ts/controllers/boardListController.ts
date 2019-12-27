@@ -10,10 +10,10 @@ import { DraggableItem } from "../components/draggableItem";
  */
 
 export class BoardListController {
-    private _boardlist: Element;
+    private boardlist: Element;
 
     constructor(boardlist: Element) {
-        this._boardlist = boardlist;
+        this.boardlist = boardlist;
     }
 
     /**
@@ -24,7 +24,7 @@ export class BoardListController {
      */
     public addBoard(board: IBoard): void {
         const item = this.createBoard(board);
-        this._boardlist.insertBefore(item, this._boardlist.firstElementChild); // Insert at top
+        this.boardlist.insertBefore(item, this.boardlist.firstElementChild); // Insert at top
     }
 
     /**
@@ -35,7 +35,7 @@ export class BoardListController {
      */
     public addBoardToBottom(board: IBoard): void {
         const item = this.createBoard(board);
-        this._boardlist.appendChild(item); // Insert at bottom
+        this.boardlist.appendChild(item); // Insert at bottom
     }
 
     /**

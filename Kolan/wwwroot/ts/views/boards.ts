@@ -39,7 +39,7 @@ class Boards {
      */
     private addBoardItem(board: IBoard): void {
         const boardListController = new BoardListController(document
-            .querySelector(".board-list tasklist"));
+            .querySelector(".board-list .draggableContainer"));
         boardListController.addBoard(board);
     }
 
@@ -48,7 +48,7 @@ class Boards {
      */
     private loadBoards(): void {
         const boardListController = new BoardListController(document
-            .querySelector(".board-list tasklist"));
+            .querySelector(".board-list .draggableContainer"));
 
         new ApiRequester().send("Boards", "", "GET").then(result => {
             const boards = JSON.parse(result as string);

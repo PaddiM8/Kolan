@@ -71,9 +71,10 @@ namespace Kolan.Repositories
             entity.Id = id;
 
             await Client.Cypher
-                .Match("(user:User)-[:ChildGroup]->(previous)-[oldRel:Next]->(next)")
+                .Match("(user:User)")
                 .Where((User user) => user.Username == username)
                 .Call("apoc.lock.nodes([user])")
+                .Match("(user)-[:ChildGroup]->(previous)-[oldRel:Next]->(next)")
                 .Create("(previous)-[:Next]->(board:Board {newBoard})-[:Next]->(next)")
                 .WithParam("newBoard", entity)
                 .Delete("oldRel")
@@ -92,9 +93,10 @@ namespace Kolan.Repositories
             entity.Id = id;
 
             await Client.Cypher
-                .Match("(:Board)-[:ChildGroup]->(previous:Group)-[oldRel:Next]->(next)")
+                .Match("(previous:Group)")
                 .Where((Group previous) => previous.Id == groupId)
                 .Call("apoc.lock.nodes([previous])")
+                .Match("(:Board)-[:ChildGroup]->(previous)-[oldRel:Next]->(next)")
                 .Create("(previous)-[:Next]->(board:Board {newBoard})-[:Next]->(next)")
                 .WithParam("newBoard", entity)
                 .Delete("oldRel")
@@ -117,10 +119,11 @@ namespace Kolan.Repositories
         public async Task DeleteAsync(string id)
         {
             await Client.Cypher
-                .Match("(prev)-[prevRel:Next]->(board:Board)-[nextRel:Next]->(next)")
+                .Match("(board:Board)")
                 .Where("board.id = {id}")
-                .WithParam("id", id)
                 .Call("apoc.lock.nodes([prev])")
+                .Match("(prev)-[prevRel:Next]->(board)-[nextRel:Next]->(next)")
+                .WithParam("id", id)
                 .Create("(prev)-[:Next]->(next)")
                 .Delete("prevRel, nextRel, board")
                 .ExecuteWithoutResultsAsync();
@@ -156,8 +159,8 @@ namespace Kolan.Repositories
             await Client.Cypher
                 .Match("(host)")
                 .Where(whereHostId)
-                .WithParam("hostId", hostId)
                 .Call("apoc.lock.nodes([host])")
+                .WithParam("hostId", hostId)
                 .Match("(previous)-[previousRel:Next]->(board:Board)-[nextRel:Next]->(next)")
                 .Where((Board board) => board.Id == boardId)
                 .Match("(newPrevious)-[rel:Next]->(newNext)")
@@ -177,10 +180,11 @@ namespace Kolan.Repositories
         public async Task AddUserAsync(string boardId, string username)
         {
             await Client.Cypher
-                .Match("(sharedBoard:Board)", "(user:User)-[:ChildGroup]->(previous)-[oldRel:Next]->(next)")
+                .Match("(user:User)")
                 .Where((User user) => user.Username == username)
-                .AndWhere((Board sharedBoard) => sharedBoard.Id == boardId)
                 .Call("apoc.lock.nodes([user])")
+                .Match("(sharedBoard:Board)", "(user)-[:ChildGroup]->(previous)-[oldRel:Next]->(next)")
+                .Where((Board sharedBoard) => sharedBoard.Id == boardId)
                 .Create("(previous)-[:Next]->(link:Link)-[:Next]->(next)")
                 .Delete("oldRel")
                 .Create("(link)-[:SharedBoard]->(sharedBoard)")
@@ -195,10 +199,11 @@ namespace Kolan.Repositories
         public async Task RemoveUserAsync(string boardId, string username)
         {
             await Client.Cypher
-                .Match("(user:User)-[:ChildGroup]->(:Group)-[:Next*]->(link:Link)-[sharedRel:SharedBoard]->(board:Board)")
-                .Where((User user) => user.Username == username)
-                .AndWhere((Board board) => board.Id == boardId)
+                .Match("(user:User)")
                 .Call("apoc.lock.nodes([user])")
+                .Where((User user) => user.Username == username)
+                .Match("(user)-[:ChildGroup]->(:Group)-[:Next*]->(link:Link)-[sharedRel:SharedBoard]->(board:Board)")
+                .Where((Board board) => board.Id == boardId)
                 .Match("(previous)-[previousRel:Next]->(link)-[nextRel:Next]->(next)")
                 .Delete("previousRel, nextRel, sharedRel, link")
                 .Create("(previous)-[:Next]->(next)")

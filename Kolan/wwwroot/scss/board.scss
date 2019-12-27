@@ -106,8 +106,8 @@ draggable-item {
         font-size: 1.2em;
     }
 
-    .description > * {
-        display: inline-block;
+    .description {
+        word-wrap: break-word;
     }
 
     .overlay {
@@ -137,38 +137,5 @@ draggable-item {
     .bottom-right {
         right: 0;
         bottom: 0;
-    }
-
-    .edit-layer {
-        display: none;
-        width: calc(100% - 10px);
-        z-index: 110;
-
-        .save {
-            position: absolute;
-            width: 21px;
-            height: 21px;
-            right: 15px;
-            bottom: 20px;
-            cursor: pointer;
-        }
-    }
-
-    input, textarea {
-        background-color: white;
-        border: 0;
-        color: black;
-    }
-
-    input {
-        width: calc(100% - 20px);
-        font-size: 1.2em;
-    }
-
-    textarea {
-        margin-top: 10px;
-        width: calc(100% - 20px);
-        resize: none;
-        min-height: 150px;
     }
 }

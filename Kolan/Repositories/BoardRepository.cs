@@ -117,10 +117,10 @@ namespace Kolan.Repositories
         public async Task DeleteAsync(string id)
         {
             await Client.Cypher
-                .Call("apoc.lock.nodes([prev])")
                 .Match("(prev)-[prevRel:Next]->(board:Board)-[nextRel:Next]->(next)")
                 .Where("board.id = {id}")
                 .WithParam("id", id)
+                .Call("apoc.lock.nodes([prev])")
                 .Create("(prev)-[:Next]->(next)")
                 .Delete("prevRel, nextRel, board")
                 .ExecuteWithoutResultsAsync();
@@ -154,10 +154,10 @@ namespace Kolan.Repositories
             if (isRoot) whereHostId = "host.username = {hostId}"; // Username
 
             await Client.Cypher
-                .Call("apoc.lock.nodes([host])")
                 .Match("(host)")
                 .Where(whereHostId)
                 .WithParam("hostId", hostId)
+                .Call("apoc.lock.nodes([host])")
                 .Match("(previous)-[previousRel:Next]->(board:Board)-[nextRel:Next]->(next)")
                 .Where((Board board) => board.Id == boardId)
                 .Match("(newPrevious)-[rel:Next]->(newNext)")
@@ -177,10 +177,10 @@ namespace Kolan.Repositories
         public async Task AddUserAsync(string boardId, string username)
         {
             await Client.Cypher
-                .Call("apoc.lock.nodes([user])")
                 .Match("(sharedBoard:Board)", "(user:User)-[:ChildGroup]->(previous)-[oldRel:Next]->(next)")
                 .Where((User user) => user.Username == username)
                 .AndWhere((Board sharedBoard) => sharedBoard.Id == boardId)
+                .Call("apoc.lock.nodes([user])")
                 .Create("(previous)-[:Next]->(link:Link)-[:Next]->(next)")
                 .Delete("oldRel")
                 .Create("(link)-[:SharedBoard]->(sharedBoard)")
@@ -195,10 +195,10 @@ namespace Kolan.Repositories
         public async Task RemoveUserAsync(string boardId, string username)
         {
             await Client.Cypher
-                .Call("apoc.lock.nodes([user])")
                 .Match("(user:User)-[:ChildGroup]->(:Group)-[:Next*]->(link:Link)-[sharedRel:SharedBoard]->(board:Board)")
                 .Where((User user) => user.Username == username)
                 .AndWhere((Board board) => board.Id == boardId)
+                .Call("apoc.lock.nodes([user])")
                 .Match("(previous)-[previousRel:Next]->(link)-[nextRel:Next]->(next)")
                 .Delete("previousRel, nextRel, sharedRel, link")
                 .Create("(previous)-[:Next]->(next)")

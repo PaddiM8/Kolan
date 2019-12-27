@@ -28,7 +28,9 @@ export class DialogBox extends LitElement {
          <div class="dialogBackground"></div>
          <section class="dialog">
             <h2>${html`${this.dialogOptions.title}`}</h2>
-            ${this.dialogOptions.inputs.map(x => html`${this.getComponentHtml(x.inputType, x.value)}`)}
+            <div id="inputs">
+                ${this.dialogOptions.inputs.map(x => html`${this.getComponentHtml(x.inputType, x.key, x.value)}`)}
+            </div>
             <button @click="${this.submitHandler}">${html`${this.dialogOptions.primaryButton}`}</button>
             <button class="secondary" @click="${this.cancelHandler}">Cancel</button>
          </section>`;
@@ -40,6 +42,18 @@ export class DialogBox extends LitElement {
         // Fire event
         if (this.shown) {
             this.dispatchEvent(new CustomEvent("openDialog"));
+        }
+    }
+
+    setValues(values: object) {
+        for (const name in values) {
+            const element = this.shadowRoot.querySelector(`[name="${name}"]`);
+
+            if (element instanceof InputList) {
+                element.items = values[name];
+            } else {
+                element["value"] = values[name];
+            }
         }
     }
 
@@ -93,14 +107,11 @@ export class DialogBox extends LitElement {
     private getFormData() {
         let input = {};
         let requestParameters: RequestParameter[] = [];
-        let dialogItems = <any>this.shadowRoot.querySelector(".dialog").children;
-        let counter = 0; // Index for each "input" element looped through
-        for (const element of dialogItems) {
-            if (element.tagName == "INPUT") {
-                let key = this.dialogOptions.inputs[counter].key; // Gets the prefered key value for the input element
-                input[key] = element.value;
-                requestParameters.push(new RequestParameter(key, element.value));
-                counter++;
+        const inputs = <any>this.shadowRoot.getElementById("inputs").children;
+        for (const element of inputs) {
+            if (element.name) {
+                input[element.name] = element.value;
+                requestParameters.push(new RequestParameter(element.name, element.value));
             }
         }
 
@@ -127,14 +138,19 @@ export class DialogBox extends LitElement {
      * @param inputType Type of input element
      * @param value Value (if any) the element should start with
      */
-    private getComponentHtml(inputType: InputType, value: string) {
+    private getComponentHtml(inputType: InputType, name: string, value: string) {
         switch (inputType) {
             case InputType.Text:
                 return html`<p>${value}:</p>
-                            <input type="text" placeholder="${value}..." /><br />`;
+            <input type="text" name="${name}" placeholder="${value}..." /><br />`;
+            case InputType.TextArea:
+                return html`<p>${value}:</p>
+            <textarea name="${name}" placeholder="${value}"></textarea>`;
             case InputType.InputList:
                 this.list = new InputList(value);
-                return this.list;
+            let element = this.list as HTMLElement;
+            element.setAttribute("name", name);
+            return element;
             default:
                 return "";
         }

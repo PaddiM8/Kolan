@@ -1,10 +1,10 @@
-declare const viewData;
-
 import { Draggable } from "../components/draggableElement";
 import { RequestParameter } from "../communication/requestParameter";
 import { ApiRequester } from "../communication/apiRequester";
 import { ITask } from "../models/ITask";
 import { IBoard } from "../models/IBoard";
+import { Board } from "../views/board";
+import { ContentFormatter } from "../processing/contentFormatter";
 
 /**
  * Controller to add/remove/edit/etc. tasks in a tasklist.
@@ -24,7 +24,7 @@ export class TasklistController {
      * @param   description {string} Task description.
      * @param   color       {string} Task background color as HEX value.
      */
-    public addTask(task: ITask) {
+    public addTask(task: ITask): void {
         const item = this.createTaskItem(task);
         this.tasklist.insertBefore(item, this.tasklist.firstElementChild);
     }
@@ -35,9 +35,34 @@ export class TasklistController {
      * @param   description {string} Task description.
      * @param   color       {string} Task background color as HEX value.
      */
-    public addTaskToBottom(task: ITask) {
+    public addTaskToBottom(task: ITask): void {
         const item = this.createTaskItem(task);
         this.tasklist.appendChild(item);
+    }
+
+    public moveTask(boardId: string, targetId: string): void {
+        const item = document.querySelector(`#tasklists [data-id="${boardId}"]`);
+        const target = document.querySelector(`#tasklists [data-id="${targetId}"]`);
+        item.parentNode.removeChild(item);
+
+        // If the target is a board
+        if (target.tagName == "DRAGGABLE-ELEMENT") {
+            target.parentNode.insertBefore(item, target.nextSibling); // Insert the board under the target inside its parent
+        } else {
+            // If a board with the targetId does not exist, assume it's for a tasklist and place it at the top of that.
+            if (this.tasklist.childElementCount > 0) this.tasklist.insertBefore(item, this.tasklist.firstChild);
+            else this.tasklist.appendChild(item);
+        }
+    }
+
+    public editTask(newBoardContent: IBoard): void {
+        const item = document.querySelector(`#tasklists [data-id="${newBoardContent.id}"]`) as HTMLElement;
+        const name = item.querySelector(".name") as HTMLElement;
+        const description = item.querySelector(".description") as HTMLElement;
+
+        item.dataset.description = newBoardContent.description;
+        name.innerHTML = ContentFormatter.format(newBoardContent.name);
+        description.innerHTML = ContentFormatter.formatWithMarkdown(newBoardContent.description);
     }
 
     /**
@@ -47,22 +72,17 @@ export class TasklistController {
      * @param description Board description
      * @param color Board color
      */
-    public createTaskItem(task: ITask) {
+    public createTaskItem(task: ITask): HTMLElement {
         const item = new Draggable();
         item.dataset.id = task.id;
+        item.dataset.description = task.description;
+        task.name = ContentFormatter.format(task.name);
+        task.description = ContentFormatter.formatWithMarkdown(task.description);
+
         item.insertAdjacentHTML("afterbegin",
             `
-         <h2>${task.name}</h2><p>${task.description}</p>
-         <div class="edit-layer">
-            <input type="text" /><br />
-            <textarea></textarea>
-            <fa-icon class="fas fa-check save"
-                     size="21px"
-                     role="button"
-                     color="#fff"
-                     path-prefix="/node_modules">
-                     </fa-icon>
-         </div>
+         <h2 class="name">${task.name}</h2>
+         <span class="description">${task.description}</span>
          <div class="overlay">
             <fa-icon class="fas fa-pen top-right edit overlay-button"
                      size="21px"
@@ -94,9 +114,6 @@ export class TasklistController {
         item.querySelector(".edit").addEventListener("click", () =>
             this.onEditClick(item));
 
-        item.querySelector(".save").addEventListener("click", () =>
-            this.onSaveClick(item));
-
         item.querySelector(".delete").addEventListener("click", () =>
             this.onDeleteClick(item));
 
@@ -106,15 +123,14 @@ export class TasklistController {
     /**
      * Fires when the board item is clicked, ends if the clicked part was the dragger.
      */
-    onClickEvent(e) {
-        if (!this.inEditMode)
-        {
+    onClickEvent(e): void {
+        if (!this.inEditMode) {
             const id = e.target.dataset.id;
             window.location.href = "./" + id;
         }
     }
 
-    onInternalMove(item: HTMLElement, toItem: HTMLElement) {
+    onInternalMove(item: HTMLElement, toItem: HTMLElement): void {
         var target: string;
         if (toItem) target = toItem.dataset.id;
         else        target = this.tasklist.dataset.id;
@@ -122,7 +138,7 @@ export class TasklistController {
         this.sendMoveRequest(item.dataset.id, target);
     }
 
-    onExternalMove(item: HTMLElement, toItem: HTMLElement, toTasklist: HTMLElement) {
+    onExternalMove(item: HTMLElement, toItem: HTMLElement, toTasklist: HTMLElement): void {
         var target: string;
         if (toItem) target = toItem.dataset.id;
         else        target = toTasklist.dataset.id;
@@ -130,8 +146,8 @@ export class TasklistController {
         this.sendMoveRequest(item.dataset.id, target);
     }
 
-    sendMoveRequest(boardId: string, targetId: string) {
-        new ApiRequester().send("Boards", viewData.id + "/ChangeOrder", "POST", [
+    sendMoveRequest(boardId: string, targetId: string): void {
+        new ApiRequester().send("Boards", Board.viewData.id + "/ChangeOrder", "POST", [
             new RequestParameter("boardId", boardId),
             new RequestParameter("targetId", targetId),
         ]);
@@ -140,7 +156,7 @@ export class TasklistController {
     /**
      * Fires when the board item is hovered
      */
-    onHoverEvent(item: Draggable) {
+    onHoverEvent(item: Draggable): void {
         if (!this.inEditMode) {
             const overlay = item.querySelector(".overlay") as HTMLElement;
             overlay.style.display = "block";
@@ -150,67 +166,25 @@ export class TasklistController {
     /**
      * Fires when the mouse leaves the board item
      */
-    onMouseLeaveEvent(item: Draggable) {
+    onMouseLeaveEvent(item: Draggable): void {
         const overlay = item.querySelector(".overlay") as HTMLElement;
         overlay.style.display = "";
     }
 
-    onEditClick(item: Draggable) {
-        this.toggleEditMode(item)
-    }
-
-    onSaveClick(item: Draggable) {
-        let newContent: IBoard = this.toggleEditMode(item)
-
-        new ApiRequester().send("Boards", viewData.id, "PUT", [
-            new RequestParameter("newBoardContent", JSON.stringify(newContent))
-        ]);
+    onEditClick(item: Draggable): void {
+        Board.dialogs.editTask.shown = true;
+        Board.dialogs.editTask.extraRequestParameters = [ new RequestParameter("id", item.dataset.id) ];
+        Board.dialogs.editTask.setValues({
+            name: item.querySelector(".name").innerHTML,
+            description: item.dataset.description
+        });
     }
 
     onDeleteClick(item: Draggable) {
         item.parentNode.removeChild(item);
 
-        new ApiRequester().send("Boards", viewData.id, "DELETE", [
+        new ApiRequester().send("Boards", Board.viewData.id, "DELETE", [
             new RequestParameter("boardId", item.dataset.id)
         ]);
-    }
-
-    /**
-     * Toggle the edit mode on a specific task item. 
-     * If it isn't already in edit mode it will change to it
-     * and let the user change the contents of the task.
-     * @param item Task item to do it on
-     */
-    toggleEditMode(item: Draggable): IBoard {
-        // Hide/show original text
-        const editLayer = item.querySelector(".edit-layer") as HTMLElement;
-        const name      = item.querySelector("h2") as HTMLElement;
-        const text      = item.querySelector("p") as HTMLElement;
-        editLayer.style.display = this.inEditMode ? "none"  : "block"; // Hide if in edit mode
-        name.style.display      = this.inEditMode ? "block" : "none"; // Show if in edit mode
-        text.style.display      = this.inEditMode ? "block" : "none";
-
-        // Update text
-        const nameEdit  = editLayer.querySelector("input");
-        const textEdit  = editLayer.querySelector("textarea");
-        const itemStyle = window.getComputedStyle(item, null);
-        if (this.inEditMode) {
-            name.innerHTML  = nameEdit.value;
-            text.innerHTML  = textEdit.value;
-        } else {
-            nameEdit.value  = name.innerHTML;
-            textEdit.value  = text.innerHTML;
-        }
-
-
-        this.onMouseLeaveEvent(item);
-        item.movable = this.inEditMode;
-        this.inEditMode = !this.inEditMode;
-
-        return {
-            "id": item.dataset.id,
-            "name": name.innerHTML,
-            "description": text.innerHTML
-        }
     }
 }

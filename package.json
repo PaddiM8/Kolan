@@ -40,6 +40,8 @@
     "@fortawesome/free-solid-svg-icons": "^5.11.2",
     "@microsoft/signalr": "^3.1.0",
     "@types/node": "^12.12.14",
-    "lit-element": "^2.2.1"
+    "dompurify": "^2.0.7",
+    "lit-element": "^2.2.1",
+    "markdown-it": "^10.0.0"
   }
 }

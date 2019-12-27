@@ -39,7 +39,8 @@ header {
     display: grid;
     font-family: "Inter", sans-serif;
     width: 100%;
-    grid-template-columns: repeat(4, 1fr);
+    grid-auto-columns: 1fr;
+    grid-auto-flow: column;
 }
 
 .list-head .item {
@@ -72,6 +73,7 @@ tasklist {
     min-height: calc(100vh - 144px);
     border-right: 2px solid $gray;
     box-sizing: border-box;
+    overflow: hidden;
 }
 
 placeholder {
@@ -88,10 +90,12 @@ draggable-element {
     position: relative;
     font-family: "Inter", sans-serif;
     padding: 20px;
+    padding-right: 30px;
     background-color: $primary;
     border-radius: 9px;
     color: white;
     margin: 20px;
+    overflow: hidden;
     user-select: none;
 
     h2 {
@@ -101,10 +105,11 @@ draggable-element {
     .overlay {
         display: none;
         position: absolute;
-        width: 100%;
+        width: 40px;
         height: 100%;
+
         top: 0;
-        left: 0;
+        right: 0;
         z-index: 100;
     }
 

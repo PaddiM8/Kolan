@@ -1,7 +1,6 @@
-declare const viewData;
-
 import { DialogBox } from "../components/dialogBox"
 import { addTaskDialog } from "../dialogs/addTaskDialog";
+import { editTaskDialog } from "../dialogs/editTaskDialog";
 import { shareDialog } from "../dialogs/shareDialog";
 import { setupDialog } from "../dialogs/setupDialog";
 import { TasklistController } from "../controllers/tasklistController";
@@ -12,14 +11,17 @@ import { ITask } from "../models/ITask";
 import { IGroup } from "../models/IGroup";
 
 window.addEventListener("load", () => new Board());
+declare const viewData;
 
-export let tasklistControllers = {};
-
-class Board {
+export class Board {
+    static dialogs;
+    static tasklistControllers = {};
+    static viewData;
     private currentTasklistId: string;
-    private dialogs: any; // eek, fix this.
 
     constructor() {
+        Board.viewData = viewData;
+
         // Load dialogs
         this.loadDialogs();
 
@@ -27,10 +29,10 @@ class Board {
         this.loadBoard();
 
         const shareButton = document.getElementById("shareButton");
-        shareButton.addEventListener("click", e => this.dialogs.share.shown = true)
+        shareButton.addEventListener("click", e => Board.dialogs.share.shown = true)
 
         // Websockets
-        new BoardHubConnection(viewData.id);
+        new BoardHubConnection(Board.viewData.id);
     }
 
     /**
@@ -41,7 +43,7 @@ class Board {
     addGroup(group: IGroup)
     {
         const listhead = document.getElementById("list-head");
-        listhead.insertAdjacentHTML("beforeend",
+        listhead.insertAdjacentHTML("afterbegin",
             `<div class="item" data-id="${group.id}">
                 ${group.name}
                 <span class="plus"><span>+</span></span>
@@ -51,7 +53,7 @@ class Board {
         const tasklistElement = document.createElement("tasklist");
         tasklistElement.dataset.id = group.id;
         tasklists.appendChild(tasklistElement);
-        tasklistControllers[group.id] = new TasklistController(tasklistElement);
+        Board.tasklistControllers[group.id] = new TasklistController(tasklistElement);
 
         // Events
         const plusElements = listhead.getElementsByClassName("plus");
@@ -59,9 +61,9 @@ class Board {
             plus.addEventListener("click", e => {
                 const groupId = e.currentTarget.parentElement.dataset.id;
 
-                this.dialogs.addTask.shown = true;
-                this.dialogs.addTask.dialogOptions.requestMethod = viewData.id;
-                this.dialogs.addTask.extraRequestParameters = [ 
+                Board.dialogs.addTask.shown = true;
+                Board.dialogs.addTask.dialogOptions.requestMethod = Board.viewData.id;
+                Board.dialogs.addTask.extraRequestParameters = [ 
                     new RequestParameter("groupId", groupId)
                 ];
 
@@ -80,32 +82,38 @@ class Board {
      */
     addTask(tasklistId: string, task: ITask, toTop = true) {
         const tasklist: HTMLElement = document.querySelector(`#tasklists tasklist[data-id='${tasklistId}']`);
-        const tasklistController: TasklistController = tasklistControllers[tasklistId];
+        const tasklistController: TasklistController = Board.tasklistControllers[tasklistId];
         if (toTop) tasklistController.addTask(task);
         else       tasklistController.addTaskToBottom(task);
     }
 
     onUserAdded(username: string) {
         const requestParameters: RequestParameter[] = [ new RequestParameter("username", username) ];
-        new ApiRequester().send("Boards", `${viewData.id}/Users`, "POST", requestParameters);
+        new ApiRequester().send("Boards", `${Board.viewData.id}/Users`, "POST", requestParameters);
     }
 
     onUserRemoved(username: string) {
         const requestParameters = [ new RequestParameter("username", username) ];
-        new ApiRequester().send("Boards", `${viewData.id}/Users`, "DELETE", requestParameters);
+        new ApiRequester().send("Boards", `${Board.viewData.id}/Users`, "DELETE", requestParameters);
     }
 
     loadDialogs() {
         const dialogs = {
             "addTask": new DialogBox(addTaskDialog, "addTaskDialog"),
+            "editTask": new DialogBox(editTaskDialog, "editTaskDialog"),
             "share": new DialogBox(shareDialog, "shareDialog"),
             "setup": new DialogBox(setupDialog, "setupDialog"),
         }
 
         // addTaskDialog
-        dialogs.addTask.dialogOptions.requestMethod = viewData.id + "/" +
+        dialogs.addTask.dialogOptions.requestMethod = Board.viewData.id + "/" +
             dialogs.addTask.dialogOptions.requestMethod;
         document.body.appendChild(dialogs.addTask);
+
+        // addTaskDialog
+        dialogs.editTask.dialogOptions.requestMethod = Board.viewData.id + "/" +
+            dialogs.editTask.dialogOptions.requestMethod;
+        document.body.appendChild(dialogs.editTask);
 
         // Prepare shareDialog
         document.body.appendChild(dialogs.share);
@@ -115,14 +123,14 @@ class Board {
             this.onUserRemoved(e.detail));
         dialogs.share.addEventListener("openDialog", () => {
             // Get collaborators
-            new ApiRequester().send("Boards", viewData.id + "/Users", "GET").then(result => {
+            new ApiRequester().send("Boards", Board.viewData.id + "/Users", "GET").then(result => {
                 const users: string[] = JSON.parse(result as string);
                 dialogs.share.list.items = users;
             });
         });
 
         // Prepare setupDialog
-        dialogs.setup.dialogOptions.requestMethod = viewData.id + "/" +
+        dialogs.setup.dialogOptions.requestMethod = Board.viewData.id + "/" +
             dialogs.setup.dialogOptions.requestMethod;
         document.body.appendChild(dialogs.setup);
 
@@ -131,7 +139,7 @@ class Board {
                 this.addGroup(group);
         });
 
-        this.dialogs = dialogs;
+        Board.dialogs = dialogs;
     }
 
     /**
@@ -140,12 +148,12 @@ class Board {
     loadBoard()
     {
         // Get board content
-        new ApiRequester().send("Boards", viewData.id, "GET").then(result => {
+        new ApiRequester().send("Boards", Board.viewData.id, "GET").then(result => {
             const boardContent = JSON.parse(result as string);
 
             // If the request returns nothing, the board hasn't been set up yet. Display the setup dialog.
             if (!boardContent || boardContent.length == 0) {
-                this.dialogs.setup.shown = true;
+                Board.dialogs.setup.shown = true;
                 return;
             }
 
@@ -160,7 +168,8 @@ class Board {
                     this.addTask(groupObject.group.id, board, false);
             }
         }).catch((req) => {
-            if (req.status == 204) this.dialogs.setup.shown = true; // If no content
+            if (req.status == 204) Board.dialogs.setup.shown = true; // If no content
+            else console.log(req);
         });
     }
 }

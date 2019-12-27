@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Security.Claims;
+using System.Web;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
@@ -15,8 +16,8 @@ namespace Kolan.Controllers.Api
     [Route("api/Boards")]
     public class BoardsController : Controller
     {
-        private readonly UnitOfWork _uow;
         private readonly IHubContext<BoardHub, IBoardClient> _boardHubContext;
+        private readonly UnitOfWork _uow;
 
         public BoardsController(UnitOfWork uow, IHubContext<BoardHub, IBoardClient> boardHubContext)
         {
@@ -43,29 +44,16 @@ namespace Kolan.Controllers.Api
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromForm]string name, [FromForm]string description)
+        public async Task<IActionResult> Create([FromForm]Board board)
         {
-            var board = new Board
-            {
-                Name = name,
-                Description = description
-            };
-
             string id = await _uow.Boards.AddAsync(board, User.Identity.Name); // Add board to current user
 
             return Ok(new { id = id });
         }
 
         [HttpPost("{parentId}")]
-        public async Task<IActionResult> Create(string parentId, [FromForm]string groupId,
-                [FromForm]string name, [FromForm]string description)
+        public async Task<IActionResult> Create(string parentId, [FromForm]string groupId, [FromForm]Board board)
         {
-            var board = new Board
-            {
-                Name = name,
-                Description = description
-            };
-
             string id = await _uow.Boards.AddAsync(board, groupId, User.Identity.Name); // Add board to parent board
             await _boardHubContext.Clients.Group(parentId).ReceiveNewBoard(board, groupId); // Send to client
 
@@ -73,12 +61,11 @@ namespace Kolan.Controllers.Api
         }
 
         [HttpPut("{parentId}")]
-        public async Task<IActionResult> Edit(string parentId, [FromForm]string newBoardContent)
+        public async Task<IActionResult> Edit(string parentId, [FromForm]Board newBoardContent)
         {
-            Board board = JsonConvert.DeserializeObject<Board>(newBoardContent);
-
-            await _uow.Boards.EditAsync(board);
-            await _boardHubContext.Clients.Group(parentId).EditBoard(board);
+            Console.WriteLine(JsonConvert.SerializeObject(newBoardContent));
+            await _uow.Boards.EditAsync(newBoardContent);
+            await _boardHubContext.Clients.Group(parentId).EditBoard(newBoardContent);
 
             return new EmptyResult();
         }

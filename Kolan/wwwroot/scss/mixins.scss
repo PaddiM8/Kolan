@@ -1,5 +1,5 @@
 @mixin text-input($size) {
-   input[type="text"], input[type="password"], input[type="email"] {
+   input[type="text"], input[type="password"], input[type="email"], textarea {
       padding: 10px 12px 10px 12px;
       margin-bottom: 15px;
       box-sizing: border-box;
@@ -17,6 +17,10 @@
       &:focus {
          border: 1px solid #0062ff;
       }
+   }
+
+   textarea {
+       min-height: 300px;
    }
 }
 

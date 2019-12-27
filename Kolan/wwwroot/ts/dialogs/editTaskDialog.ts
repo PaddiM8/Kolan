@@ -3,12 +3,12 @@ import { IDialogTemplate } from "./IDialogTemplate";
 
 /** add task dialog schematic
  */
-export const addTaskDialog: IDialogTemplate = {
+export const editTaskDialog: IDialogTemplate = {
     requestAction: "Boards",
     requestMethod: "",
-    requestType: "POST",
-    title: "Add Task",
-    primaryButton: "Add",
+    requestType: "PUT",
+    title: "Edit Task",
+    primaryButton: "Edit",
     inputs: [
         {
             key: "name",

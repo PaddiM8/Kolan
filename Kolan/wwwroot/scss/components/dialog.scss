@@ -10,7 +10,7 @@
 
 @include ui-elements(1em);
 
-input[type="text"] {
+input[type="text"], textarea {
    width: 100%;
 }
 

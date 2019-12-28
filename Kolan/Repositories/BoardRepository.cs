@@ -200,8 +200,8 @@ namespace Kolan.Repositories
         {
             await Client.Cypher
                 .Match("(user:User)")
-                .Call("apoc.lock.nodes([user])")
                 .Where((User user) => user.Username == username)
+                .Call("apoc.lock.nodes([user])")
                 .Match("(user)-[:ChildGroup]->(:Group)-[:Next*]->(link:Link)-[sharedRel:SharedBoard]->(board:Board)")
                 .Where((Board board) => board.Id == boardId)
                 .Match("(previous)-[previousRel:Next]->(link)-[nextRel:Next]->(next)")

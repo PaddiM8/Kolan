@@ -46,7 +46,7 @@ export class TasklistController {
         item.parentNode.removeChild(item);
 
         // If the target is a board
-        if (target.tagName == "DRAGGABLE-ELEMENT") {
+        if (target.tagName == "DRAGGABLE-ITEM") {
             target.parentNode.insertBefore(item, target.nextSibling); // Insert the board under the target inside its parent
         } else {
             // If a board with the targetId does not exist, assume it's for a tasklist and place it at the top of that.

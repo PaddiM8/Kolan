@@ -38,7 +38,7 @@ gulp.task("compress", () => {
 });
 
 gulp.task('webpack', function() {
-    return gulp.src('Kolan/wwwroot/js/index.js')
+    return gulp.src('Kolan/wwwroot/js/views/boards.js')
         .pipe(webpack(require('./webpack.config.js')))
         .pipe(gulp.dest('Kolan/wwwroot/dist/'))
         .pipe(notify({ title: "Webpack complete", onLast: true }));

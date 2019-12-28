@@ -45,11 +45,11 @@ namespace Kolan.Repositories
         public async Task<object> GetAsync(string id)
         {
             var result = await Client.Cypher
-                .Match("(parentBoard:Board)-[:ChildGroup]->(group:Group)")
+                .Match("(parentBoard:Board)-[groupRel:ChildGroup]->(group:Group)")
                 .Where((Board parentBoard) => parentBoard.Id == id)
                 .OptionalMatch("(group)-[:Next*]->(board:Board)-[:Next*]->(:End)")
-                .With("group, parentBoard, board")
-                .OrderBy("group.order")
+                .With("group, groupRel, parentBoard, board")
+                .OrderBy("groupRel.order")
                 .With("parentBoard, {group: group, boards: collect(board)} AS groups")
                 .Return((parentBoard, groups) => new
                         {

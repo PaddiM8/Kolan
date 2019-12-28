@@ -39,8 +39,7 @@ header {
     display: grid;
     font-family: "Inter", sans-serif;
     width: 100%;
-    grid-auto-columns: 1fr;
-    grid-auto-flow: column;
+    grid-template-columns: repeat(4, 1fr);
 }
 
 .list-head .item {

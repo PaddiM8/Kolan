@@ -23,6 +23,7 @@ export class DraggableItem extends LitElement {
         return css`
       :host {
         display: block;
+        box-sizing: border-box;
       }
     `;
     }
@@ -125,19 +126,19 @@ export class DraggableItem extends LitElement {
 
         // Detach from list
         if (!this.detached) {
-            const computedStyle = getComputedStyle(this);
             // Placeholder
             const placeholder: HTMLElement = this.parentElement.parentElement.querySelector(this.placeholder);
+            placeholder.style.boxSizing = "border-box";
+
             this.parentElement.insertBefore(placeholder, this); // Move placeholder to list slot
             Object.assign(placeholder.style, {
-                width: computedStyle.width,
-                height: computedStyle.height,
+                height: this.offsetHeight + "px",
                 display: "block"
             });
 
             // Draggable
             this.parentElement.parentElement.appendChild(this); // Move task out from tasklists, then get position: fixed
-            this.style.width = this.scrollWidth + "px";
+            this.style.width = this.offsetWidth + "px";
             this.style.position = "fixed";
             this.detached = true;
         }

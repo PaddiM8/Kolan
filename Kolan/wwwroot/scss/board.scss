@@ -95,7 +95,6 @@ draggable-item {
     color: white;
     margin: 20px;
     overflow: hidden;
-    user-select: none;
 
     a {
         color: white;
@@ -108,6 +107,7 @@ draggable-item {
 
     .description {
         word-wrap: break-word;
+        cursor: text;
     }
 
     .overlay {

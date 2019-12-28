@@ -47,7 +47,7 @@ export class Board {
      */
     private addGroup(group: IGroup): void {
         const listhead = document.getElementById("list-head");
-        listhead.insertAdjacentHTML("afterbegin",
+        listhead.insertAdjacentHTML("beforeend",
             `<div class="item" data-id="${group.id}">
                 ${group.name}
                 <span class="plus"><span>+</span></span>

@@ -24,7 +24,7 @@ export class ContentFormatter {
     }
 
     /**
-     * Sanitizes the input to prevent XSS attacks.
+     * Makes the input safe for use, preventing XSS attacks.
      *
      * @name format
      * @static
@@ -32,6 +32,6 @@ export class ContentFormatter {
      * @returns {string}
      */
     public static format(input: string): string {
-        return DOMPurify.sanitize(input);
+        return DOMPurify.sanitize(input); // TODO: Don't only sanitize!
     }
 }

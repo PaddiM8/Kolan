@@ -153,10 +153,9 @@ export class DialogBox extends LitElement {
      * @returns {void}
      */
     private hide(): void {
-        let dialogItems = <any>this.shadowRoot.querySelector(".dialog").children;
+        let dialogItems = <any>this.shadowRoot.getElementById("inputs").children;
         for (let element of dialogItems) {
-            if (element.tagName == "INPUT")
-                element.value = "";
+            if (element.name) element.value = "";
         }
 
         this.shown = false;

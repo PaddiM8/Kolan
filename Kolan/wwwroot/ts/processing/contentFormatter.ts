@@ -20,6 +20,7 @@ export class ContentFormatter {
      * @returns {string}
      */
     public static formatWithMarkdown(input: string): string {
+        if (!input) return "";
         return this.markdownRenderer.render(input);
     }
 
@@ -32,6 +33,7 @@ export class ContentFormatter {
      * @returns {string}
      */
     public static format(input: string): string {
+        if (!input) return "";
         return DOMPurify.sanitize(input); // TODO: Don't only sanitize!
     }
 }

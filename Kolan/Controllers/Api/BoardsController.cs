@@ -63,7 +63,6 @@ namespace Kolan.Controllers.Api
         [HttpPut("{parentId}")]
         public async Task<IActionResult> Edit(string parentId, [FromForm]Board newBoardContent)
         {
-            Console.WriteLine(JsonConvert.SerializeObject(newBoardContent));
             await _uow.Boards.EditAsync(newBoardContent);
             await _boardHubContext.Clients.Group(parentId).EditBoard(newBoardContent);
 

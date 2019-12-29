@@ -29,12 +29,16 @@ namespace Kolan
             Configuration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
+        public IConfiguration Configuration {
+            get;
+        }
 
-        public void ConfigureServices(IServiceCollection services)
+        public void ConfigureServices(IServiceCollection
+                                      services)
         {
             // Dependency injection
-            services.AddSingleton<UnitOfWork>(new UnitOfWork(Database.Client));
+            services.AddSingleton<UnitOfWork>(new UnitOfWork(
+                                                  Database.Client));
 
             // SignalR
             services.AddSignalR();
@@ -64,8 +68,7 @@ namespace Kolan
             .AddCookie(options =>
             {
                 options.Cookie.HttpOnly = true;
-                options.Cookie.SecurePolicy = _env.IsDevelopment() ? CookieSecurePolicy.None :
-                                              CookieSecurePolicy.Always;
+                options.Cookie.SecurePolicy = _env.IsDevelopment() ? CookieSecurePolicy.None : CookieSecurePolicy.Always;
                 options.Cookie.SameSite = SameSiteMode.Strict;
                 options.Cookie.Name = "Kolan.AuthCookieAspNetCore";
                 options.LoginPath = "/Login";
@@ -126,14 +129,12 @@ namespace Kolan
             app.UseStaticFiles();
             app.UseStaticFiles(new StaticFileOptions()
             {
-                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "..",
-                                                        "node_modules/fa-icons")),
+                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "..", "node_modules/fa-icons")),
                 RequestPath = new PathString("/node_modules/fa-icons")
             });
             app.UseStaticFiles(new StaticFileOptions()
             {
-                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "..",
-                                                        "node_modules/@fortawesome/fontawesome-free/sprites")),
+                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "..", "node_modules/@fortawesome/fontawesome-free/sprites")),
                 RequestPath = new PathString("/node_modules/@fortawesome/fontawesome-free/sprites")
             });
             app.UseAuthentication();

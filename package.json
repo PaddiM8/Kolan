@@ -12,7 +12,7 @@
     "type": "git",
     "url": "git+https://github.com/PaddiM8/Kolan.git"
   },
-  "author": "",
+  "author": "PaddiM8",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/PaddiM8/Kolan/issues"
@@ -29,7 +29,6 @@
     "gulp-notify": "^3.2.0",
     "gulp-sass": "^4.0.2",
     "gulp-terser": "^1.2.0",
-    "gulp-typedoc": "^2.2.3",
     "gulp-typescript": "^5.0.1",
     "jsdoc": "^3.6.3",
     "node-sass": "^4.13.0",

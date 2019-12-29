@@ -61,7 +61,7 @@ export class TasklistController {
         const description = item.querySelector(".description") as HTMLElement;
 
         item.dataset.description = newBoardContent.description;
-        name.innerHTML = ContentFormatter.format(newBoardContent.name);
+        name.textContent = ContentFormatter.format(newBoardContent.name);
         description.innerHTML = ContentFormatter.formatWithMarkdown(newBoardContent.description);
     }
 
@@ -81,7 +81,7 @@ export class TasklistController {
 
         item.insertAdjacentHTML("afterbegin",
             `
-         <h2 class="name">${task.name}</h2>
+         <h2 class="name"></h2>
          <br />
          <span class="description">${task.description}</span>
          <div class="overlay">
@@ -99,6 +99,8 @@ export class TasklistController {
                      </fa-icon>
          </div>
          `);
+
+         item.querySelector(".name").textContent = task.name;
 
         if (task.color != "") item.style.backgroundColor = task.color;
 

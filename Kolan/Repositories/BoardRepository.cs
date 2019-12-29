@@ -31,11 +31,11 @@ namespace Kolan.Repositories
                 .Where((User user) => user.Username == username)
                 .OptionalMatch("(board)-[:SharedBoard]->(shared:Board)")
                 .Return((board, shared) => new
-                        {
-                            Board = board.As<Board>(),
-                            Shared = shared.As<Board>()
-                        })
-                .ResultsAsync;
+                {
+                    Board = board.As<Board>(),
+                    Shared = shared.As<Board>()
+                })
+            .ResultsAsync;
         }
 
         /// <summary>
@@ -45,18 +45,18 @@ namespace Kolan.Repositories
         public async Task<object> GetAsync(string id)
         {
             var result = await Client.Cypher
-                .Match("(parentBoard:Board)-[groupRel:ChildGroup]->(group:Group)")
+                .Match("(parentBoard:Board)")
                 .Where((Board parentBoard) => parentBoard.Id == id)
-                .OptionalMatch("(group)-[:Next*]->(board:Board)-[:Next*]->(:End)")
+                .OptionalMatch("(parentBoard)-[groupRel:ChildGroup]->(group:Group)-[:Next*]->(board:Board)-[:Next*]->(:End)")
                 .With("group, groupRel, parentBoard, board")
                 .OrderBy("groupRel.order")
                 .With("parentBoard, {group: group, boards: collect(board)} AS groups")
                 .Return((parentBoard, groups) => new
-                        {
-                            Board = parentBoard.As<Board>(),
-                            Groups = groups.CollectAs<GroupsObject>()
-                        })
-                .ResultsAsync;
+                {
+                    Board = parentBoard.As<Board>(),
+                    Groups = Return.As<GroupsObject>("CASE WHEN groups IS NOT NULL then collect(groups) ELSE NULL END") //groups.CollectAs<GroupsObject>()
+                })
+            .ResultsAsync;
 
             return result.SingleOrDefault();
         }
@@ -134,15 +134,17 @@ namespace Kolan.Repositories
         /// </summary>
         public async Task<object> SetupAsync(string id)
         {
-            IEnumerable<int> childrenCount = await Client.Cypher
-                .Match("(board:Board)-[:ChildGroup]->(group:Group)")
-                .Where((Board board) => board.Id == id)
-                .Return<int>("count(group)")
-                .ResultsAsync;
+            IEnumerable<int> childrenCount =
+                await Client.Cypher
+                    .Match("(board:Board)-[:ChildGroup]->(group:Group)")
+                    .Where((Board board) => board.Id == id)
+                    .Return<int>("count(group)")
+                    .ResultsAsync;
+
             bool isEmpty = childrenCount.First() == 0;
 
             if (isEmpty) return await AddDefaultGroups(id);
-            else         throw new InvalidOperationException();
+            else throw new InvalidOperationException();
         }
 
         /// <summary>

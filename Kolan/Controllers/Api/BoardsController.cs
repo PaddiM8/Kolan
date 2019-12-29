@@ -25,24 +25,44 @@ namespace Kolan.Controllers.Api
             _boardHubContext = boardHubContext;
         }
 
+        /// <summary>
+        /// Get all root boards from a user.
+        /// </summary>
         [HttpGet]
         public async Task<object> GetAll()
         {
-             return await _uow.Boards.GetAllAsync(User.Identity.Name);
+            return await _uow.Boards.GetAllAsync(User.Identity.Name);
         }
 
+        /// <summary>
+        /// Get the content of a board. This includes the board node itself and groups with child boards.
+        /// </summary>
+        /// <param name="id">Id of the board to get</param>
+        /// <returns>Board, Groups (containing boards)</returns>
         [HttpGet("{id}")]
-        public async Task<object> GetBoard(string id)
+        public async Task<IActionResult> GetBoard(string id)
         {
-            return await _uow.Boards.GetAsync(id);
+            var result = await _uow.Boards.GetAsync(id);
+            if (result == null) return NotFound();
+
+            return Ok(result);
         }
 
+        /// <summary>
+        /// Initialise a board to make it ready for use. This needs to be done before you can edit it.
+        /// </summary>
+        /// <returns>The groups added by default</returns>
         [HttpPost("{id}/Setup")]
         public async Task<object> Setup(string id)
         {
             return await _uow.Boards.SetupAsync(id);
         }
 
+        /// <summary>
+        /// Create a root board for a user.
+        /// </summary>
+        /// <param name="board">Board object</param>
+        /// <returns>The id assigned  to the new board</returns>
         [HttpPost]
         public async Task<IActionResult> Create([FromForm]Board board)
         {
@@ -52,9 +72,11 @@ namespace Kolan.Controllers.Api
         }
 
         [HttpPost("{parentId}")]
-        public async Task<IActionResult> Create(string parentId, [FromForm]string groupId, [FromForm]Board board)
+        public async Task<IActionResult> Create(string parentId, [FromForm]string groupId, [FromForm]Board
+                                                board)
         {
-            string id = await _uow.Boards.AddAsync(board, groupId, User.Identity.Name); // Add board to parent board
+            string id = await _uow.Boards.AddAsync(board, groupId,
+                                                   User.Identity.Name); // Add board to parent board
             await _boardHubContext.Clients.Group(parentId).ReceiveNewBoard(board, groupId); // Send to client
 
             return Ok(new { id = id });
@@ -78,9 +100,9 @@ namespace Kolan.Controllers.Api
             return new EmptyResult();
         }
 
-        [Route("ChangeOrder")]
         [HttpPost("{parentId}/ChangeOrder")]
-        public async Task<IActionResult> ChangeOrder(string parentId, [FromForm]string boardId, [FromForm]string targetId)
+        public async Task<IActionResult> ChangeOrder(string parentId, [FromForm]string
+                boardId, [FromForm]string targetId)
         {
             await _uow.Boards.MoveAsync(parentId, boardId, targetId, false);
             await _boardHubContext.Clients.Group(parentId).MoveBoard(boardId, targetId); // Send to client
@@ -88,7 +110,6 @@ namespace Kolan.Controllers.Api
             return new EmptyResult();
         }
 
-        [Route("ChangeOrder")]
         [HttpPost("ChangeOrder")]
         public async Task<IActionResult> ChangeOrder([FromForm]string boardId, [FromForm]string targetId)
         {
@@ -97,15 +118,13 @@ namespace Kolan.Controllers.Api
             return new EmptyResult();
         }
 
-        [Route("{id}/Users")]
-        [HttpGet]
+        [HttpGet("{id}/Users")]
         public async Task<object> GetUsers(string id)
         {
             return await _uow.Boards.GetUsersAsync(id);
         }
 
-        [Route("{id}/Users")]
-        [HttpPost]
+        [HttpPost("{id}/Users")]
         public async Task<IActionResult> AddUser(string id, [FromForm]string username)
         {
             await _uow.Boards.AddUserAsync(id, username);
@@ -113,8 +132,7 @@ namespace Kolan.Controllers.Api
             return new EmptyResult();
         }
 
-        [Route("{id}/Users")]
-        [HttpDelete]
+        [HttpDelete("{id}/Users")]
         public async Task<IActionResult> RemoveUser(string id, [FromForm]string username)
         {
             await _uow.Boards.RemoveUserAsync(id, username);

@@ -169,7 +169,7 @@ export class Board {
             const boardContent = JSON.parse(result as string);
 
             // If the request returns nothing, the board hasn't been set up yet. Display the setup dialog.
-            if (!boardContent || boardContent.length == 0) {
+            if (!boardContent.groups) {
                 Board.dialogs.setup.shown = true;
                 return;
             }
@@ -185,8 +185,7 @@ export class Board {
                     this.addTask(groupObject.group.id, board, false);
             }
         }).catch((req) => {
-            if (req.status == 204) Board.dialogs.setup.shown = true; // If no content
-            else console.log(req);
+            console.log(req);
         });
     }
 }

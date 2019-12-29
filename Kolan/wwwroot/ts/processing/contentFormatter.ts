@@ -34,6 +34,6 @@ export class ContentFormatter {
      */
     public static format(input: string): string {
         if (!input) return "";
-        return DOMPurify.sanitize(input); // TODO: Don't only sanitize!
+        return DOMPurify.sanitize(input);
     }
 }

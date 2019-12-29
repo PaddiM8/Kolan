@@ -8,9 +8,9 @@ namespace Kolan.Repositories
 {
     public class Repository<T> : IRepository<T> where T : class
     {
-        protected readonly GraphClient Client;
+        protected readonly IGraphClient Client;
 
-        public Repository(GraphClient client)
+        public Repository(IGraphClient client)
         {
             Client = client;
         }

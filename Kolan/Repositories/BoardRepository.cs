@@ -14,7 +14,7 @@ namespace Kolan.Repositories
     {
         private Generator _generator;
 
-        public BoardRepository(GraphClient client)
+        public BoardRepository(IGraphClient client)
             : base(client)
         {
             _generator = new Generator();
@@ -54,7 +54,7 @@ namespace Kolan.Repositories
                 .Return((parentBoard, groups) => new
                 {
                     Board = parentBoard.As<Board>(),
-                    Groups = Return.As<GroupsObject>("CASE WHEN groups IS NOT NULL then collect(groups) ELSE NULL END") //groups.CollectAs<GroupsObject>()
+                    Groups = Return.As<Groups>("CASE WHEN groups IS NOT NULL then collect(groups) ELSE NULL END") //groups.CollectAs<GroupsObject>()
                 })
             .ResultsAsync;
 

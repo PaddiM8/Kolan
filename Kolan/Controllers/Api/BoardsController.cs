@@ -13,6 +13,7 @@ using Kolan.Hubs;
 
 namespace Kolan.Controllers.Api
 {
+    [Produces("application/json")]
     [Route("api/Boards")]
     public class BoardsController : Controller
     {
@@ -39,6 +40,7 @@ namespace Kolan.Controllers.Api
         /// </summary>
         /// <param name="id">Id of the board to get</param>
         /// <returns>Board, Groups (containing boards)</returns>
+        /// <response code="404">If the board doesn't exist</response>
         [HttpGet("{id}")]
         public async Task<IActionResult> GetBoard(string id)
         {

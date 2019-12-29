@@ -10,7 +10,7 @@ namespace Kolan
 {
     static class Database
     {
-        public static GraphClient Client;
+        public static IGraphClient Client;
 
         public static async void Init()
         {

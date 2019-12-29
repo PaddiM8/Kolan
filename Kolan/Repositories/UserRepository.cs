@@ -8,7 +8,7 @@ namespace Kolan.Repositories
 {
     public class UserRepository : Repository<User>
     {
-        public UserRepository(GraphClient client)
+        public UserRepository(IGraphClient client)
             : base(client)
         {
         }

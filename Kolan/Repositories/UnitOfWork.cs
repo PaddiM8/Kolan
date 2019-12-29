@@ -9,7 +9,7 @@ namespace Kolan.Repositories
         public BoardRepository Boards { get; private set; }
         public UserRepository  Users  { get; private set; }
 
-        public UnitOfWork(GraphClient client)
+        public UnitOfWork(IGraphClient client)
         {
             Boards = new BoardRepository(client);
             Users = new UserRepository(client);

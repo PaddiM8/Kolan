@@ -64,8 +64,9 @@ namespace Kolan
             .AddCookie(options =>
             {
                 options.Cookie.HttpOnly = true;
-                options.Cookie.SecurePolicy = _env.IsDevelopment() ? CookieSecurePolicy.None :
-                                              CookieSecurePolicy.Always;
+                options.Cookie.SecurePolicy = _env.IsDevelopment()
+                                              ? CookieSecurePolicy.None
+                                              : CookieSecurePolicy.Always;
                 options.Cookie.SameSite = SameSiteMode.Strict;
                 options.Cookie.Name = "Kolan.AuthCookieAspNetCore";
                 options.LoginPath = "/Login";
@@ -77,7 +78,9 @@ namespace Kolan
                 options.MinimumSameSitePolicy =
                     SameSiteMode.Strict;
                 options.HttpOnly = HttpOnlyPolicy.None;
-                options.Secure = _env.IsDevelopment() ? CookieSecurePolicy.None : CookieSecurePolicy.Always;
+                options.Secure = _env.IsDevelopment()
+                                 ? CookieSecurePolicy.None
+                                 : CookieSecurePolicy.Always;
             });
 
             services.AddMvc(options => options.Filters.Add(new AuthorizeFilter()));
@@ -89,8 +92,7 @@ namespace Kolan
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Kolan API", Version = "v1" });
 
                 // Set the comments path for the Swagger JSON and UI.
-                var xmlFile =
-                    $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
             });
@@ -143,7 +145,7 @@ namespace Kolan
             {
                 endpoints.MapControllerRoute(
                     "default",
-                    "{controller=Login}/{action=Index}/{id?}");
+                    "{controller=Boards}/{action=Index}/{id?}");
 
                 endpoints.MapControllerRoute(
                     "api",

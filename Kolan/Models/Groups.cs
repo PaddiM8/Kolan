@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace Kolan.Models
 {
-    public class GroupsObject
+    public class Groups
     {
         [JsonProperty("group")]
         public Group Group { get; set; }

@@ -63,6 +63,7 @@ namespace Kolan.Repositories
 
         /// <summary>
         /// Add a root board to a user.
+        /// <param name="entity">Board object</param>
         /// <param name="username">User to add it to.</param>
         /// </summary>
         public async Task<string> AddAsync(Board entity, string username)
@@ -85,7 +86,9 @@ namespace Kolan.Repositories
         ///
         /// <summary>
         /// Add a root board to a parent board.
-        /// <param name="parentId">Id of parent board</param>
+        /// <param name="entity">Board object</param>
+        /// <param name="groupId">Id of group to add it to</param>
+        /// <param name="username">Username of the owner</param>
         /// </summary>
         public async Task<string> AddAsync(Board entity, string groupId, string username)
         {
@@ -152,6 +155,7 @@ namespace Kolan.Repositories
         /// <param name="hostId">Id of the parent board</param>
         /// <param name="boardId">Id of board to move</param>
         /// <param name="targetId">Id of board to put it under</param>
+        /// <param name="isRoot">Whether or not the board is a root board</param>
         /// </summary>
         public async Task MoveAsync(string hostId, string boardId, string targetId, bool isRoot)
         {

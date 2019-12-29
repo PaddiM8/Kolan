@@ -29,7 +29,7 @@ namespace Kolan.Controllers
         /// </summary>
         /// <param name="username">Chosen username</param>
         /// <param name="password">Chosen password</param>
-        /// <returns>Returns an empty string for now.</param>
+        /// <returns>Returns an empty string for now.</returns>
         [HttpPost("Create")]
         public async Task<string> Create(string username, string password)
         {

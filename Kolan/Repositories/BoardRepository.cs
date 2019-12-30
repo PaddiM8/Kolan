@@ -250,8 +250,10 @@ namespace Kolan.Repositories
                 .ExecuteWithoutResultsAsync();
 
             return await Client.Cypher
-                .Match("(board:Board)-[:ChildGroup]->(group:Group)")
+                .Match("(board:Board)-[groupRel:ChildGroup]->(group:Group)")
                 .Where((Board board) => board.Id == id)
+                .With("group, groupRel")
+                .OrderBy("groupRel.order")
                 .Return((group) => group.As<Group>())
                 .ResultsAsync;
         }

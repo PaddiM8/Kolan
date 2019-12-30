@@ -164,12 +164,13 @@ export class Board {
      * @returns {void}
      */
     private loadBoard(): void {
+        const boardNameElement = document.getElementById("boardName");
         // Get board content
         new ApiRequester().send("Boards", Board.viewData.id, "GET").then(result => {
             const boardContent = JSON.parse(result as string);
 
             // Set title
-            document.getElementById("boardName").innerHTML = boardContent.board.name;
+            boardNameElement.textContent = boardContent.board.name;
 
             // If the request returns nothing, the board hasn't been set up yet. Display the setup dialog.
             if (!boardContent.groups) {
@@ -185,6 +186,7 @@ export class Board {
                     this.addTask(groupObject.group.id, board, false);
             }
         }).catch((req) => {
+            if (req.status == 404) boardNameElement.textContent = "404 - Board does not exist.";
             console.log(req);
         });
     }

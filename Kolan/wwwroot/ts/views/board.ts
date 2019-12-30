@@ -156,6 +156,11 @@ export class Board {
         Board.dialogs = dialogs;
     }
 
+    private setTitle(title: string) {
+        document.getElementById("boardName").textContent = title;
+        document.title = title + " - Kolan";
+    }
+
     /**
      * Load the contents of the board from the backend.
      *
@@ -165,12 +170,13 @@ export class Board {
      */
     private loadBoard(): void {
         const boardNameElement = document.getElementById("boardName");
+
         // Get board content
         new ApiRequester().send("Boards", Board.viewData.id, "GET").then(result => {
             const boardContent = JSON.parse(result as string);
 
-            // Set title
-            boardNameElement.textContent = boardContent.board.name;
+            // Set title on the client side, both on the board page and in the document title.
+            this.setTitle(boardContent.board.name);
 
             // If the request returns nothing, the board hasn't been set up yet. Display the setup dialog.
             if (!boardContent.groups) {
@@ -186,7 +192,7 @@ export class Board {
                     this.addTask(groupObject.group.id, board, false);
             }
         }).catch((req) => {
-            if (req.status == 404) boardNameElement.textContent = "404 - Board does not exist.";
+            if (req.status == 404) this.setTitle("404 - Board does not exist");
             console.log(req);
         });
     }

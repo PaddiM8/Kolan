@@ -48,8 +48,11 @@ export class BoardListController {
     private createBoard(board: IBoard): HTMLElement {
         const item = new DraggableItem();
         item.dataset.id = board.id;
-        item.insertAdjacentHTML("beforeend",
-            `<span class="dragger"></span><h2>${board.name}</h2><p>${board.description}</p>`);
+        board.description = board.description ? board.description : "";
+
+        item.insertAdjacentHTML("beforeend", `<span class="dragger"></span><h2></h2><p></p>`);
+        item.querySelector("h2").textContent = board.name;
+        item.querySelector("p").textContent = board.description;
         if (board.color != "") item.style.backgroundColor = board.color;
 
         item.addEventListener("draggableClick", e => this.onClickEvent(e));

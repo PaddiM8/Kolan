@@ -60,7 +60,7 @@ export class TasklistController {
         const name = item.querySelector(".name") as HTMLElement;
         const description = item.querySelector(".description") as HTMLElement;
 
-        item.dataset.description = newBoardContent.description;
+        item.dataset.description = newBoardContent.description ? newBoardContent.description : "";
         name.textContent = ContentFormatter.format(newBoardContent.name);
         description.innerHTML = ContentFormatter.formatWithMarkdown(newBoardContent.description);
     }
@@ -75,7 +75,7 @@ export class TasklistController {
     public createTaskItem(task: ITask): HTMLElement {
         const item = new DraggableItem();
         item.dataset.id = task.id;
-        item.dataset.description = task.description;
+        item.dataset.description = task.description ? task.description : "";
         task.name = ContentFormatter.format(task.name);
         task.description = ContentFormatter.formatWithMarkdown(task.description);
 

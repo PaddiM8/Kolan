@@ -50,7 +50,7 @@ export class Board {
         listhead.insertAdjacentHTML("beforeend",
             `<div class="item" data-id="${group.id}">
                 ${group.name}
-                <span class="plus"><span>+</span></span>
+                <span class="plus">+</span>
             </div>`);
 
         const tasklists = document.getElementById("tasklists");

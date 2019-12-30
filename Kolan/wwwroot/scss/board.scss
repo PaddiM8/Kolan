@@ -46,6 +46,7 @@ header {
     width: 100%;
     border-right: 2px solid $gray;
     height: 50px;
+    padding-right: 10px;
     box-sizing: border-box;
     text-align: center;
     line-height: 50px;
@@ -53,13 +54,13 @@ header {
 }
 
 .plus {
-    display: inline;
+    display: inline-block;
     float: right;
     font-family: sans-serif;
-    margin-right: 10px;
     font-size: 30px;
     font-weight: 100;
     color: black;
+    text-align: right;
     cursor: pointer;
 }
 

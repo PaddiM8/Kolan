@@ -47,14 +47,15 @@ namespace Kolan.Repositories
             var result = await Client.Cypher
                 .Match("(parentBoard:Board)")
                 .Where((Board parentBoard) => parentBoard.Id == id)
-                .OptionalMatch("(parentBoard)-[groupRel:ChildGroup]->(group:Group)-[:Next*]->(board:Board)-[:Next*]->(:End)")
+                .OptionalMatch("(parentBoard)-[groupRel:ChildGroup]->(group:Group)")
+                .OptionalMatch("(group)-[:Next*]->(board:Board)-[:Next*]->(:End)")
                 .With("group, groupRel, parentBoard, board")
                 .OrderBy("groupRel.order")
-                .With("parentBoard, {group: group, boards: collect(board)} AS groups")
-                .Return((parentBoard, groups) => new
+                .With("parentBoard, group, {group: group, boards: collect(board)} AS groups")
+                .Return((parentBoard, group, groups) => new
                 {
                     Board = parentBoard.As<Board>(),
-                    Groups = Return.As<Groups>("CASE WHEN groups IS NOT NULL then collect(groups) ELSE NULL END") //groups.CollectAs<GroupsObject>()
+                    Groups = Return.As<IEnumerable<Groups>>("CASE WHEN group IS NULL THEN NULL ELSE collect(groups) END")
                 })
             .ResultsAsync;
 
@@ -137,17 +138,16 @@ namespace Kolan.Repositories
         /// </summary>
         public async Task<object> SetupAsync(string id)
         {
-            IEnumerable<int> childrenCount =
+            var result =
                 await Client.Cypher
-                    .Match("(board:Board)-[:ChildGroup]->(group:Group)")
+                    .Match("(board:Board)")
                     .Where((Board board) => board.Id == id)
+                    .OptionalMatch("(board)-[:ChildGroup]->(group:Group)")
                     .Return<int>("count(group)")
                     .ResultsAsync;
 
-            bool isEmpty = childrenCount.First() == 0;
-
-            if (isEmpty) return await AddDefaultGroups(id);
-            else throw new InvalidOperationException();
+            if (result.Single() == 0) return await AddDefaultGroups(id);
+            else                      throw new InvalidOperationException();
         }
 
         /// <summary>

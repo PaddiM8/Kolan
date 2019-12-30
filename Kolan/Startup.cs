@@ -118,8 +118,7 @@ namespace Kolan
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json",
-                                  "Kolan API");
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Kolan API");
             });
 
             app.UseHttpsRedirection();

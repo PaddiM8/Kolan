@@ -168,14 +168,14 @@ export class Board {
         new ApiRequester().send("Boards", Board.viewData.id, "GET").then(result => {
             const boardContent = JSON.parse(result as string);
 
+            // Set title
+            document.getElementById("boardName").innerHTML = boardContent.board.name;
+
             // If the request returns nothing, the board hasn't been set up yet. Display the setup dialog.
             if (!boardContent.groups) {
                 Board.dialogs.setup.shown = true;
                 return;
             }
-
-            // Set title
-            document.getElementById("boardName").innerHTML = boardContent.board.name;
 
             const tasklists = document.getElementById("tasklists");
             for (const groupObject of boardContent.groups) {

@@ -33,8 +33,6 @@ namespace Kolan.Controllers.Api
         [HttpGet]
         public async Task<object> GetAll()
         {
-            var result = await _uow.Boards.GetAllAsync(User.Identity.Name);
-            Console.WriteLine(JsonConvert.SerializeObject(result));
             return await _uow.Boards.GetAllAsync(User.Identity.Name);
         }
 

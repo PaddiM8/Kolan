@@ -36,6 +36,8 @@ namespace Kolan
 
         public static bool Validate(string password, string correctHash)
         {
+            if (string.IsNullOrEmpty(password)) return false;
+
             // Extract the parameters from the hash
             var delimiter = new[] { ':' };
             var split = correctHash.Split(delimiter);

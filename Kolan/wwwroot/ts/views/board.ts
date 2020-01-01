@@ -87,11 +87,10 @@ export class Board {
      * @param toTop=true
      * @returns {void}
      */
-    private addTask(tasklistId: string, task: ITask, toTop = true): void {
+    private addTask(tasklistId: string, task: ITask): void {
         const tasklist: HTMLElement = document.querySelector(`#tasklists tasklist[data-id='${tasklistId}']`);
         const tasklistController: TasklistController = Board.tasklistControllers[tasklistId];
-        if (toTop) tasklistController.addTask(task);
-        else       tasklistController.addTaskToBottom(task);
+        tasklistController.addTask(task);
     }
 
     private onUserAdded(username: string): void {
@@ -189,7 +188,7 @@ export class Board {
                 this.addGroup(groupObject.group);
 
                 for (const board of groupObject.boards)
-                    this.addTask(groupObject.group.id, board, false);
+                    this.addTask(groupObject.group.id, board);
             }
         }).catch((req) => {
             if (req.status == 404) this.setTitle("404 - Board does not exist");

@@ -64,9 +64,12 @@ namespace Kolan.Repositories
 
         /// <summary>
         /// Add a root board to a user.
+        /// </summary>
+        /// <remarks>
+        /// Board gets added at the start.
+        /// </remarks>
         /// <param name="entity">Board object</param>
         /// <param name="username">User to add it to.</param>
-        /// </summary>
         public async Task<string> AddAsync(Board entity, string username)
         {
             string id = _generator.NewId(username);
@@ -87,20 +90,24 @@ namespace Kolan.Repositories
         ///
         /// <summary>
         /// Add a root board to a parent board.
+        /// </summary>
+        /// <remarks>
+        /// Board gets added at the end.
+        /// </remarks>
         /// <param name="entity">Board object</param>
         /// <param name="groupId">Id of group to add it to</param>
         /// <param name="username">Username of the owner</param>
-        /// </summary>
         public async Task<string> AddAsync(Board entity, string groupId, string username)
         {
             string id = _generator.NewId(username);
             entity.Id = id;
 
             await Client.Cypher
-                .Match("(previous:Group)")
-                .Where((Group previous) => previous.Id == groupId)
-                .Call("apoc.lock.nodes([previous])")
-                .Match("(:Board)-[:ChildGroup]->(previous)-[oldRel:Next]->(next)")
+                .Match("(group:Group)")
+                .Where((Group group) => group.Id == groupId)
+                .Call("apoc.lock.nodes([group])")
+                .Match("(group)-[:Next*]->(next:End)")
+                .Match("(previous)-[oldRel:Next]->(next)")
                 .Create("(previous)-[:Next]->(board:Board {newBoard})-[:Next]->(next)")
                 .WithParam("newBoard", entity)
                 .Delete("oldRel")

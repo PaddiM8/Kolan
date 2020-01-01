@@ -19,23 +19,12 @@ export class TasklistController {
     }
 
     /**
-     * Add a task to the tasklist.
-     * @param   name        {string} Task title.
-     * @param   description {string} Task description.
-     * @param   color       {string} Task background color as HEX value.
-     */
-    public addTask(task: ITask): void {
-        const item = this.createTaskItem(task);
-        this.tasklist.insertBefore(item, this.tasklist.firstElementChild);
-    }
-
-    /**
      * Add a task to bottom of the tasklist.
      * @param   name        {string} Task title.
      * @param   description {string} Task description.
      * @param   color       {string} Task background color as HEX value.
      */
-    public addTaskToBottom(task: ITask): void {
+    public addTask(task: ITask): void {
         const item = this.createTaskItem(task);
         this.tasklist.appendChild(item);
     }

@@ -99,15 +99,25 @@ export class DialogBox extends LitElement {
                 this.dispatchEvent(new CustomEvent("submitDialog", {
                     detail: { output: outputObject, input: formData["inputValues"] }
                 }));
+
+                this.hide();
+            })
+            .catch(output => {
+                const outputObject = JSON.parse(output.response);
+                for (const name in outputObject) {
+                    const label = this.shadowRoot.getElementById("inputs")
+                        .querySelector(`label[for="${name}"]`);
+                    label.textContent = outputObject[name];
+                }
             });
         } else {
             // Fire event
             this.dispatchEvent(new CustomEvent("submitDialog", {
                 detail: { output: formData["inputValues"] }
             }));
-        }
 
-        this.hide();
+            this.hide();
+        }
     }
 
     /**
@@ -156,6 +166,7 @@ export class DialogBox extends LitElement {
         let dialogItems = <any>this.shadowRoot.getElementById("inputs").children;
         for (let element of dialogItems) {
             if (element.name) element.value = "";
+            else if (element.tagName == "LABEL") element.textContent = "";
         }
 
         this.shown = false;
@@ -175,9 +186,11 @@ export class DialogBox extends LitElement {
         switch (inputType) {
             case InputType.Text:
                 return html`<p>${value}:</p>
+            <label for="${name}"></label>
             <input type="text" name="${name}" placeholder="${value}..." /><br />`;
             case InputType.TextArea:
                 return html`<p>${value}:</p>
+            <label for="${name}"></label>
             <textarea name="${name}" placeholder="${value}"></textarea>`;
             case InputType.InputList:
                 this.list = new InputList(value);

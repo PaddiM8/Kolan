@@ -7,7 +7,7 @@ namespace Kolan
 {
    public class User
    {
-      [JsonProperty("id")]
+       [JsonProperty("id")]
       public string Id { get; set; }
 
       [JsonProperty("username")]

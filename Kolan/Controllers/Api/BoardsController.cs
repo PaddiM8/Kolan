@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using Kolan.Models;
 using Kolan.Repositories;
 using Kolan.Hubs;
+using Kolan.Filters;
 
 namespace Kolan.Controllers.Api
 {
@@ -32,6 +33,8 @@ namespace Kolan.Controllers.Api
         [HttpGet]
         public async Task<object> GetAll()
         {
+            var result = await _uow.Boards.GetAllAsync(User.Identity.Name);
+            Console.WriteLine(JsonConvert.SerializeObject(result));
             return await _uow.Boards.GetAllAsync(User.Identity.Name);
         }
 
@@ -66,6 +69,7 @@ namespace Kolan.Controllers.Api
         /// <param name="board">Board object</param>
         /// <returns>The id assigned to the new board</returns>
         [HttpPost]
+        [ValidateModel]
         public async Task<IActionResult> Create([FromForm]Board board)
         {
             string id = await _uow.Boards.AddAsync(board, User.Identity.Name); // Add board to current user
@@ -81,6 +85,7 @@ namespace Kolan.Controllers.Api
         /// <param name="board">Board object</param>
         /// <returns>The id assigned to the new board</returns>
         [HttpPost("{parentId}")]
+        [ValidateModel]
         public async Task<IActionResult> Create(string parentId, [FromForm]string groupId, [FromForm]Board board)
         {
             string id = await _uow.Boards.AddAsync(board, groupId,
@@ -96,6 +101,7 @@ namespace Kolan.Controllers.Api
         /// <param name="parentId">Parent board id</param>
         /// <param name="newBoardContent">Board object with the new values, containing the board id</param>
         [HttpPut("{parentId}")]
+        [ValidateModel]
         public async Task<IActionResult> Edit(string parentId, [FromForm]Board newBoardContent)
         {
             await _uow.Boards.EditAsync(newBoardContent);

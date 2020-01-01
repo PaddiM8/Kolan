@@ -18,6 +18,7 @@ using Microsoft.OpenApi.Models;
 using Kolan.Repositories;
 using Kolan.Hubs;
 using System.Reflection;
+using Newtonsoft.Json.Serialization;
 
 namespace Kolan
 {
@@ -83,8 +84,13 @@ namespace Kolan
                                  : CookieSecurePolicy.Always;
             });
 
-            services.AddMvc(options => options.Filters.Add(new AuthorizeFilter()));
+            services.AddControllers()
+                .AddNewtonsoftJson(options =>
+                {
+                    options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                });
 
+            services.AddMvc(options => options.Filters.Add(new AuthorizeFilter()));
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
             services.AddSwaggerGen(c =>

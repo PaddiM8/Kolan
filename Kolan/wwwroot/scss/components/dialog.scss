@@ -33,8 +33,13 @@ input[type="text"], textarea {
    }
 
    p {
-      font-size: 1em;
+      font-size: 1.2em;
       margin-bottom: 10px;
+   }
+
+   label {
+       color: red;
+       font-size: 1em;
    }
 
    button {

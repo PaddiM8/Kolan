@@ -155,9 +155,30 @@ export class Board {
         Board.dialogs = dialogs;
     }
 
-    private setTitle(title: string) {
-        document.getElementById("boardName").textContent = title;
+    private setTitle(title: string, ancestors: object[]) {
         document.title = title + " - Kolan";
+        let html = `<a href="/">Boards</a> / `;
+
+        // Ancestors
+        for (let i = 0; i < ancestors.length; i++) {
+            // If there are a lot of ancestors, hide the middle ones
+            if (ancestors.length >= 5 && i == 1)
+            {
+                html += `<span>...</span> / `
+                i = ancestors.length - 2;
+                continue;
+            }
+
+            const ancestor = ancestors[ancestors.length - i - 1]; // Do backwards for correct order
+            const name = ancestor["name"];
+            const id = ancestor["id"];
+            html += `<a href="./${id}">${name}</a> / `;
+        }
+
+        // Current board
+        html += `<span>${title}</span>`;
+
+        document.getElementById("title").insertAdjacentHTML("afterbegin", html);
     }
 
     /**
@@ -175,7 +196,7 @@ export class Board {
             const boardContent = JSON.parse(result as string);
 
             // Set title on the client side, both on the board page and in the document title.
-            this.setTitle(boardContent.board.name);
+            this.setTitle(boardContent.board.name, boardContent.ancestors);
 
             // If the request returns nothing, the board hasn't been set up yet. Display the setup dialog.
             if (!boardContent.groups) {
@@ -191,7 +212,7 @@ export class Board {
                     this.addTask(groupObject.group.id, board);
             }
         }).catch((req) => {
-            if (req.status == 404) this.setTitle("404 - Board does not exist");
+            if (req.status == 404) this.setTitle("404 - Board does not exist", []);
             console.log(req);
         });
     }

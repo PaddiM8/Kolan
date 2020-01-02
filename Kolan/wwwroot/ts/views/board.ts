@@ -9,6 +9,8 @@ import { RequestParameter } from "../communication/requestParameter"
 import { BoardHubConnection } from "../communication/boardHubConnection";
 import { ITask } from "../models/ITask";
 import { IGroup } from "../models/IGroup";
+import { ToastType } from "../enums/toastType";
+import { ToastNotif } from "../components/toastNotif";
 
 window.addEventListener("load", () => new Board());
 declare const viewData;
@@ -211,6 +213,8 @@ export class Board {
                 for (const board of groupObject.boards)
                     this.addTask(groupObject.group.id, board);
             }
+
+            document.body.appendChild(new ToastNotif("Loaded board", ToastType.Info));
         }).catch((req) => {
             if (req.status == 404) this.setTitle("404 - Board does not exist", []);
             console.log(req);

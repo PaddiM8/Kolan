@@ -170,9 +170,9 @@ namespace Kolan.Controllers.Api
         [HttpPost("{id}/Users")]
         public async Task<IActionResult> AddUser(string id, [FromForm]string username)
         {
-            await _uow.Boards.AddUserAsync(id, username);
+            bool userAdded = await _uow.Boards.AddUserAsync(id, username);
 
-            return Ok();
+            return userAdded ? (IActionResult)Ok() : (IActionResult)BadRequest();
         }
 
         /// <summary>

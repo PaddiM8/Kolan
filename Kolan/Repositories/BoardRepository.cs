@@ -192,9 +192,9 @@ namespace Kolan.Repositories
         /// </summary>
         /// <param name="boardId">Id of the relevant board</param>
         /// <param name="username">Username of user to add</param>
-        public async Task AddUserAsync(string boardId, string username)
+        public async Task<bool> AddUserAsync(string boardId, string username)
         {
-            await Client.Cypher
+            var result = await Client.Cypher
                 .Match("(user:User)")
                 .Where((User user) => user.Username == username)
                 .Call("apoc.lock.nodes([user])")
@@ -203,7 +203,10 @@ namespace Kolan.Repositories
                 .Create("(previous)-[:Next]->(link:Link)-[:Next]->(next)")
                 .Delete("oldRel")
                 .Create("(link)-[:SharedBoard]->(sharedBoard)")
-                .ExecuteWithoutResultsAsync();
+                .Return((user) => user.As<User>().Username)
+                .ResultsAsync;
+
+            return result.Count() == 1; // If no users were found, return false
         }
 
         /// <summary>

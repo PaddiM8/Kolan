@@ -80,8 +80,7 @@ export class DialogBox extends LitElement {
         let formData = this.getFormData();
 
         // Do request
-        if (this.dialogOptions.requestAction != undefined) // Not all dialogs do requests
-        {
+        if (this.dialogOptions.requestAction) { // Not all dialogs do requests
             let requestParameters: RequestParameter[] = [...formData["requestParameters"], 
                 ...this.extraRequestParameters];
             const request = new ApiRequester().send(

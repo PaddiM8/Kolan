@@ -1,4 +1,5 @@
 import { DialogBox } from "../components/dialogBox"
+import { InputList } from "../components/inputList"
 import { addTaskDialog } from "../dialogs/addTaskDialog";
 import { editTaskDialog } from "../dialogs/editTaskDialog";
 import { shareDialog } from "../dialogs/shareDialog";
@@ -11,6 +12,7 @@ import { ITask } from "../models/ITask";
 import { IGroup } from "../models/IGroup";
 import { ToastType } from "../enums/toastType";
 import { ToastNotif } from "../components/toastNotif";
+import { ToastController } from "../controllers/toastController";
 
 window.addEventListener("load", () => new Board());
 declare const viewData;
@@ -25,9 +27,11 @@ export class Board {
     static tasklistControllers = {};
     static viewData;
     private currentTasklistId: string;
+    private toastController: ToastController;
 
     constructor() {
         Board.viewData = viewData;
+        this.toastController = new ToastController();
 
         // Load dialogs
         this.loadDialogs();
@@ -95,9 +99,16 @@ export class Board {
         tasklistController.addTask(task);
     }
 
-    private onUserAdded(username: string): void {
+    private onUserAdded(username: string, inputList: InputList): void {
         const requestParameters: RequestParameter[] = [ new RequestParameter("username", username) ];
-        new ApiRequester().send("Boards", `${Board.viewData.id}/Users`, "POST", requestParameters);
+        new ApiRequester().send("Boards", `${Board.viewData.id}/Users`, "POST", requestParameters)
+        .then(() => {
+            this.toastController.new("Collaborator added", ToastType.Info);
+        })
+        .catch(() => {
+            this.toastController.new("Failed to add collaborator", ToastType.Error);
+            inputList.undo();
+        });
     }
 
     private onUserRemoved(username: string): void {
@@ -133,7 +144,7 @@ export class Board {
         // Prepare shareDialog
         document.body.appendChild(dialogs.share);
         dialogs.share.addEventListener("itemAdded", (e: CustomEvent) => // User added in the share dialog
-            this.onUserAdded(e.detail));
+            this.onUserAdded(e.detail["value"], e.detail["object"]));
         dialogs.share.addEventListener("itemRemoved", (e: CustomEvent) => // User removed in the share dialog
             this.onUserRemoved(e.detail));
         dialogs.share.addEventListener("openDialog", () => {
@@ -214,7 +225,7 @@ export class Board {
                     this.addTask(groupObject.group.id, board);
             }
 
-            document.body.appendChild(new ToastNotif("Loaded board", ToastType.Info));
+            this.toastController.new("Loaded board", ToastType.Info);
         }).catch((req) => {
             if (req.status == 404) this.setTitle("404 - Board does not exist", []);
             console.log(req);

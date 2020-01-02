@@ -3,7 +3,7 @@ import "fa-icons";
 
 @customElement("input-list")
 export class InputList extends LitElement {
-    @property({type: Array }) items = [];
+    @property({ type: Array }) items = [];
     private inputPlaceholder: string;
 
     constructor(inputPlaceholder: string) {
@@ -79,7 +79,7 @@ export class InputList extends LitElement {
                          path-prefix="/node_modules"
                          @mouseover="${this.handleIconMouseOver}"
                          @mouseout="${this.handleIconMouseOut}"
-                         @click="${this.handleIconClick}"
+                         @click="${this.onRemoveClick}"
                          </fa-icon>
             </li>`;
     }
@@ -104,9 +104,17 @@ export class InputList extends LitElement {
             this.dispatchEvent(new CustomEvent("itemAdded", {
                 bubbles: true,  // Let the event be listened to from outside a web component, eg. dialog-box
                 composed: true,
-                detail: value
+                detail: {
+                    value: value,
+                    object: this
+                }
             }));
         }
+    }
+
+    public undo(): void {
+        const lastItem = this.items[this.items.length - 1];
+        this.items = this.items.filter((item: string) => item != lastItem);
     }
 
     private handleIconMouseOver(e): void {
@@ -117,7 +125,7 @@ export class InputList extends LitElement {
         e.target.color = "black";
     }
 
-    private handleIconClick(e: Event): void {
+    private onRemoveClick(e: Event): void {
         const itemElement = (e.target as HTMLElement).parentElement;
         const itemValue = itemElement.dataset.value;
         this.items = this.items.filter((item: string) => item != itemValue); // Remove from list, give back a list without the item. Needs optimization.

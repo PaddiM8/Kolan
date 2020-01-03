@@ -1,18 +1,21 @@
 import { DialogBox } from "../components/dialogBox"
 import { InputList } from "../components/inputList"
-import { addTaskDialog } from "../dialogs/addTaskDialog";
-import { editTaskDialog } from "../dialogs/editTaskDialog";
-import { shareDialog } from "../dialogs/shareDialog";
-import { setupDialog } from "../dialogs/setupDialog";
 import { TasklistController } from "../controllers/tasklistController";
 import { ApiRequester } from "../communication/apiRequester";
 import { RequestParameter } from "../communication/requestParameter"
-import { BoardHubConnection } from "../communication/boardHubConnection";
+import { BoardHub } from "../communication/boardHub";
 import { ITask } from "../models/ITask";
 import { IGroup } from "../models/IGroup";
 import { ToastType } from "../enums/toastType";
+import { RequestType } from "../enums/requestType";
 import { ToastNotif } from "../components/toastNotif";
 import { ToastController } from "../controllers/toastController";
+
+// Dialogs
+import { AddTaskDialog } from "../dialogs/addTaskDialog";
+import { EditTaskDialog } from "../dialogs/editTaskDialog";
+import { ShareDialog } from "../dialogs/shareDialog";
+import { SetupDialog } from "../dialogs/setupDialog";
 
 window.addEventListener("load", () => new Board());
 declare const viewData;
@@ -27,11 +30,9 @@ export class Board {
     static tasklistControllers = {};
     static viewData;
     private currentTasklistId: string;
-    private toastController: ToastController;
 
     constructor() {
         Board.viewData = viewData;
-        this.toastController = new ToastController();
 
         // Load dialogs
         this.loadDialogs();
@@ -43,7 +44,7 @@ export class Board {
         shareButton.addEventListener("click", e => Board.dialogs.share.shown = true)
 
         // Websockets
-        new BoardHubConnection(Board.viewData.id);
+        new BoardHub().join(Board.viewData.id);
     }
 
     /**
@@ -71,12 +72,12 @@ export class Board {
         for (let plus of <any>plusElements) {
             plus.addEventListener("click", e => {
                 const groupId = e.currentTarget.parentElement.dataset.id;
-
-                Board.dialogs.addTask.shown = true;
-                Board.dialogs.addTask.dialogOptions.requestMethod = Board.viewData.id;
-                Board.dialogs.addTask.extraRequestParameters = [ 
+                Board.dialogs["addTask"].shown = true;
+                Board.dialogs["addTask"].groupId = groupId;
+                //Board.dialogs.addTask.dialogOptions.requestMethod = Board.viewData.id;
+                /*Board.dialogs.addTask.extraRequestParameters = [ 
                     new RequestParameter("groupId", groupId)
-                ];
+                ];*/
 
                 this.currentTasklistId = groupId;
             });
@@ -100,20 +101,22 @@ export class Board {
     }
 
     private onUserAdded(username: string, inputList: InputList): void {
-        const requestParameters: RequestParameter[] = [ new RequestParameter("username", username) ];
-        new ApiRequester().send("Boards", `${Board.viewData.id}/Users`, "POST", requestParameters)
+        new ApiRequester().send("Boards", `${Board.viewData.id}/Users`, RequestType.Post, {
+            username: username
+        })
         .then(() => {
-            this.toastController.new("Collaborator added", ToastType.Info);
+            ToastController.new("Collaborator added", ToastType.Info);
         })
         .catch(() => {
-            this.toastController.new("Failed to add collaborator", ToastType.Error);
+            ToastController.new("Failed to add collaborator", ToastType.Error);
             inputList.undo();
         });
     }
 
     private onUserRemoved(username: string): void {
-        const requestParameters = [ new RequestParameter("username", username) ];
-        new ApiRequester().send("Boards", `${Board.viewData.id}/Users`, "DELETE", requestParameters);
+        new ApiRequester().send("Boards", `${Board.viewData.id}/Users`, RequestType.Delete, {
+            username: username
+        });
     }
 
     /**
@@ -125,6 +128,18 @@ export class Board {
      */
     private loadDialogs(): void {
         const dialogs = {
+            addTask: new AddTaskDialog(),
+            editTask: new EditTaskDialog(),
+            share: new ShareDialog()
+        }
+
+        for (const dialogName in dialogs) {
+            document.body.appendChild(dialogs[dialogName]);
+        }
+
+        Board.dialogs = dialogs;
+
+        /*const dialogs = {
             "addTask": new DialogBox(addTaskDialog, "addTaskDialog"),
             "editTask": new DialogBox(editTaskDialog, "editTaskDialog"),
             "share": new DialogBox(shareDialog, "shareDialog"),
@@ -132,13 +147,13 @@ export class Board {
         }
 
         // addTaskDialog
-        dialogs.addTask.dialogOptions.requestMethod = Board.viewData.id + "/" +
-            dialogs.addTask.dialogOptions.requestMethod;
+        //dialogs.addTask.dialogOptions.requestMethod = Board.viewData.id + "/" +
+            //dialogs.addTask.dialogOptions.requestMethod;
         document.body.appendChild(dialogs.addTask);
 
-        // addTaskDialog
-        dialogs.editTask.dialogOptions.requestMethod = Board.viewData.id + "/" +
-            dialogs.editTask.dialogOptions.requestMethod;
+        // editTaskDialog
+        //dialogs.editTask.dialogOptions.requestMethod = Board.viewData.id + "/" +
+            //dialogs.editTask.dialogOptions.requestMethod;
         document.body.appendChild(dialogs.editTask);
 
         // Prepare shareDialog
@@ -149,15 +164,15 @@ export class Board {
             this.onUserRemoved(e.detail));
         dialogs.share.addEventListener("openDialog", () => {
             // Get collaborators
-            new ApiRequester().send("Boards", Board.viewData.id + "/Users", "GET").then(result => {
+            new ApiRequester().send("Boards", Board.viewData.id + "/Users", RequestType.Get).then(result => {
                 const users: string[] = JSON.parse(result as string);
                 dialogs.share.list.items = users;
             });
         });
 
         // Prepare setupDialog
-        dialogs.setup.dialogOptions.requestMethod = Board.viewData.id + "/" +
-            dialogs.setup.dialogOptions.requestMethod;
+        (dialogs.setup.dialogOptions as IDialogHttpTemplate).requestMethod = Board.viewData.id + "/" +
+            (dialogs.setup.dialogOptions as IDialogHttpTemplate).requestMethod;
         document.body.appendChild(dialogs.setup);
 
         dialogs.setup.addEventListener("submitDialog", (e: CustomEvent) => {
@@ -165,7 +180,7 @@ export class Board {
                 this.addGroup(group);
         });
 
-        Board.dialogs = dialogs;
+        Board.dialogs = dialogs;*/
     }
 
     private setTitle(title: string, ancestors: object[]) {
@@ -205,7 +220,7 @@ export class Board {
         const boardNameElement = document.getElementById("boardName");
 
         // Get board content
-        new ApiRequester().send("Boards", Board.viewData.id, "GET").then(result => {
+        new ApiRequester().send("Boards", Board.viewData.id, RequestType.Get).then(result => {
             const boardContent = JSON.parse(result as string);
 
             // Set title on the client side, both on the board page and in the document title.
@@ -213,7 +228,13 @@ export class Board {
 
             // If the request returns nothing, the board hasn't been set up yet. Display the setup dialog.
             if (!boardContent.groups) {
-                Board.dialogs.setup.shown = true;
+                const setupDialog = new SetupDialog();
+                document.body.appendChild(setupDialog);
+                setupDialog.shown = true;
+                setupDialog.addEventListener("submitDialog", (e: CustomEvent) => {
+                    for (const group of e.detail.output)
+                        this.addGroup(group);
+                });
                 return;
             }
 
@@ -225,7 +246,7 @@ export class Board {
                     this.addTask(groupObject.group.id, board);
             }
 
-            this.toastController.new("Loaded board", ToastType.Info);
+            ToastController.new("Loaded board", ToastType.Info);
         }).catch((req) => {
             if (req.status == 404) this.setTitle("404 - Board does not exist", []);
             console.log(req);

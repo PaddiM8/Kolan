@@ -1,4 +1,5 @@
 import { RequestParameter } from "./requestParameter";
+import { RequestType } from "../enums/requestType";
 import { Promise } from "es6-promise";
 
 /** Do an API request
@@ -19,7 +20,7 @@ export class ApiRequester {
      * @param {RequestParameter[]} requestParameters=null
      * @returns {undefined}
      */
-    public send(action: string, method: string, requestType: string, requestParameters: RequestParameter[] = null) {
+    public send(action: string, method: string, requestType: RequestType, requestObject: object = []): Promise<any> {
         return new Promise((resolve, reject) => {
             const req = new XMLHttpRequest();
             let url = "/api/" + action;
@@ -34,8 +35,8 @@ export class ApiRequester {
             }
 
             // Send data
-            if (requestParameters != null) {
-                req.send(this.createURLSearchParams(requestParameters));
+            if (requestObject) {
+                req.send(this.createURLSearchParams(requestObject));
             } else {
                 req.send();
             }
@@ -50,10 +51,10 @@ export class ApiRequester {
      * @param {RequestParameter[]} requestParameters
      * @returns {URLSearchParams}
      */
-    private createURLSearchParams(requestParameters: RequestParameter[]): URLSearchParams {
+    private createURLSearchParams(requestObject: object): URLSearchParams {
         let params = new URLSearchParams();
-        for (let parameter of requestParameters) {
-            params.append(parameter.key, parameter.value);
+        for (const key in requestObject) {
+            params.append(key, requestObject[key]);
         }
 
         return params;

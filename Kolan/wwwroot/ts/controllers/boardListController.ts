@@ -3,6 +3,7 @@ declare const viewData;
 import { ApiRequester } from "../communication/apiRequester";
 import { RequestParameter } from "../communication/requestParameter";
 import { IBoard } from "../models/IBoard";
+import { RequestType } from "../enums/requestType";
 import { DraggableItem } from "../components/draggableItem";
 
 /**
@@ -80,9 +81,9 @@ export class BoardListController {
         if (toItem) target = toItem.dataset.id;
         else        target = viewData.username; // If there is no item above, set the target to the user's username.
 
-        new ApiRequester().send("Boards", "ChangeOrder", "POST", [
-            new RequestParameter("boardId", item.dataset.id),
-            new RequestParameter("targetId", target)
-        ]);
+        new ApiRequester().send("Boards", "ChangeOrder", RequestType.Post, {
+            boardId: item.dataset.id,
+            targetId: target
+        });
     }
 }

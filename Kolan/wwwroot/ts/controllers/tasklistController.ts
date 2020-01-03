@@ -5,6 +5,7 @@ import { ITask } from "../models/ITask";
 import { IBoard } from "../models/IBoard";
 import { Board } from "../views/board";
 import { ContentFormatter } from "../processing/contentFormatter";
+import { BoardHub } from "../communication/boardHub";
 
 /**
  * Controller to add/remove/edit/etc. tasks in a tasklist.
@@ -123,11 +124,7 @@ export class TasklistController {
     }
 
     private onInternalMove(item: HTMLElement, toItem: HTMLElement): void {
-        var target: string;
-        if (toItem) target = toItem.dataset.id;
-        else        target = this.tasklist.dataset.id;
-
-        this.sendMoveRequest(item.dataset.id, target);
+        this.onExternalMove(item, toItem, this.tasklist);
     }
 
     private onExternalMove(item: HTMLElement, toItem: HTMLElement, toTasklist: HTMLElement): void {
@@ -139,10 +136,12 @@ export class TasklistController {
     }
 
     private sendMoveRequest(boardId: string, targetId: string): void {
-        new ApiRequester().send("Boards", Board.viewData.id + "/ChangeOrder", "POST", [
+        /*new ApiRequester().send("Boards", Board.viewData.id + "/ChangeOrder", "POST", [
             new RequestParameter("boardId", boardId),
             new RequestParameter("targetId", targetId),
-        ]);
+        ]);*/
+
+       new BoardHub().moveTask(boardId, targetId);
     }
 
     /**
@@ -165,7 +164,7 @@ export class TasklistController {
 
     private onEditClick(item: DraggableItem): void {
         Board.dialogs.editTask.shown = true;
-        Board.dialogs.editTask.extraRequestParameters = [ new RequestParameter("id", item.dataset.id) ];
+        Board.dialogs.editTask.boardId = item.dataset.id;
         Board.dialogs.editTask.setValues({
             name: item.querySelector(".name").innerHTML,
             description: item.dataset.description
@@ -174,9 +173,9 @@ export class TasklistController {
 
     private onDeleteClick(item: DraggableItem) {
         item.parentNode.removeChild(item);
-
-        new ApiRequester().send("Boards", Board.viewData.id, "DELETE", [
+        new BoardHub().deleteTask(item.dataset.id);;
+        /*new ApiRequester().send("Boards", Board.viewData.id, "DELETE", [
             new RequestParameter("boardId", item.dataset.id)
-        ]);
+        ]);*/
     }
 }

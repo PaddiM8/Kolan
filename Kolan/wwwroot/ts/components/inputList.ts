@@ -30,9 +30,6 @@ export class InputList extends LitElement {
                 margin-right: 7px;
             }
 
-            :host button {
-            }
-
             :host ul {
                 width: 100%;
                 height: 400px;

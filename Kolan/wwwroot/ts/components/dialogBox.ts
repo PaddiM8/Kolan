@@ -1,5 +1,4 @@
 import { LitElement, html, css, property, customElement, TemplateResult } from "lit-element";
-import { IDialogTemplate } from "../dialogs/IDialogTemplate";
 import { ApiRequester } from "../communication/apiRequester";
 import { RequestParameter } from "../communication/requestParameter";
 import { InputType } from "../enums/inputType"
@@ -16,14 +15,14 @@ import { InputList } from "./inputList"
 @customElement('dialog-box')
 export class DialogBox extends LitElement {
     @property({type: Boolean}) shown = false;
-    @property({type: Array<RequestParameter>()}) extraRequestParameters = [];
-    @property({type: Object}) dialogOptions: IDialogTemplate
-    list: InputList;
+    @property({type: Array<object>()}) fields;
+    @property({type: String}) options;
+    protected list: InputList;
 
-    constructor(dialogOptions, id) {
+    constructor() {
         super();
-        this.dialogOptions = dialogOptions;
-        this.id = id;
+        //this.dialogOptions = dialogOptions;
+        //this.id = id;
     }
 
     render() {
@@ -31,11 +30,11 @@ export class DialogBox extends LitElement {
          <link rel="stylesheet" type="text/css" href="../css/components/dialog.css">
          <div class="dialogBackground"></div>
          <section class="dialog">
-            <h2>${html`${this.dialogOptions.title}`}</h2>
+            <h2>${html`${this.options.title}`}</h2>
             <div id="inputs">
-                ${this.dialogOptions.inputs.map(x => html`${this.getComponentHtml(x.inputType, x.key, x.value)}`)}
+                ${this.fields.map(x => html`${this.getComponentHtml(x.inputType, x.key, x.value)}`)}
             </div>
-            <button @click="${this.submitHandler}">${html`${this.dialogOptions.primaryButton}`}</button>
+            <button @click="${this.submitHandler}">${html`${this.options.primaryButton}`}</button>
             <button class="secondary" @click="${this.cancelHandler}">Cancel</button>
          </section>`;
     }
@@ -46,6 +45,7 @@ export class DialogBox extends LitElement {
         // Fire event
         if (this.shown) {
             this.dispatchEvent(new CustomEvent("openDialog"));
+            this.onOpen();
         }
     }
 
@@ -76,47 +76,15 @@ export class DialogBox extends LitElement {
      * @function
      * @returns {void}
      */
-    private submitHandler(): void {
+    protected submitHandler(): void {
         let formData = this.getFormData();
 
-        // Do request
-        if (this.dialogOptions.requestAction) { // Not all dialogs do requests
-            let requestParameters: RequestParameter[] = [...formData["requestParameters"], 
-                ...this.extraRequestParameters];
-            const request = new ApiRequester().send(
-                this.dialogOptions.requestAction,
-                this.dialogOptions.requestMethod,
-                this.dialogOptions.requestType,
-                requestParameters
-            );
+        // Fire event
+        this.dispatchEvent(new CustomEvent("submitDialog", {
+            detail: { output: formData["inputValues"] }
+        }));
 
-            // Fire the event after the request was successful, and include the returned information
-            request.then(output => {
-                const outputObject = JSON.parse(output as string);
-
-                // Fire event
-                this.dispatchEvent(new CustomEvent("submitDialog", {
-                    detail: { output: outputObject, input: formData["inputValues"] }
-                }));
-
-                this.hide();
-            })
-            .catch(output => {
-                const outputObject = JSON.parse(output.response);
-                for (const name in outputObject) {
-                    const label = this.shadowRoot.getElementById("inputs")
-                        .querySelector(`label[for="${name}"]`);
-                    label.textContent = outputObject[name];
-                }
-            });
-        } else {
-            // Fire event
-            this.dispatchEvent(new CustomEvent("submitDialog", {
-                detail: { output: formData["inputValues"] }
-            }));
-
-            this.hide();
-        }
+        this.hide();
     }
 
     /**
@@ -126,9 +94,11 @@ export class DialogBox extends LitElement {
      * @function
      * @returns {void}
      */
-    private cancelHandler(): void {
+    protected cancelHandler(): void {
         this.hide();
     }
+
+    protected onOpen(): void {}
 
     /**
      * Get the user input values.
@@ -137,21 +107,16 @@ export class DialogBox extends LitElement {
      * @function
      * @returns {object}
      */
-    private getFormData(): object {
+    protected getFormData(): object {
         let input = {};
-        let requestParameters: RequestParameter[] = [];
         const inputs = <any>this.shadowRoot.getElementById("inputs").children;
         for (const element of inputs) {
             if (element.name) {
                 input[element.name] = element.value;
-                requestParameters.push(new RequestParameter(element.name, element.value));
             }
         }
 
-        return {
-            inputValues: input,
-            requestParameters: requestParameters
-        };
+        return input;
     }
 
     /**
@@ -161,7 +126,7 @@ export class DialogBox extends LitElement {
      * @function
      * @returns {void}
      */
-    private hide(): void {
+    public hide(): void {
         let dialogItems = <any>this.shadowRoot.getElementById("inputs").children;
         for (let element of dialogItems) {
             if (element.name) element.value = "";
@@ -193,9 +158,9 @@ export class DialogBox extends LitElement {
             <textarea name="${name}" placeholder="${value}"></textarea>`;
             case InputType.InputList:
                 this.list = new InputList(value);
-                let element = this.list as HTMLElement;
-                element.setAttribute("name", name);
-                return html`${element}`;
+            let element = this.list as HTMLElement;
+            element.setAttribute("name", name);
+            return html`${element}`;
             default:
                 return html``;
         }

@@ -1,15 +1,12 @@
+import { DialogBox } from "../components/dialogBox";
+import { LitElement, property, customElement } from "lit-element";
 import { InputType } from "../enums/inputType";
-import { IDialogTemplate } from "./IDialogTemplate";
+import { BoardHub } from "../communication/boardHub";
 
-/** add task dialog schematic
- */
-export const addTaskDialog: IDialogTemplate = {
-    requestAction: "Boards",
-    requestMethod: "",
-    requestType: "POST",
-    title: "Add Task",
-    primaryButton: "Add",
-    inputs: [
+@customElement("add-task-dialog")
+export class AddTaskDialog extends DialogBox {
+    @property({type: String}) groupId;
+    @property({type: Array<object>()}) fields = [
         {
             key: "name",
             value: "Task title",
@@ -20,5 +17,15 @@ export const addTaskDialog: IDialogTemplate = {
             value: "Task description",
             inputType: InputType.TextArea
         }
-    ]
+    ];
+    @property({type: Object}) options = {
+        title: "Add Task",
+        primaryButton: "Add"
+    }
+
+    submitHandler(): void {
+        const task = this.getFormData();
+        new BoardHub().addTask(task, this.groupId);
+        this.hide();
+    }
 }

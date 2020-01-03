@@ -89,9 +89,9 @@ namespace Kolan.Repositories
 
             return id;
         }
-        ///
+
         /// <summary>
-        /// Add a root board to a parent board.
+        /// Add a board to a parent board.
         /// </summary>
         /// <remarks>
         /// Board gets added at the end.
@@ -132,7 +132,7 @@ namespace Kolan.Repositories
         public async Task DeleteAsync(string id)
         {
             await Client.Cypher
-                .Match("(board:Board)")
+                .Match("(prev)-[:Next]->(board:Board)")
                 .Where("board.id = {id}")
                 .Call("apoc.lock.nodes([prev])")
                 .Match("(prev)-[prevRel:Next]->(board)-[nextRel:Next]->(next)")

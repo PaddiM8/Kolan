@@ -50,8 +50,8 @@ export class DraggableItem extends LitElement {
         });
         this.addEventListener("mousedown", e => { // Save mouse coordinates when mouse down anywhere on element
             this.mouseDownPos = {
-                X: e.clientX,
-                Y: e.clientY
+                X: e.pageX,
+                Y: e.pageY
             };
         });
     }
@@ -59,8 +59,8 @@ export class DraggableItem extends LitElement {
     private onMouseDown(e): void {
         this.mouseIsDown = true && this.movable;
         this.startPos = {
-            X: e.clientX - this.getBoundingClientRect().left,
-            Y: e.clientY - this.getBoundingClientRect().top
+            X: e.pageX - this.getBoundingClientRect().left,
+            Y: e.pageY - this.getBoundingClientRect().top
         };
 
         this.currentTasklist = this.parentElement;
@@ -76,8 +76,8 @@ export class DraggableItem extends LitElement {
         // If mouse is at same position as before, it's just a click.
         // Fire the "draggableClick" event, since a normal click event also fires
         // even when the element has been dragged.
-        if (this.mouseDownPos.X == e.clientX &&
-            this.mouseDownPos.Y == e.clientY) {
+        if (this.mouseDownPos.X == e.pageX &&
+            this.mouseDownPos.Y == e.pageY) {
             this.dispatchEvent(new CustomEvent("draggableClick"));
         }
     }
@@ -139,14 +139,14 @@ export class DraggableItem extends LitElement {
             // Draggable
             this.parentElement.parentElement.appendChild(this); // Move task out from tasklists, then get position: fixed
             this.style.width = this.offsetWidth + "px";
-            this.style.position = "fixed";
+            this.style.position = "absolute";
             this.detached = true;
         }
 
         const parentRect = this.parentElement.parentElement.getBoundingClientRect();
         const newPos = {
-            X: e.clientX - this.startPos.X - parentRect.left - 20,
-            Y: e.clientY - this.startPos.Y - parentRect.top
+            X: e.pageX - this.startPos.X - parentRect.left - 20,
+            Y: e.pageY - this.startPos.Y - parentRect.top
         }
 
         this.style.left = newPos.X + "px";

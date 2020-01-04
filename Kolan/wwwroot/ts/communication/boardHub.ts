@@ -87,22 +87,32 @@ export class BoardHub implements IHub {
     }
 
     private static onDisconnected(): void {
-        console.log("disconnected");
         if (BoardHub.stateToast) BoardHub.stateToast.hide();
-        document.getElementById("uiBlocker").style.display = "block";
+
+        const uiBlocker = document.getElementById("uiBlocker");
+        uiBlocker.style.display = "block";
+        uiBlocker.style.opacity = "1";
         BoardHub.stateToast = ToastController.new("Disconnected", ToastType.Warning, true);
     }
 
     private static onConnected(): void {
         if (BoardHub.stateToast) BoardHub.stateToast.hide();
-        document.getElementById("uiBlocker").style.display = "none";
+
+        const uiBlocker = document.getElementById("uiBlocker");
+        uiBlocker.style.opacity = "0";
         ToastController.new("Connected!", ToastType.Info);
+        setTimeout(() => {
+            uiBlocker.style.display = "none";
+        }, 300);
     }
 
     private static onReconnecting(): void {
+        if (Board.pageReloadInProgress) return;
         if (BoardHub.stateToast) BoardHub.stateToast.hide();
-        document.getElementById("uiBlocker").style.display = "block";
-        console.log(document.getElementById("uiBlocker"));
+
+        const uiBlocker = document.getElementById("uiBlocker");
+        uiBlocker.style.display = "block";
+        uiBlocker.style.opacity = "1";
         BoardHub.stateToast = ToastController.new("Reconnecting...", ToastType.Warning, true);
     }
 }

@@ -29,6 +29,7 @@ export class Board {
     static dialogs;
     static tasklistControllers = {};
     static viewData;
+    static pageReloadInProgress = false;
     private currentTasklistId: string;
 
     constructor() {
@@ -45,6 +46,8 @@ export class Board {
 
         // Websockets
         new BoardHub().join(Board.viewData.id);
+
+        window.onbeforeunload = () => Board.pageReloadInProgress = true;
     }
 
     /**

@@ -3,6 +3,8 @@ import { Board } from "../views/board";
 import { IBoard } from "../models/IBoard";
 import { IHub } from "./IHub";
 import { RequestParameter } from "./requestParameter";
+import { ToastController } from "../controllers/toastController";
+import { ToastType } from "../enums/toastType";
 
 /**
  * Manages the websocket connection and acts on responses.
@@ -12,6 +14,11 @@ import { RequestParameter } from "./requestParameter";
 export class BoardHub implements IHub {
     private static connection;
     private static boardId;
+    private static stateToast;
+
+    public static get state() {
+        return BoardHub.connection.state;
+    }
 
     public join(boardId: string) {
         BoardHub.boardId = boardId;
@@ -30,6 +37,10 @@ export class BoardHub implements IHub {
         BoardHub.connection.on("moveBoard", this.onMoveBoard);
         BoardHub.connection.on("editBoard", this.onEditBoard);
         BoardHub.connection.on("deleteBoard", this.onDeleteBoard);
+
+        BoardHub.connection.onclose(() => BoardHub.onDisconnected());
+        BoardHub.connection.onreconnecting(() => BoardHub.onReconnecting());
+        BoardHub.connection.onreconnected(() => BoardHub.onConnected());
     }
 
     public addTask(task: object, boardId: string): string {
@@ -73,5 +84,25 @@ export class BoardHub implements IHub {
     private onDeleteBoard(boardId: string): void {
         const item = document.querySelector(`#tasklists [data-id="${boardId}"]`)
         if (item) item.parentNode.removeChild(item);
+    }
+
+    private static onDisconnected(): void {
+        console.log("disconnected");
+        if (BoardHub.stateToast) BoardHub.stateToast.hide();
+        document.getElementById("uiBlocker").style.display = "block";
+        BoardHub.stateToast = ToastController.new("Disconnected", ToastType.Warning, true);
+    }
+
+    private static onConnected(): void {
+        if (BoardHub.stateToast) BoardHub.stateToast.hide();
+        document.getElementById("uiBlocker").style.display = "none";
+        ToastController.new("Connected!", ToastType.Info);
+    }
+
+    private static onReconnecting(): void {
+        if (BoardHub.stateToast) BoardHub.stateToast.hide();
+        document.getElementById("uiBlocker").style.display = "block";
+        console.log(document.getElementById("uiBlocker"));
+        BoardHub.stateToast = ToastController.new("Reconnecting...", ToastType.Warning, true);
     }
 }

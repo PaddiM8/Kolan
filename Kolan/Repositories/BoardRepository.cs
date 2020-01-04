@@ -168,6 +168,7 @@ namespace Kolan.Repositories
         /// </summary>
         public async Task MoveAsync(string hostId, string boardId, string targetId, bool isRoot)
         {
+            Console.WriteLine("Moved");
             string whereHostId = "host.id = {hostId}";
             if (isRoot) whereHostId = "host.username = {hostId}"; // Username
 
@@ -206,7 +207,7 @@ namespace Kolan.Repositories
                 .Return((user) => user.As<User>().Username)
                 .ResultsAsync;
 
-            return result.Count() == 1; // If no users were found, return false
+            return result.Count() == 1; // If no users were found, return false. // TODO: Exception?
         }
 
         /// <summary>

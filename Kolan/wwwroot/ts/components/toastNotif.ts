@@ -6,11 +6,13 @@ import "fa-icons";
 export class ToastNotif extends LitElement {
     @property({ type: String }) message;
     @property({ type: ToastType }) type;
+    @property({ type: Boolean }) persistent;
 
-    constructor(message: string, type: ToastType) {
+    constructor(message: string, type: ToastType, persistent: Boolean = false) {
         super();
         this.message = message;
         this.type = type;
+        this.persistent = persistent;
     }
 
     static get styles() {
@@ -81,9 +83,16 @@ export class ToastNotif extends LitElement {
             this.shadowRoot.getElementById("content").classList.add("slide-down");
         }, 100);
 
-        setTimeout(() => {
-            this.destroy();
+        if (!this.persistent) setTimeout(() => {
+            this.hide()
         }, 2500);
+    }
+
+    public hide(): void {
+        this.shadowRoot.getElementById("content").classList.toggle("slide-down");
+        setTimeout(() => {
+            this.parentNode.removeChild(this);
+        }, 300);
     }
 
     private getIconName(): string {
@@ -95,13 +104,6 @@ export class ToastNotif extends LitElement {
     }
 
     private onClick(): void {
-        this.destroy();
-    }
-
-    private destroy(): void {
-        this.shadowRoot.getElementById("content").classList.toggle("slide-down");
-        setTimeout(() => {
-            this.parentNode.removeChild(this);
-        }, 300);
+        this.hide();
     }
 }

@@ -47,7 +47,10 @@ export class Board {
         // Websockets
         new BoardHub().join(Board.viewData.id);
 
-        window.onbeforeunload = () => Board.pageReloadInProgress = true;
+        window.onbeforeunload = () => {
+            Board.pageReloadInProgress = true;
+            return;
+        }
     }
 
     /**

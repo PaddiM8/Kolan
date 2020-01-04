@@ -49,10 +49,11 @@ namespace Kolan.Repositories
                 .Where((Board board) => board.Id == id)
                 .OptionalMatch("(board)-[groupRel:ChildGroup]->(group:Group)")
                 .OptionalMatch("(group)-[:Next*]->(childBoard:Board)-[:Next*]->(:End)")
-                .OptionalMatch("(:User)-[:Next|ChildGroup*]->(ancestor:Board)-[:Next|ChildGroup*]->(board)")
-                .With("group, groupRel, board, childBoard, ancestor")
+                //.OptionalMatch("(:User)-[:Next|ChildGroup*]->(ancestor:Board)-[:Next|ChildGroup*]->(board)")
+                .With("board, group, groupRel, {group: group, boards: collect(childBoard)} AS groups")
                 .OrderBy("groupRel.order")
-                .With("board, group, {group: group, boards: collect(childBoard)} AS groups, collect(ancestor) AS ancestors")
+                .OptionalMatch("(board)<-[:ChildBoard*]-(ancestor:Board)")
+                .With("board, group, groups, collect(ancestor) AS ancestors")
                 .Return((board, group, groups, ancestors) => new
                 {
                     Board = board.As<Board>(),
@@ -105,13 +106,14 @@ namespace Kolan.Repositories
             entity.Id = id;
 
             await Client.Cypher
-                .Match("(group:Group)")
+                .Match("(parent:Board)-[:ChildGroup]->(group:Group)")
                 .Where((Group group) => group.Id == groupId)
                 .Call("apoc.lock.nodes([group])")
                 .Match("(group)-[:Next*]->(next:End)")
                 .Match("(previous)-[oldRel:Next]->(next)")
                 .Create("(previous)-[:Next]->(board:Board {newBoard})-[:Next]->(next)")
                 .WithParam("newBoard", entity)
+                .Create("(parent)-[:ChildBoard]->(board)")
                 .Delete("oldRel")
                 .ExecuteWithoutResultsAsync();
 
@@ -137,8 +139,9 @@ namespace Kolan.Repositories
                 .Call("apoc.lock.nodes([prev])")
                 .Match("(prev)-[prevRel:Next]->(board)-[nextRel:Next]->(next)")
                 .WithParam("id", id)
+                .Match("(parent:Board)-[:ChildBoard]->(board)")
                 .Create("(prev)-[:Next]->(next)")
-                .Delete("prevRel, nextRel, board")
+                .Delete("prevRel, nextRel, board, parent")
                 .ExecuteWithoutResultsAsync();
         }
 

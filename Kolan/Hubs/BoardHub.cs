@@ -24,8 +24,9 @@ namespace Kolan.Hubs
 
         public async Task<IActionResult> AddBoard(string parentId, Board board, string groupId)
         {
-            await Clients.Group(parentId).ReceiveNewBoard(board, groupId);
             string id = await _uow.Boards.AddAsync(board, groupId, "bakk"); // TODO: Username!
+            board.Id = id;
+            await Clients.Group(parentId).ReceiveNewBoard(board, groupId);
 
             return new OkObjectResult(new { id = id });
         }

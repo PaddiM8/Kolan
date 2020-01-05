@@ -42,25 +42,25 @@ namespace Kolan.Repositories
         /// Return the groups and boards from a parent board.
         /// </summary>
         /// <param name="id">Board id</param>
-        public async Task<object> GetAsync(string id)
+        public async Task<object> GetAsync(string id, string username)
         {
             var result = await Client.Cypher
                 .Match("(board:Board)")
                 .Where((Board board) => board.Id == id)
                 .OptionalMatch("(board)-[groupRel:ChildGroup]->(group:Group)")
                 .OptionalMatch("(group)-[:Next*]->(childBoard:Board)-[:Next*]->(:End)")
-                //.OptionalMatch("(:User)-[:Next|ChildGroup*]->(ancestor:Board)-[:Next|ChildGroup*]->(board)")
                 .With("board, group, groupRel, {group: group, boards: collect(childBoard)} AS groups")
                 .OrderBy("groupRel.order")
-                .OptionalMatch("(board)<-[:ChildBoard*]-(ancestor:Board)")
-                .With("board, group, groups, collect(ancestor) AS ancestors")
-                .Return((board, group, groups, ancestors) => new
+                .OptionalMatch("path=(board:Board)<-[:ChildBoard|SharedBoard*]-()<-[:Next]-()<-[:ChildGroup]-(user:User)")
+                .Where((User user) => user.Username == username)
+                .With("board, group, groups, path")
+                .Return((board, group, groups, path) => new
                 {
                     Board = board.As<Board>(),
                     Groups = Return.As<IEnumerable<Groups>>("CASE WHEN group IS NULL THEN NULL ELSE collect(groups) END"),
-                    Ancestors = ancestors.As<IEnumerable<Board>>()
+                    Ancestors = Return.As<IEnumerable<Board>>("tail([b in nodes(path) WHERE (b:Board) | b])")
                 })
-            .ResultsAsync;
+                .ResultsAsync;
 
             return result.SingleOrDefault();
         }

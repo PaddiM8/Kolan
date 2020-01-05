@@ -45,7 +45,7 @@ namespace Kolan.Controllers.Api
         [HttpGet("{id}")]
         public async Task<IActionResult> GetBoard(string id)
         {
-            var result = await _uow.Boards.GetAsync(id);
+            var result = await _uow.Boards.GetAsync(id, User.Identity.Name);
             if (result == null) return NotFound();
 
             return Ok(result);

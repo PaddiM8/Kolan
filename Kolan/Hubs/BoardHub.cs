@@ -3,8 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 using Kolan.Models;
 using Kolan.Repositories;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using Newtonsoft.Json;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Kolan.Hubs
 {

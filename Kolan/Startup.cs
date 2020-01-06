@@ -72,6 +72,7 @@ namespace Kolan
                 options.Cookie.Name = "Kolan.AuthCookieAspNetCore";
                 options.LoginPath = "/Login";
                 options.LogoutPath = "/Logout";
+                options.AccessDeniedPath = "/AccessDenied";
             });
 
             services.Configure<CookiePolicyOptions>(options =>
@@ -129,6 +130,8 @@ namespace Kolan
 
             app.UseHttpsRedirection();
             app.UseRouting();
+            app.UseAuthentication();
+            app.UseAuthorization();
             app.UseDefaultFiles();
             app.UseStaticFiles();
             app.UseStaticFiles(new StaticFileOptions()
@@ -143,7 +146,6 @@ namespace Kolan
                                                         "node_modules/@fortawesome/fontawesome-free/sprites")),
                 RequestPath = new PathString("/node_modules/@fortawesome/fontawesome-free/sprites")
             });
-            app.UseAuthentication();
 
             EndpointRoutingApplicationBuilderExtensions.UseEndpoints(
                 app, endpoints =>

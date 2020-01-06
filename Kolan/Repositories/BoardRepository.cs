@@ -42,7 +42,7 @@ namespace Kolan.Repositories
         /// Return the groups and boards from a parent board.
         /// </summary>
         /// <param name="id">Board id</param>
-        public async Task<object> GetAsync(string id, string username)
+        public async Task<dynamic> GetAsync(string id, string username)
         {
             var result = await Client.Cypher
                 .Match("(board:Board)")
@@ -58,11 +58,27 @@ namespace Kolan.Repositories
                 {
                     Board = board.As<Board>(),
                     Groups = Return.As<IEnumerable<Groups>>("CASE WHEN group IS NULL THEN NULL ELSE collect(groups) END"),
-                    Ancestors = Return.As<IEnumerable<Board>>("tail([b in nodes(path) WHERE (b:Board) | b])")
+                    Ancestors = Return.As<IEnumerable<Board>>("tail([b in nodes(path) WHERE (b:Board) | b])"),
+                    UserAccess = Return.As<string>("CASE WHEN path IS NULL THEN 'false' ELSE 'true' END")
                 })
                 .ResultsAsync;
 
             return result.SingleOrDefault();
+        }
+
+        /// <summary>
+        /// Checks if a user has access to a board.
+        /// </summary>
+        public async Task<bool> UserHasAccess(string boardId, string username)
+        {
+            var result = await Client.Cypher
+                .Match("path=(board:Board)<-[:ChildBoard|SharedBoard*]-()<-[:Next]-()<-[:ChildGroup]-(user:User)")
+                .Where((User user) => user.Username == username)
+                .AndWhere((Board board) => board.Id == boardId)
+                .Return((path) => Return.As<string>("CASE WHEN path IS NULL THEN 'false' ELSE 'true' END"))
+                .ResultsAsync;
+
+            return result.SingleOrDefault() == "true";
         }
 
         /// <summary>

@@ -1,12 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using System.Security.Claims;
-using System.Web;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using Newtonsoft.Json;
 using Kolan.Models;
 using Kolan.Repositories;
 using Kolan.Hubs;
@@ -16,6 +11,7 @@ namespace Kolan.Controllers.Api
 {
     [Produces("application/json")]
     [Route("api/Boards")]
+    [Authorize]
     public class BoardsController : Controller
     {
         private readonly IHubContext<BoardHub, IBoardClient> _boardHubContext;
@@ -47,6 +43,7 @@ namespace Kolan.Controllers.Api
         {
             var result = await _uow.Boards.GetAsync(id, User.Identity.Name);
             if (result == null) return NotFound();
+            //if (result.UserAccess == "false") return Unauthorized();
 
             return Ok(result);
         }
@@ -55,6 +52,7 @@ namespace Kolan.Controllers.Api
         /// Initialise a board to make it ready for use. This needs to be done before you can edit it.
         /// </summary>
         /// <returns>The groups added by default</returns>
+        [AuthorizeForBoard]
         [HttpPost("{id}/Setup")]
         public async Task<object> Setup(string id)
         {

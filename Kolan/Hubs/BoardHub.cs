@@ -17,14 +17,19 @@ namespace Kolan.Hubs
             _uow = uow;
         }
 
-        public Task Join(string boardId)
+        public async Task<IActionResult> Join(string boardId)
         {
-            return Groups.AddToGroupAsync(Context.ConnectionId, boardId);
+            if (await _uow.Boards.UserHasAccess(boardId, Context.User.Identity.Name))
+            {
+                return new OkObjectResult(Groups.AddToGroupAsync(Context.ConnectionId, boardId));
+            }
+
+            return new UnauthorizedResult();
         }
 
         public async Task<IActionResult> AddBoard(string parentId, Board board, string groupId)
         {
-            string id = await _uow.Boards.AddAsync(board, groupId, "bakk"); // TODO: Username!
+            string id = await _uow.Boards.AddAsync(board, groupId, Context.User.Identity.Name);
             board.Id = id;
             await Clients.Group(parentId).ReceiveNewBoard(board, groupId);
 

@@ -43,7 +43,7 @@ namespace Kolan.Controllers.Api
         {
             var result = await _uow.Boards.GetAsync(id, User.Identity.Name);
             if (result == null) return NotFound();
-            //if (result.UserAccess == "false") return Unauthorized();
+            if (result.UserAccess == "false") return Unauthorized(); // No AuthorizeForBoard attribute here since this GetAsync() already retrieves this (for other reason). Also, later on users should be able to make boards visible to the public
 
             return Ok(result);
         }
@@ -82,6 +82,7 @@ namespace Kolan.Controllers.Api
         /// <returns>The id assigned to the new board</returns>
         [HttpPost("{parentId}")]
         [ValidateModel]
+        [AuthorizeForBoard]
         public async Task<IActionResult> Create(string parentId, [FromForm]string groupId, [FromForm]Board board)
         {
             string id = await _uow.Boards.AddAsync(board, groupId,
@@ -98,6 +99,7 @@ namespace Kolan.Controllers.Api
         /// <param name="newBoardContent">Board object with the new values, containing the board id</param>
         [HttpPut("{parentId}")]
         [ValidateModel]
+        [AuthorizeForBoard]
         public async Task<IActionResult> Edit(string parentId, [FromForm]Board newBoardContent)
         {
             await _uow.Boards.EditAsync(newBoardContent);
@@ -109,13 +111,14 @@ namespace Kolan.Controllers.Api
         /// <summary>
         /// Delete a child board
         /// </summary>
-        /// <param name="parentId">Parent board id</param>
+        /// <param name="id">Parent board id</param>
         /// <param name="boardId">Id of the board to delete</param>
-        [HttpDelete("{parentId}")]
-        public async Task<IActionResult> Delete(string parentId, [FromForm]string boardId)
+        [HttpDelete("{id}")]
+        [AuthorizeForBoard]
+        public async Task<IActionResult> Delete(string id, [FromForm]string boardId)
         {
             await _uow.Boards.DeleteAsync(boardId);
-            await _boardHubContext.Clients.Group(parentId).DeleteBoard(boardId);
+            await _boardHubContext.Clients.Group(id).DeleteBoard(boardId);
 
             return Ok();
         }
@@ -136,15 +139,16 @@ namespace Kolan.Controllers.Api
         /// <summary>
         /// Move a child board.
         /// </summary>
-        /// <param name="parentId">Parent board id</param>
+        /// <param name="id">Parent board id</param>
         /// <param name="boardId">Id of the board to move</param>
         /// <param name="targetId">Id of the board it will be placed under</param>
-        [HttpPost("{parentId}/ChangeOrder")]
-        public async Task<IActionResult> ChangeOrder(string parentId, [FromForm]string
+        [HttpPost("{id}/ChangeOrder")]
+        [AuthorizeForBoard]
+        public async Task<IActionResult> ChangeOrder(string id, [FromForm]string
                 boardId, [FromForm]string targetId)
         {
-            await _uow.Boards.MoveAsync(parentId, boardId, targetId, false);
-            await _boardHubContext.Clients.Group(parentId).MoveBoard(boardId, targetId); // Send to client
+            await _uow.Boards.MoveAsync(id, boardId, targetId, false);
+            await _boardHubContext.Clients.Group(id).MoveBoard(boardId, targetId); // Send to client
 
             return Ok();
         }
@@ -155,6 +159,7 @@ namespace Kolan.Controllers.Api
         /// <param name="id">Id of the board</param>
         /// <returns>A list of usernames (as strings)</returns>
         [HttpGet("{id}/Users")]
+        [AuthorizeForBoard]
         public async Task<object> GetUsers(string id)
         {
             return await _uow.Boards.GetUsersAsync(id);
@@ -166,6 +171,7 @@ namespace Kolan.Controllers.Api
         /// <param name="id">Id of the board</param>
         /// <param name="username">Username of the user to add</param>
         [HttpPost("{id}/Users")]
+        [AuthorizeForBoard]
         public async Task<IActionResult> AddUser(string id, [FromForm]string username)
         {
             bool userAdded = await _uow.Boards.AddUserAsync(id, username);
@@ -179,6 +185,7 @@ namespace Kolan.Controllers.Api
         /// <param name="id">Id of the board</param>
         /// <param name="username">Username of the user to remove</param>
         [HttpDelete("{id}/Users")]
+        [AuthorizeForBoard]
         public async Task<IActionResult> RemoveUser(string id, [FromForm]string username)
         {
             await _uow.Boards.RemoveUserAsync(id, username);

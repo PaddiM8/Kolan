@@ -10,11 +10,13 @@ using Microsoft.AspNetCore.Http;
 using Kolan.Models;
 using Kolan.Repositories;
 
-namespace Kolan.Controllers
+namespace Kolan.Controllers.Api
 {
     /// <summary>
     /// Managing users
     /// </summary>
+    [Produces("application/json")]
+    [Route("api/Login")]
     public class UserController : Controller
     {
         private readonly UnitOfWork _uow;
@@ -29,15 +31,24 @@ namespace Kolan.Controllers
         /// </summary>
         /// <param name="username">Chosen username</param>
         /// <param name="password">Chosen password</param>
-        /// <returns>Returns an empty string for now.</returns>
         [HttpPost("Create")]
-        public async Task<string> Create(string username, string password)
+        public async Task<IActionResult> Create(string username, string password)
         {
             string passwordHash = PBKDF2.Hash(password);
             await _uow.Users.AddAsync(new User { Username = username, Password = passwordHash });
-            //await Database.Client.Cypher.Create($"(u:User {{ username: '{username}', password: '{passwordHash}' }})")
-            //                      .ExecuteWithoutResultsAsync();
-            return "";
+            return Ok();
+        }
+
+        public async Task<IActionResult> ChangePassword(string username, string currentPassword, string newPassword)
+        {
+            if (await _uow.Users.ValidatePassword(username, currentPassword) == false)
+            {
+                return BadRequest("Invalid password.");
+            }
+
+            _uow.Users.ChangePassword(username, newPassword);
+
+            return Ok();
         }
     }
 }

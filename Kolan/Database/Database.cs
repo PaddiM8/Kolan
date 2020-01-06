@@ -1,10 +1,9 @@
-using System;
-using System.Linq;
-using System.Collections.Generic;
-using Neo4jClient;
 
-using Kolan.Controllers;
+using System.Linq;
+using Neo4jClient;
+using Kolan.Controllers.Api;
 using Kolan.Repositories;
+using System;
 
 namespace Kolan
 {

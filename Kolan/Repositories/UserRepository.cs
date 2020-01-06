@@ -1,8 +1,8 @@
-using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Neo4jClient;
 using Kolan.Models;
+using System.Linq;
+using System.Collections;
 
 namespace Kolan.Repositories
 {
@@ -22,6 +22,27 @@ namespace Kolan.Repositories
                 .Create("(u:User {newUser})-[:ChildGroup]->(g:Group {newGroup})-[:Next]->(:End)")
                 .WithParam("newUser", entity)
                 .WithParam("newGroup", new Group { Name = "root", Id = entity.Username })
+                .ExecuteWithoutResultsAsync();
+        }
+
+        public async Task<bool> ValidatePassword(string username, string password)
+        {
+            var result = await Client.Cypher
+                .Match("(user:User)")
+                .Where((User user) => user.Username == username)
+                .Return((user) => user.As<User>().Password)
+                .ResultsAsync;
+
+            return PBKDF2.Validate(password, result.SingleOrDefault());
+        }
+
+        public async Task ChangePassword(string username, string newPassword)
+        {
+            await Client.Cypher
+                .Match("(user:User)")
+                .Where((User user) => user.Username == username)
+                .Set("user.password = {password}")
+                .WithParam("password", PBKDF2.Hash(newPassword))
                 .ExecuteWithoutResultsAsync();
         }
     }

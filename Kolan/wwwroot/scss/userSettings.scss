@@ -1,0 +1,47 @@
+@import "common";
+@import "mixins";
+
+@include ui-elements(1em);
+
+body {
+    display: grid;
+    grid-template-columns: auto 800px auto;
+    grid-template-rows: 150px auto;
+}
+
+h1 {
+    font-size: 1.8em;
+    font-weight: 400;
+}
+
+h3 {
+    font-size: 1.4em;
+    font-weight: 500;
+}
+
+header {
+    grid-area: 1 / 2;
+    margin-top: 50px;
+}
+
+main {
+    grid-area: 2 / 2;
+
+    form {
+        display: flex;
+        flex-direction: column;
+        width: 400px;
+    }
+
+    input {
+        margin-bottom: 10px;
+    }
+
+    input[type="text"], input[type="password"], input[type="email"] {
+        width: 100%;
+    }
+
+    input[type="submit"] {
+        margin-left: auto;
+    }
+}

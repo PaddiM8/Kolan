@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+        <title>User Settings - Kolan</title>
+
+        <link rel="stylesheet" type="text/css" href="https://rsms.me/inter/inter.css">
+        <link rel="stylesheet" type="text/css" href="~/css/userSettings.css">
+    </head>
+    <body>
+        <header>
+            <h1>User Settings</h1>
+            <hr />
+        </header>
+        <main>
+            <h3>Change Password</h3>
+            @model ChangePasswordViewModel
+            <form asp-action="ChangePassword" method="post">
+                <label class="error">@Html.ValidationMessageFor(m => m.CurrentPassword)</label>
+                <input asp-for="CurrentPassword" class="input" placeholder="Current password..." />
+                <label class="error">@Html.ValidationMessageFor(m => m.NewPassword)</label>
+                <input asp-for="NewPassword" class="input" placeholder="New password..." />
+                <label class="error">@Html.ValidationMessageFor(m => m.RepeatPassword)</label>
+                <input asp-for="RepeatPassword" class="input" placeholder="Repeat password..." />
+                <input type="submit" value="Change" />
+            </form>
+        </main>
+        <script>
+            const tempData = {
+                message: '@TempData["message"]'
+            }
+        </script>
+        <script src="~/dist/userSettings.js"></script>
+    </body>
+</html>

@@ -6,6 +6,7 @@ module.exports = {
     entry: {
         boards: './Kolan/wwwroot/js/views/boards.js',
         board: './Kolan/wwwroot/js/views/board.js',
+        userSettings: './Kolan/wwwroot/js/views/userSettings.js',
         components: './Kolan/wwwroot/js/components/components.js'
     },
     output: {

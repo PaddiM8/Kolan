@@ -6,6 +6,7 @@ import { IBoard } from "../models/IBoard";
 import { Board } from "../views/board";
 import { ContentFormatter } from "../processing/contentFormatter";
 import { BoardHub } from "../communication/boardHub";
+import { ConfirmDialog } from "../dialogs/confirmDialog";
 
 /**
  * Controller to add/remove/edit/etc. tasks in a tasklist.
@@ -172,10 +173,12 @@ export class TasklistController {
     }
 
     private onDeleteClick(item: DraggableItem) {
+        const confirmDialog = new ConfirmDialog("Delete task?", "Delete");
+        document.body.appendChild(confirmDialog);
+        confirmDialog.shown = true;
+        confirmDialog.addEventListener("submitDialog", () => {
+            new BoardHub().deleteTask(item.dataset.id);;
         item.parentNode.removeChild(item);
-        new BoardHub().deleteTask(item.dataset.id);;
-        /*new ApiRequester().send("Boards", Board.viewData.id, "DELETE", [
-            new RequestParameter("boardId", item.dataset.id)
-        ]);*/
+        });
     }
 }

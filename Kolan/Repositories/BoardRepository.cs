@@ -155,9 +155,9 @@ namespace Kolan.Repositories
                 .Call("apoc.lock.nodes([prev])")
                 .Match("(prev)-[prevRel:Next]->(board)-[nextRel:Next]->(next)")
                 .WithParam("id", id)
-                .Match("(parent:Board)-[:ChildBoard]->(board)")
+                .Match("(:Board)-[childRel:ChildBoard]->(board)")
                 .Create("(prev)-[:Next]->(next)")
-                .Delete("prevRel, nextRel, board, parent")
+                .Delete("prevRel, nextRel, board, childRel")
                 .ExecuteWithoutResultsAsync();
         }
 

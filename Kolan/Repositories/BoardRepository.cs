@@ -51,7 +51,7 @@ namespace Kolan.Repositories
                 .OptionalMatch("(group)-[:Next*]->(childBoard:Board)-[:Next*]->(:End)")
                 .With("board, group, groupRel, {group: group, boards: collect(childBoard)} AS groups")
                 .OrderBy("groupRel.order")
-                .OptionalMatch("path=(board:Board)<-[:ChildBoard|SharedBoard*0..]-()<-[:Next*]-()<-[:ChildGroup]-(user:User)")
+                .OptionalMatch("path=(board)<-[:ChildBoard*0..]-()<-[:ChildBoard|SharedBoard]-(user:User)")
                 .Where((User user) => user.Username == username)
                 .With("board, group, groups, path")
                 .Return((board, group, groups, path) => new
@@ -72,7 +72,7 @@ namespace Kolan.Repositories
         public async Task<bool> UserHasAccess(string boardId, string username)
         {
             var result = await Client.Cypher
-                .Match("path=(board:Board)<-[:ChildBoard|SharedBoard*0..]-()<-[:Next*]-()<-[:ChildGroup]-(user:User)")
+                .Match("path=(board:Board)<-[:ChildBoard*0..]-()<-[:ChildBoard|SharedBoard]-(user:User)")
                 .Where((User user) => user.Username == username)
                 .AndWhere((Board board) => board.Id == boardId)
                 .Return((path) => Return.As<string>("CASE WHEN path IS NULL THEN 'false' ELSE 'true' END"))
@@ -101,6 +101,7 @@ namespace Kolan.Repositories
                 .Match("(user)-[:ChildGroup]->(previous)-[oldRel:Next]->(next)")
                 .Create("(previous)-[:Next]->(board:Board {newBoard})-[:Next]->(next)")
                 .WithParam("newBoard", entity)
+                .Create("(user)-[:ChildBoard]->(board)")
                 .Delete("oldRel")
                 .ExecuteWithoutResultsAsync();
 
@@ -240,7 +241,7 @@ namespace Kolan.Repositories
                 .Match("(user:User)")
                 .Where((User user) => user.Username == username)
                 .Call("apoc.lock.nodes([user])")
-                .Match("(user)-[:ChildGroup]->(:Group)-[:Next*]->(link:Link)-[sharedRel:SharedBoard]->(board:Board)")
+                .Match("(user)-[:ChildGroup]->()-[:Next*]->(link:Link)-[sharedRel:SharedBoard]->(board:Board)")
                 .Where((Board board) => board.Id == boardId)
                 .Match("(previous)-[previousRel:Next]->(link)-[nextRel:Next]->(next)")
                 .Delete("previousRel, nextRel, sharedRel, link")

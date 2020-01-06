@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Kolan.Hubs
 {
+    [Authorize]
     public class BoardHub : Hub<IBoardClient>
     {
         private readonly UnitOfWork _uow;

@@ -1,14 +1,11 @@
-using System;
 using System.Collections.Generic;
-using System.Security.Authentication;
 using System.Threading.Tasks;
-using System.Linq;
-using Neo4jClient;
-using Neo4jClient.Cypher;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
-using Kolan.Models;
 using Kolan.Repositories;
+using System.Security.Claims;
+using Kolan.Security;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
 
 namespace Kolan.Controllers.Api
 {

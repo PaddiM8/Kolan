@@ -177,8 +177,9 @@ export class TasklistController {
         document.body.appendChild(confirmDialog);
         confirmDialog.shown = true;
         confirmDialog.addEventListener("submitDialog", () => {
-            new BoardHub().deleteTask(item.dataset.id);;
-        item.parentNode.removeChild(item);
+            new BoardHub().deleteTask(item.dataset.id);
+            item.parentNode.removeChild(item);
+            document.body.removeChild(confirmDialog);
         });
     }
 }

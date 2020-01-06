@@ -62,6 +62,7 @@ header {
     font-family: "Inter", sans-serif;
     width: 100%;
     grid-template-columns: repeat(4, 1fr);
+    overflow: hidden;
 }
 
 .list-head .item {

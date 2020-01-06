@@ -139,16 +139,15 @@ export class DraggableItem extends LitElement {
             });
 
             // Draggable
-            this.parentElement.parentElement.appendChild(this); // Move task out from tasklists, then get position: fixed
             this.style.width = this.offsetWidth + "px";
             this.style.position = "absolute";
+            this.ownerDocument.body.appendChild(this); // Move task out from tasklists, then get position: absolute
             this.detached = true;
         }
 
-        const parentRect = this.parentElement.parentElement.getBoundingClientRect();
         const newPos = {
-            X: e.pageX - this.startPos.X - parentRect.left - 20,
-            Y: e.pageY - this.startPos.Y - parentRect.top
+            X: e.pageX - this.startPos.X,
+            Y: e.pageY - this.startPos.Y
         }
 
         this.style.left = newPos.X + "px";

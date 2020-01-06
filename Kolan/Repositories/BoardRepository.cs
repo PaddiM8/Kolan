@@ -51,7 +51,7 @@ namespace Kolan.Repositories
                 .OptionalMatch("(group)-[:Next*]->(childBoard:Board)-[:Next*]->(:End)")
                 .With("board, group, groupRel, {group: group, boards: collect(childBoard)} AS groups")
                 .OrderBy("groupRel.order")
-                .OptionalMatch("path=(board:Board)<-[:ChildBoard|SharedBoard*0..]-()<-[:Next]-()<-[:ChildGroup]-(user:User)")
+                .OptionalMatch("path=(board:Board)<-[:ChildBoard|SharedBoard*0..]-()<-[:Next*]-()<-[:ChildGroup]-(user:User)")
                 .Where((User user) => user.Username == username)
                 .With("board, group, groups, path")
                 .Return((board, group, groups, path) => new
@@ -72,7 +72,7 @@ namespace Kolan.Repositories
         public async Task<bool> UserHasAccess(string boardId, string username)
         {
             var result = await Client.Cypher
-                .Match("path=(board:Board)<-[:ChildBoard|SharedBoard*0..]-()<-[:Next]-()<-[:ChildGroup]-(user:User)")
+                .Match("path=(board:Board)<-[:ChildBoard|SharedBoard*0..]-()<-[:Next*]-()<-[:ChildGroup]-(user:User)")
                 .Where((User user) => user.Username == username)
                 .AndWhere((Board board) => board.Id == boardId)
                 .Return((path) => Return.As<string>("CASE WHEN path IS NULL THEN 'false' ELSE 'true' END"))

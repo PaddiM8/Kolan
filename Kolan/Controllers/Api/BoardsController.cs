@@ -41,7 +41,7 @@ namespace Kolan.Controllers.Api
         [HttpGet("{id}")]
         public async Task<IActionResult> GetBoard(string id)
         {
-            var result = await _uow.Boards.GetAsync(id, User.Identity.Name);
+            dynamic result = await _uow.Boards.GetAsync(id, User.Identity.Name);
             if (result == null) return NotFound();
             if (result.UserAccess == "false") return Unauthorized(); // No AuthorizeForBoard attribute here since this GetAsync() already retrieves this (for other reason). Also, later on users should be able to make boards visible to the public
 

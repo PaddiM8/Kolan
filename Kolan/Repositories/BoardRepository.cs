@@ -1,13 +1,13 @@
 using System;
 using System.Linq;
-using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using Neo4jClient;
 using Neo4jClient.Cypher;
 using Kolan.Models;
+using System.Runtime.CompilerServices;
 
+[assembly:InternalsVisibleTo("Kolan.Tests")]
 namespace Kolan.Repositories
 {
     public class BoardRepository : Repository<Board>
@@ -146,6 +146,18 @@ namespace Kolan.Repositories
                 .Set("board = {newBoardContents}")
                 .WithParam("newBoardContents", newBoardContents)
                 .ExecuteWithoutResultsAsync();
+        }
+
+        public async Task<bool> Exists(string id)
+        {
+            var result = await Client.Cypher
+                .Match("(board:Board)")
+                .Where("board.id = {id}")
+                .WithParam("id", id)
+                .Return((board) => Return.As<int>("count(board)"))
+                .ResultsAsync;
+
+            return result.Single() > 0;
         }
 
         public async Task DeleteAsync(string id)

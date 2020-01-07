@@ -4,14 +4,15 @@ using Neo4jClient;
 using Kolan.Controllers.Api;
 using Kolan.Repositories;
 using System;
+using Neo4jClient.Transactions;
 
 namespace Kolan
 {
-    static class Database
+    public class Database
     {
-        public static IGraphClient Client;
+        public static ITransactionalGraphClient Client;
 
-        public static async void Init()
+        public async void Init()
         {
             // Create graph client
             Client = new GraphClient(new Uri(Config.Values.DatabaseUrl),
@@ -33,7 +34,7 @@ namespace Kolan
             new UserController(new UnitOfWork(Client)).Create("bakk2", "pass");
         }
 
-        public static void Setup()
+        public void Setup()
         {
             try
             {

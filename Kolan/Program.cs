@@ -15,7 +15,6 @@ namespace Kolan
       public static void Main(string[] args)
       {
          Config.Load();
-         Database.Init();
          CreateWebHostBuilder(args).Build().Run();
       }
 

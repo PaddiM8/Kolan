@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace Kolan
 {
-   class ConfigObject
+   public class ConfigObject
    {
       public string DatabaseUrl      { get; set; }
       public string DatabaseUser     { get; set; }

@@ -35,6 +35,7 @@ namespace Kolan
         public void ConfigureServices(IServiceCollection services)
         {
             // Dependency injection
+            new Database().Init();
             services.AddSingleton<UnitOfWork>(new UnitOfWork(Database.Client));
 
             // SignalR

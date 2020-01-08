@@ -24,18 +24,17 @@ namespace Kolan.Repositories
         /// Return all the root boards of a user.
         /// <param name="username">User to get the boards from.</param>
         /// </summary>
-        public async Task<object> GetAllAsync(string username)
+        public async Task<IEnumerable<Board>> GetAllAsync(string username)
         {
-            return await Client.Cypher
-                .Match("(user:User)-[:ChildGroup]->(:Group)-[:Next*]->(board)-[:Next*]->(:End)")
+            var result = await Client.Cypher
+                .Match("(user:User)-[:ChildGroup]->(:Group)-[:Next*]->(boardOrLink)-[:Next*]->(:End)")
                 .Where((User user) => user.Username == username)
-                .OptionalMatch("(board)-[:SharedBoard]->(shared:Board)")
-                .Return((board, shared) => new
-                {
-                    Board = board.As<Board>(),
-                    Shared = shared.As<Board>()
-                })
-            .ResultsAsync;
+                .OptionalMatch("(boardOrLink)-[:SharedBoard]->(shared:Board)")
+                .Return((boardOrLink, shared) => Return.As<IEnumerable<Board>>(
+                            "collect(boardOrLink) + collect(shared{.*, shared:true})"))
+                .ResultsAsync;
+
+            return result.Single();
         }
 
         /// <summary>

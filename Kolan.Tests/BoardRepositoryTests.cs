@@ -1,19 +1,20 @@
 using NUnit.Framework;
 using Kolan.Repositories;
-using Neo4jClient.Transactions;
 using Kolan.Controllers.Api;
 using System.Threading.Tasks;
 using Kolan.Models;
+using Neo4jClient;
+using System.Collections.Generic;
+using System.Linq;
 using System;
 using Newtonsoft.Json;
-using System.Runtime.CompilerServices;
 
 namespace Kolan.Tests
 {
     public class BoardRepositoryTest
     {
         private UnitOfWork _uow;
-        private ITransactionalGraphClient _graphClient;
+        private IGraphClient _graphClient;
 
         [SetUp]
         public async Task Setup()
@@ -26,11 +27,14 @@ namespace Kolan.Tests
         [TearDown]
         public async Task TearDown()
         {
-            await _graphClient.Cypher.Match("(n)").DetachDelete("n").ExecuteWithoutResultsAsync();
+            await _graphClient.Cypher
+                .Match("(n)")
+                .DetachDelete("n")
+                .ExecuteWithoutResultsAsync();
         }
 
         [OneTimeSetUp]
-        public async Task SetupTests()
+        public void SetupTests()
         {
             Config.Load("../../../../server-config.json");
             new Database().Init();
@@ -39,52 +43,90 @@ namespace Kolan.Tests
         }
 
         [TestCase("testUser1", "board", "some description")]
-        [TestCase("testUser2", "board", "some description")]
         [TestCase("testUser1", "board", "")]
-        [TestCase("testUser2", "board", "")]
         public async Task Add_RootBoardWithName_ReturnsId(string username, string name, string description)
         {
-            string returnedId = await _uow.Boards.AddAsync
-            (
-                new Board
-                {
-                    Name = name,
-                    Description = description
-                },
-                username
-           );
+            // Arrange
+            var board = new Board
+            {
+                Name = name,
+                Description = description
+            };
 
+            // Act
+            string returnedId = await _uow.Boards.AddAsync(board, username);
             bool exists = await _uow.Boards.Exists(returnedId);
 
+            // Assert
             Assert.That(returnedId, Is.Not.Null);
             Assert.That(exists, Is.True);
         }
 
         [TestCase("testUser1", "board", "some description")]
-        [TestCase("testUser2", "board", "some description")]
         [TestCase("testUser1", "board", "")]
-        [TestCase("testUser2", "board", "")]
-        public async Task AddAndGet_BoardWithName_ReturnsBoardNoGroupsNoAncestorsAndUserAccess(string username, string name, string description)
+        public async Task AddAndGet_BoardWithName_ReturnsEmptyBoardAndUserAccess(string username, string name, string description)
         {
-            string returnedId = await _uow.Boards.AddAsync
-            (
-                new Board
-                {
-                    Name = name,
-                    Description = description
-                },
-                username
-           );
+            // Arrange
+            var board = new Board
+            {
+                Name = name,
+                Description = description
+            };
 
-            dynamic actual = await _uow.Boards.GetAsync(returnedId, username);
-            Console.WriteLine(JsonConvert.SerializeObject(actual));
+            // Act
+            string returnedId = await _uow.Boards.AddAsync(board, username);
+            dynamic returnedBoard = await _uow.Boards.GetAsync(returnedId, username);
 
-            Assert.That(returnedId, Is.Not.Null);
-            Assert.That(actual.Board.Name, Is.EqualTo(name));
-            Assert.That(actual.Board.Description, Is.EqualTo(description));
-            Assert.That(actual.Groups, Is.Null);
-            Assert.That(actual.Ancestors, Is.Empty);
-            Assert.That(actual.UserAccess, Is.EqualTo("true"));
+            // Assert
+            Assert.That(returnedBoard.Board.Name, Is.EqualTo(name));
+            Assert.That(returnedBoard.Board.Description, Is.EqualTo(description));
+            Assert.That(returnedBoard.Groups, Is.Null);
+            Assert.That(returnedBoard.Ancestors, Is.Empty);
+            Assert.That(returnedBoard.UserAccess, Is.EqualTo("true"));
+        }
+
+        [TestCase("testUser1", "board", "some description", "testUser2")]
+        [TestCase("testUser1", "board", "some description", "")]
+        [TestCase("testUser1", "board", "some description", "abc")]
+        public async Task AddAndGet_BoardWithUnauthorizedUser_ReturnsUserAccessFalse(string username, string name, string description, string unauthorizedUser)
+        {
+            // Arrange
+            var board = new Board
+            {
+                Name = name,
+                Description = description
+            };
+
+            // Act
+            string returnedId = await _uow.Boards.AddAsync(board, username);
+            dynamic returnedBoard = await _uow.Boards.GetAsync(returnedId, unauthorizedUser);
+
+            // Assert
+            Assert.That(returnedBoard.UserAccess, Is.EqualTo("false"));
+        }
+
+        [TestCase("testUser1", "testUser2", "board", "some description")]
+        public async Task AddAndGetAll_BoardsIncludingSharedOnes_ListOfBoards(string username1, string username2, string name, string description)
+        {
+            // Arrange
+            var board = new Board
+            {
+                Name = name,
+                Description = description
+            };
+
+            // Act
+            string boardId1 = await _uow.Boards.AddAsync(board, username1);
+            string boardId2 = await _uow.Boards.AddAsync(board, username1);
+            string boardId3 = await _uow.Boards.AddAsync(board, username2);
+            await _uow.Boards.AddUserAsync(boardId3, username1);
+
+            List<Board> returnedBoards = (await _uow.Boards.GetAllAsync(username1)).ToList();
+
+            // Assert
+            Assert.That(returnedBoards.Any(x => x.Id == boardId1 && !x.Shared), Is.True);
+            Assert.That(returnedBoards.Any(x => x.Id == boardId2 && !x.Shared), Is.True);
+            Assert.That(returnedBoards.Any(x => x.Id == boardId3 && x.Shared), Is.True);
         }
     }
 }

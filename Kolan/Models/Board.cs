@@ -19,5 +19,8 @@ namespace Kolan.Models
         [JsonProperty("description")]
         [StringLength(2000, ErrorMessage = "Description may not be more than 2000 characters long.")]
         public string Description { get; set; }
+
+        [JsonProperty("shared")]
+        public bool Shared { get; set; } = false;
     }
 }

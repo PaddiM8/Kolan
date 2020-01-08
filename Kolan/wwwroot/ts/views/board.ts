@@ -228,7 +228,6 @@ export class Board {
         // Get board content
         new ApiRequester().send("Boards", Board.viewData.id, RequestType.Get).then(result => {
             const boardContent = JSON.parse(result as string);
-            console.log(boardContent.ancestors);
 
             // Set title on the client side, both on the board page and in the document title.
             this.setTitle(boardContent.board.name, boardContent.ancestors);

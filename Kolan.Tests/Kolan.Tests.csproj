@@ -16,11 +16,5 @@
   <ItemGroup>
     <ProjectReference Include="..\Kolan\Kolan.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-  <Content Include="premadeEnvironments\**\*.*">
-    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-  </Content>
-  </ItemGroup>
 
 </Project>

@@ -176,7 +176,7 @@ namespace Kolan.Repositories
         /// <summary>
         /// Add board groups
         /// </summary>
-        public async Task<object> SetupAsync(string id)
+        public async Task<IEnumerable<Group>> SetupAsync(string id)
         {
             var result =
                 await Client.Cypher
@@ -199,7 +199,6 @@ namespace Kolan.Repositories
         /// </summary>
         public async Task MoveAsync(string hostId, string boardId, string targetId, bool isRoot)
         {
-            Console.WriteLine("Moved");
             string whereHostId = "host.id = {hostId}";
             if (isRoot) whereHostId = "host.username = {hostId}"; // Username
 
@@ -275,7 +274,7 @@ namespace Kolan.Repositories
         }
 
         // This is all temporary ok
-        private async Task<object> AddDefaultGroups(string id)
+        private async Task<IEnumerable<Group>> AddDefaultGroups(string id)
         {
             await Client.Cypher
                 .Match("(board:Board)")

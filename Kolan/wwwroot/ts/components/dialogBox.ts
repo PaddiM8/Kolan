@@ -21,8 +21,6 @@ export class DialogBox extends LitElement {
 
     constructor() {
         super();
-        //this.dialogOptions = dialogOptions;
-        //this.id = id;
     }
 
     render() {
@@ -32,7 +30,7 @@ export class DialogBox extends LitElement {
          <section class="dialog">
             <h2>${html`${this.options.title}`}</h2>
             <div id="inputs">
-                ${this.fields.map(x => html`${this.getComponentHtml(x.inputType, x.key, x.value)}`)}
+                ${this.fields.map(x => html`${this.getComponentHtml(x.inputType, x.key, x.value, x.title)}`)}
             </div>
             <button @click="${this.submitHandler}">${html`${this.options.primaryButton}`}</button>
             <button class="secondary" @click="${this.cancelHandler}">Cancel</button>
@@ -63,6 +61,8 @@ export class DialogBox extends LitElement {
 
             if (element instanceof InputList) {
                 element.items = values[name];
+            } else if (element.getAttribute("type") == "checkbox") {
+                (element as HTMLInputElement).checked = values[name];
             } else {
                 element["value"] = values[name];
             }
@@ -113,6 +113,9 @@ export class DialogBox extends LitElement {
         for (const element of inputs) {
             if (element.name) {
                 input[element.name] = element.value;
+            } else if (element.classList.contains("checkboxLabel")) {
+                const checkbox = element.children[0];
+                input[checkbox.name] = checkbox.checked;
             }
         }
 
@@ -129,8 +132,11 @@ export class DialogBox extends LitElement {
     public hide(): void {
         let dialogItems = <any>this.shadowRoot.getElementById("inputs").children;
         for (let element of dialogItems) {
-            if (element.name) element.value = "";
-            else if (element.tagName == "LABEL") element.textContent = "";
+            if (element.name) {
+                element.value = "";
+            } else if (element.tagName == "LABEL" && !element.classList.contains("checkboxLabel")) {
+                element.textContent = "";
+            }
         }
 
         this.shown = false;
@@ -146,21 +152,23 @@ export class DialogBox extends LitElement {
      * @param {string} value
      * @returns {TemplateResult}
      */
-    private getComponentHtml(inputType: InputType, name: string, value: string): TemplateResult {
+    private getComponentHtml(inputType: InputType, name: string, value: string, title: string = null): TemplateResult {
         switch (inputType) {
             case InputType.Text:
                 return html`<p>${value}:</p>
-            <label for="${name}"></label>
-            <input type="text" name="${name}" placeholder="${value}..." /><br />`;
+                            <label for="${name}"></label>
+                            <input type="text" name="${name}" placeholder="${value}..." /><br />`;
             case InputType.TextArea:
                 return html`<p>${value}:</p>
-            <label for="${name}"></label>
-            <textarea name="${name}" placeholder="${value}"></textarea>`;
+                            <label for="${name}"></label>
+                            <textarea name="${name}" placeholder="${value}"></textarea>`;
             case InputType.InputList:
                 this.list = new InputList(value);
-            let element = this.list as HTMLElement;
-            element.setAttribute("name", name);
-            return html`${element}`;
+                let element = this.list as HTMLElement;
+                element.setAttribute("name", name);
+                return html`<h3>${title}</h3>${element}`;
+            case InputType.Checkbox:
+                return html`<label class="checkboxLabel"><input type="checkbox" name="${name}" />${value}</label>`
             default:
                 return html``;
         }

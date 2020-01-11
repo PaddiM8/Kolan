@@ -6,6 +6,7 @@ import { RequestType } from "../enums/requestType";
 import { ApiRequester } from "../communication/apiRequester";
 import { ToastController } from "../controllers/toastController";
 import { ToastType } from "../enums/toastType";
+import { Board } from "../views/board";
 
 declare const viewData;
 
@@ -13,13 +14,19 @@ declare const viewData;
 export class ShareDialog extends DialogBox {
     @property({type: Array<object>()}) fields = [
         {
+            key: "public",
+            value: "Anyone can view",
+            inputType: InputType.Checkbox
+        },
+        {
             key: "inputList",
+            title: "Add collaborators",
             value: "Name of user",
             inputType: InputType.InputList
         }
     ];
     @property({type: Object}) options = {
-        title: "Add collaborators",
+        title: "Share",
         primaryButton: "Done"
     }
 
@@ -35,6 +42,17 @@ export class ShareDialog extends DialogBox {
         .then(response => {
             this.list.items = JSON.parse(response as string);
         });
+    }
+
+    submitHandler(): void {
+        const isPublic = this.getFormData()["public"];
+        new ApiRequester().send("Boards", `${viewData.id}/ChangePublicity`, RequestType.Post, {
+            publicity: isPublic
+        });
+
+        Board.content.public = isPublic;
+
+        this.hide();
     }
 
     private onUserAdded(e): void {

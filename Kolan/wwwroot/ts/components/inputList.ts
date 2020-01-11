@@ -32,7 +32,7 @@ export class InputList extends LitElement {
 
             :host ul {
                 width: 100%;
-                height: 400px;
+                height: 200px;
                 border: 1px solid #9e9e9e;
                 list-style: none;
                 margin-left: 0;

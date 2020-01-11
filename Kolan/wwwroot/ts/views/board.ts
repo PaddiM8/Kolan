@@ -10,6 +10,7 @@ import { ToastType } from "../enums/toastType";
 import { RequestType } from "../enums/requestType";
 import { ToastNotif } from "../components/toastNotif";
 import { ToastController } from "../controllers/toastController";
+import { IBoard } from "../models/IBoard";
 
 // Dialogs
 import { AddTaskDialog } from "../dialogs/addTaskDialog";
@@ -26,10 +27,11 @@ declare const viewData;
  * @function
  */
 export class Board {
-    static dialogs;
-    static tasklistControllers = {};
-    static viewData;
-    static pageReloadInProgress = false;
+    public static content: IBoard;
+    public static dialogs;
+    public static tasklistControllers = {};
+    public static viewData;
+    public static pageReloadInProgress = false;
     private currentTasklistId: string;
 
     constructor() {
@@ -42,7 +44,12 @@ export class Board {
         this.loadBoard();
 
         const shareButton = document.getElementById("shareButton");
-        shareButton.addEventListener("click", e => Board.dialogs.share.shown = true)
+        shareButton.addEventListener("click", e => {
+            Board.dialogs.share.shown = true
+            Board.dialogs.share.setValues({
+                public: Board.content.public
+            });
+        });
 
         // Websockets
         new BoardHub().join(Board.viewData.id);
@@ -144,49 +151,6 @@ export class Board {
         }
 
         Board.dialogs = dialogs;
-
-        /*const dialogs = {
-            "addTask": new DialogBox(addTaskDialog, "addTaskDialog"),
-            "editTask": new DialogBox(editTaskDialog, "editTaskDialog"),
-            "share": new DialogBox(shareDialog, "shareDialog"),
-            "setup": new DialogBox(setupDialog, "setupDialog"),
-        }
-
-        // addTaskDialog
-        //dialogs.addTask.dialogOptions.requestMethod = Board.viewData.id + "/" +
-            //dialogs.addTask.dialogOptions.requestMethod;
-        document.body.appendChild(dialogs.addTask);
-
-        // editTaskDialog
-        //dialogs.editTask.dialogOptions.requestMethod = Board.viewData.id + "/" +
-            //dialogs.editTask.dialogOptions.requestMethod;
-        document.body.appendChild(dialogs.editTask);
-
-        // Prepare shareDialog
-        document.body.appendChild(dialogs.share);
-        dialogs.share.addEventListener("itemAdded", (e: CustomEvent) => // User added in the share dialog
-            this.onUserAdded(e.detail["value"], e.detail["object"]));
-        dialogs.share.addEventListener("itemRemoved", (e: CustomEvent) => // User removed in the share dialog
-            this.onUserRemoved(e.detail));
-        dialogs.share.addEventListener("openDialog", () => {
-            // Get collaborators
-            new ApiRequester().send("Boards", Board.viewData.id + "/Users", RequestType.Get).then(result => {
-                const users: string[] = JSON.parse(result as string);
-                dialogs.share.list.items = users;
-            });
-        });
-
-        // Prepare setupDialog
-        (dialogs.setup.dialogOptions as IDialogHttpTemplate).requestMethod = Board.viewData.id + "/" +
-            (dialogs.setup.dialogOptions as IDialogHttpTemplate).requestMethod;
-        document.body.appendChild(dialogs.setup);
-
-        dialogs.setup.addEventListener("submitDialog", (e: CustomEvent) => {
-            for (const group of e.detail.output)
-                this.addGroup(group);
-        });
-
-        Board.dialogs = dialogs;*/
     }
 
     private setTitle(title: string, ancestors: object[]) {
@@ -194,20 +158,21 @@ export class Board {
         let html = `<a href="/">Boards</a> / `;
 
         // Ancestors
-        for (let i = 0; i < ancestors.length; i++) {
-            // If there are a lot of ancestors, hide the middle ones
-            if (ancestors.length >= 5 && i == 1)
-            {
-                html += `<span>...</span> / `
-                i = ancestors.length - 2;
-                continue;
-            }
+        if (ancestors)
+            for (let i = 0; i < ancestors.length; i++) {
+                // If there are a lot of ancestors, hide the middle ones
+                if (ancestors.length >= 5 && i == 1)
+                {
+                    html += `<span>...</span> / `
+                    i = ancestors.length - 2;
+                    continue;
+                }
 
-            const ancestor = ancestors[ancestors.length - i - 1]; // Do backwards for correct order
-            const name = ancestor["name"];
-            const id = ancestor["id"];
-            html += `<a href="./${id}">${name}</a> / `;
-        }
+                const ancestor = ancestors[ancestors.length - i - 1]; // Do backwards for correct order
+                const name = ancestor["name"];
+                const id = ancestor["id"];
+                html += `<a href="./${id}">${name}</a> / `;
+            }
 
         // Current board
         html += `<span>${title}</span>`;
@@ -251,6 +216,8 @@ export class Board {
                 for (const board of groupObject.boards)
                     this.addTask(groupObject.group.id, board);
             }
+
+            Board.content = boardContent.board;
 
             ToastController.new("Loaded board", ToastType.Info);
         }).catch((req) => {

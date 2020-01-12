@@ -160,23 +160,28 @@ export class DraggableItem extends LitElement {
         const placeholder: HTMLElement = this.parentElement.parentElement.querySelector(this.placeholder);
         const tasklistElements = elementsUnder.tasklist.children;
         let lastRect = undefined;
+
         if (tasklistElements.length > 0 )
+        {
             lastRect = tasklistElements[tasklistElements.length - 1].getBoundingClientRect(); // Get last element in tasklist if not empty
-        if (elementsUnder.tasklist == undefined) return;
+        }
+
+        if (!elementsUnder.tasklist) return;
 
         // If a draggable is under, and the placeholder wasn't already inserted there
-        if (elementsUnder.closestDraggable != undefined && elementsUnder.closestDraggable != this) {
-            const overTopHalf = elementsUnder.middlePoint.Y <= this.getMiddlePoint(elementsUnder.closestDraggable).Y;
+        const closest = elementsUnder.closestDraggable;
+        if (closest && closest != this) {
+            const overTopHalf = elementsUnder.middlePoint.Y <= this.getMiddlePoint(closest).Y;
 
             // If over the top half of the element
-            if  (overTopHalf && this.lastHoveredDraggable != elementsUnder.closestDraggable) {
-                elementsUnder.tasklist.insertBefore(placeholder, elementsUnder.closestDraggable);
-                this.lastHoveredDraggable = elementsUnder.closestDraggable as DraggableItem; // Remember last placement
-            } else if (this.lastHoveredDraggable != elementsUnder.closestDraggable.nextSibling) { // If over the bottom half of the element
-                elementsUnder.tasklist.insertBefore(placeholder, elementsUnder.closestDraggable.nextSibling);
-                this.lastHoveredDraggable = elementsUnder.closestDraggable.nextSibling as DraggableItem;
+            if  (overTopHalf && this.lastHoveredDraggable != closest) {
+                elementsUnder.tasklist.insertBefore(placeholder, closest);
+                this.lastHoveredDraggable = closest as DraggableItem; // Remember last placement
+            } else if (this.lastHoveredDraggable != closest.nextSibling) { // If over the bottom half of the element
+                elementsUnder.tasklist.insertBefore(placeholder, closest.nextSibling);
+                this.lastHoveredDraggable = closest.nextSibling as DraggableItem;
             }
-        } else if (lastRect == undefined) { // If empty tasklist
+        } else if (!lastRect) { // If empty tasklist
             elementsUnder.tasklist.appendChild(placeholder);
         } else if (this.getMiddlePoint().Y > lastRect.top + lastRect.height) {  // If at bottom
             elementsUnder.tasklist.appendChild(placeholder);

@@ -37,6 +37,7 @@ export class InputList extends LitElement {
                 list-style: none;
                 margin-left: 0;
                 padding-left: 0;
+                overflow: auto;
             }
 
             :host ul li {
@@ -125,12 +126,16 @@ export class InputList extends LitElement {
     private onRemoveClick(e: Event): void {
         const itemElement = (e.target as HTMLElement).parentElement;
         const itemValue = itemElement.dataset.value;
+        const index = this.items.findIndex((value) => value == itemValue);
         this.items = this.items.filter((item: string) => item != itemValue); // Remove from list, give back a list without the item. Needs optimization.
 
         this.dispatchEvent(new CustomEvent("itemRemoved", {
             bubbles: true,
             composed: true,
-            detail: itemValue
+            detail: {
+                value: itemValue,
+                index: index
+            }
         }));
     }
 }

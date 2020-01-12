@@ -22,5 +22,8 @@ namespace Kolan.Models
 
         [JsonProperty("shared")]
         public bool Shared { get; set; } = false;
+
+        [JsonProperty("public")]
+        public bool Public { get; set; } = false;
     }
 }

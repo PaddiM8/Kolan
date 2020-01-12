@@ -14,10 +14,12 @@ import { ConfirmDialog } from "../dialogs/confirmDialog";
 
 export class TasklistController {
     public tasklist: HTMLElement;
+    public name: string;
     private inEditMode: boolean;
 
-    constructor(tasklist: HTMLElement) {
+    constructor(tasklist: HTMLElement, name: string) {
         this.tasklist = tasklist;
+        this.name = name;
     }
 
     /**

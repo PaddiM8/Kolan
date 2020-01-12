@@ -58,7 +58,7 @@ namespace Kolan.Repositories
                     Board = board.As<Board>(),
                     Groups = Return.As<IEnumerable<Groups>>("CASE WHEN group IS NULL THEN NULL ELSE collect(groups) END"),
                     Ancestors = Return.As<IEnumerable<Board>>("tail([b in nodes(path) WHERE (b:Board) | b])"),
-                    UserAccess = Return.As<string>("CASE WHEN path IS NULL THEN 'false' ELSE 'true' END")
+                    UserAccess = Return.As<int>("CASE WHEN path IS NULL AND board.public = false THEN 0 ELSE 1 END")
                 })
                 .ResultsAsync;
 
@@ -147,7 +147,18 @@ namespace Kolan.Repositories
                 .ExecuteWithoutResultsAsync();
         }
 
-        public async Task<bool> Exists(string id)
+        public async Task SetPublicityAsync(string boardId, bool publicity)
+        {
+            await Client.Cypher
+                .Match("(board:Board)")
+                .Where("board.id = {id}")
+                .WithParam("id", boardId)
+                .Set("board.public = {publicity}")
+                .WithParam("publicity", publicity)
+                .ExecuteWithoutResultsAsync();
+        }
+
+        public async Task<bool> ExistsAsync(string id)
         {
             var result = await Client.Cypher
                 .Match("(board:Board)")

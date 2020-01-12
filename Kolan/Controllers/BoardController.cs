@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.Authorization;
 using Kolan.Models;
-using Kolan.Hubs;
 
 namespace Kolan.Controllers
 {
     public class BoardController : Controller
     {
+        [AllowAnonymous]
         [HttpGet("Board/{id}")]
         public IActionResult Index(string id)
         {

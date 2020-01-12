@@ -70,7 +70,7 @@ export class ShareDialog extends DialogBox {
 
     private onUserRemoved(e): void {
         new ApiRequester().send("Boards", `${viewData.id}/Users`, RequestType.Delete, {
-            username: e.detail
+            username: e.detail["value"]
         })
         .then(() => {
             ToastController.new("Collaborator removed", ToastType.Info);

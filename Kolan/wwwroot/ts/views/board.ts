@@ -17,6 +17,7 @@ import { AddTaskDialog } from "../dialogs/addTaskDialog";
 import { EditTaskDialog } from "../dialogs/editTaskDialog";
 import { ShareDialog } from "../dialogs/shareDialog";
 import { SetupDialog } from "../dialogs/setupDialog";
+import { SettingsDialog } from "../dialogs/settingsDialog";
 
 window.addEventListener("load", () => new Board());
 declare const viewData;
@@ -51,6 +52,11 @@ export class Board {
             });
         });
 
+        const settingsButton = document.getElementById("settingsButton");
+        settingsButton.addEventListener("click", e => {
+            Board.dialogs.settings.shown = true;
+        });
+
         // Websockets
         new BoardHub().join(Board.viewData.id);
 
@@ -68,7 +74,7 @@ export class Board {
     private addGroup(group: IGroup): void {
         const listhead = document.getElementById("list-head");
         listhead.insertAdjacentHTML("beforeend",
-            `<div class="item" data-id="${group.id}">
+            `<div class="item" data-id="${group.id}" data-name="${group.name}">
                 ${group.name}
                 <span class="plus">+</span>
             </div>`);
@@ -78,7 +84,7 @@ export class Board {
         tasklistElement.className = "draggableContainer";
         tasklistElement.dataset.id = group.id;
         tasklists.appendChild(tasklistElement);
-        Board.tasklistControllers[group.id] = new TasklistController(tasklistElement);
+        Board.tasklistControllers[group.id] = new TasklistController(tasklistElement, group.name);
 
         // Events
         const plusElements = listhead.getElementsByClassName("plus");
@@ -87,10 +93,6 @@ export class Board {
                 const groupId = e.currentTarget.parentElement.dataset.id;
                 Board.dialogs["addTask"].shown = true;
                 Board.dialogs["addTask"].groupId = groupId;
-                //Board.dialogs.addTask.dialogOptions.requestMethod = Board.viewData.id;
-                /*Board.dialogs.addTask.extraRequestParameters = [ 
-                    new RequestParameter("groupId", groupId)
-                ];*/
 
                 this.currentTasklistId = groupId;
             });
@@ -143,7 +145,8 @@ export class Board {
         const dialogs = {
             addTask: new AddTaskDialog(),
             editTask: new EditTaskDialog(),
-            share: new ShareDialog()
+            share: new ShareDialog(),
+            settings: new SettingsDialog()
         }
 
         for (const dialogName in dialogs) {
@@ -210,6 +213,10 @@ export class Board {
             }
 
             const tasklists = document.getElementById("tasklists");
+            const listHead = document.getElementById("list-head");
+            tasklists.style.gridTemplateColumns = `repeat(${boardContent.groups.length}, 1fr)`;
+            listHead.style.gridTemplateColumns = tasklists.style.gridTemplateColumns;
+
             for (const groupObject of boardContent.groups) {
                 this.addGroup(groupObject.group);
 

@@ -164,9 +164,9 @@ export class DialogBox extends LitElement {
                             <textarea name="${name}" placeholder="${value}"></textarea>`;
             case InputType.InputList:
                 this.list = new InputList(value);
-                let element = this.list as HTMLElement;
-                element.setAttribute("name", name);
-                return html`<h3>${title}</h3>${element}`;
+                let listElement = this.list as HTMLElement;
+                listElement.setAttribute("name", name);
+                return html`<h3>${title}</h3>${listElement}`;
             case InputType.Checkbox:
                 return html`<label class="checkboxLabel"><input type="checkbox" name="${name}" />${value}</label>`
             default:

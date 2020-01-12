@@ -6,6 +6,7 @@ using Kolan.Models;
 using Kolan.Repositories;
 using Kolan.Hubs;
 using Kolan.Filters;
+using System;
 
 namespace Kolan.Controllers.Api
 {
@@ -38,12 +39,13 @@ namespace Kolan.Controllers.Api
         /// <param name="id">Id of the board to get</param>
         /// <returns>Board, Groups (containing boards)</returns>
         /// <response code="404">If the board doesn't exist</response>
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetBoard(string id)
         {
             dynamic result = await _uow.Boards.GetAsync(id, User.Identity.Name);
             if (result == null) return NotFound();
-            if (result.UserAccess == "false") return Unauthorized(); // No AuthorizeForBoard attribute here since this GetAsync() already retrieves this (for other reason). Also, later on users should be able to make boards visible to the public
+            if (result.UserAccess == 0) return Unauthorized(); // No AuthorizeForBoard attribute here since this GetAsync() already retrieves this (for other reason). Also, later on users should be able to make boards visible to the public
 
             return Ok(result);
         }
@@ -149,6 +151,15 @@ namespace Kolan.Controllers.Api
         {
             await _uow.Boards.MoveAsync(id, boardId, targetId, false);
             await _boardHubContext.Clients.Group(id).MoveBoard(boardId, targetId); // Send to client
+
+            return Ok();
+        }
+
+        [HttpPost("{id}/ChangePublicity")]
+        [AuthorizeForBoard]
+        public async Task<IActionResult> ChangePublicity(string id, [FromForm]bool publicity)
+        {
+            await _uow.Boards.SetPublicityAsync(id, publicity);
 
             return Ok();
         }

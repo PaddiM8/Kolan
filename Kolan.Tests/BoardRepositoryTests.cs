@@ -56,7 +56,7 @@ namespace Kolan.Tests
         public async Task Add_RootBoardWithName_ReturnsId()
         {
             string returnedId = await _uow.Boards.AddAsync(_defaultBoard, _username1);
-            bool exists = await _uow.Boards.Exists(returnedId);
+            bool exists = await _uow.Boards.ExistsAsync(returnedId);
 
             // Assert
             Assert.That(returnedId, Is.Not.Null);

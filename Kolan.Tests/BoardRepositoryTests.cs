@@ -158,7 +158,7 @@ namespace Kolan.Tests
                     .Single() == 1;
 
                 bool wasAddedInLinkedList = (await _graphClient.Cypher
-                    .Match("(parent:BOARD)-[:CHILD_GROUP]->(group:GROUP)-[:NEXT*]->(child:BOARD)-[:NEXT*]->(:End)")
+                    .Match("(parent:BOARD)-[:CHILD_GROUP]->(group:GROUP)-[:NEXT*]->(child:BOARD)-[:NEXT*]->(:END)")
                     .Where((Board parent) => parent.Id == parentId)
                     .AndWhere((Board group) => group.Id == parentGroup.Id)
                     .AndWhere((Board child) => child.Id == childId)

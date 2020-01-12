@@ -27,7 +27,7 @@ namespace Kolan.Repositories
         public async Task<IEnumerable<Board>> GetAllAsync(string username)
         {
             var result = await Client.Cypher
-                .Match("(user:USER)-[:CHILD_GROUP]->(:GROUP)-[:NEXT*]->(boardOrLink)-[:NEXT*]->(:End)")
+                .Match("(user:USER)-[:CHILD_GROUP]->(:GROUP)-[:NEXT*]->(boardOrLink)-[:NEXT*]->(:END)")
                 .Where((User user) => user.Username == username)
                 .OptionalMatch("(boardOrLink)-[:SHARED_BOARD]->(shared:BOARD)")
                 .Return((boardOrLink, shared) => Return.As<IEnumerable<Board>>(
@@ -47,7 +47,7 @@ namespace Kolan.Repositories
                 .Match("(board:BOARD)")
                 .Where((Board board) => board.Id == id)
                 .OptionalMatch("(board)-[groupRel:CHILD_GROUP]->(group:GROUP)")
-                .OptionalMatch("(group)-[:NEXT*]->(childBoard:BOARD)-[:NEXT*]->(:End)")
+                .OptionalMatch("(group)-[:NEXT*]->(childBoard:BOARD)-[:NEXT*]->(:END)")
                 .With("board, group, groupRel, {group: group, boards: collect(childBoard)} AS groups")
                 .OrderBy("groupRel.order")
                 .OptionalMatch("path=(board)<-[:CHILD_BOARD*0..]-()<-[:CHILD_BOARD|SHARED_BOARD]-(user:USER)")
@@ -125,7 +125,7 @@ namespace Kolan.Repositories
                 .Match("(parent:BOARD)-[:CHILD_GROUP]->(group:GROUP)")
                 .Where((Group group) => group.Id == groupId)
                 .Call("apoc.lock.nodes([group])")
-                .Match("(group)-[:NEXT*]->(next:End)")
+                .Match("(group)-[:NEXT*]->(next:END)")
                 .Match("(previous)-[oldRel:NEXT]->(next)")
                 .Create("(previous)-[:NEXT]->(board:BOARD {newBoard})-[:NEXT]->(next)")
                 .WithParam("newBoard", entity)
@@ -291,16 +291,16 @@ namespace Kolan.Repositories
             await Client.Cypher
                 .Match("(board:BOARD)")
                 .Where((Board board) => board.Id == id)
-                .Create("(board)-[:CHILD_GROUP { order: 0 }]->(g1:GROUP { name: 'Backlog' })-[:NEXT]->(:End)")
+                .Create("(board)-[:CHILD_GROUP { order: 0 }]->(g1:GROUP { name: 'Backlog' })-[:NEXT]->(:END)")
                 .Set("g1.id = '" + _generator.NewId(id + "1") + "'")
 
-                .Create("(board)-[:CHILD_GROUP { order: 1 }]->(g2:GROUP { name: 'Ready' })-[:NEXT]->(:End)")
+                .Create("(board)-[:CHILD_GROUP { order: 1 }]->(g2:GROUP { name: 'Ready' })-[:NEXT]->(:END)")
                 .Set("g2.id = '" + _generator.NewId(id + "2") + "'")
 
-                .Create("(board)-[:CHILD_GROUP { order: 2 }]->(g3:GROUP { name: 'In Progress' })-[:NEXT]->(:End)")
+                .Create("(board)-[:CHILD_GROUP { order: 2 }]->(g3:GROUP { name: 'In Progress' })-[:NEXT]->(:END)")
                 .Set("g3.id = '" + _generator.NewId(id + "3") + "'")
 
-                .Create("(board)-[:CHILD_GROUP { order: 3 }]->(g4:GROUP { name: 'Done' })-[:NEXT]->(:End)")
+                .Create("(board)-[:CHILD_GROUP { order: 3 }]->(g4:GROUP { name: 'Done' })-[:NEXT]->(:END)")
                 .Set("g4.id = '" + _generator.NewId(id + "4") + "'")
                 .ExecuteWithoutResultsAsync();
 

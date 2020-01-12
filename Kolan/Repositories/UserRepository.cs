@@ -19,7 +19,7 @@ namespace Kolan.Repositories
         public async Task AddAsync(User entity)
         {
             await Client.Cypher
-                .Create("(u:USER {newUser})-[:CHILD_GROUP]->(g:GROUP {newGroup})-[:NEXT]->(:End)")
+                .Create("(u:USER {newUser})-[:CHILD_GROUP]->(g:GROUP {newGroup})-[:NEXT]->(:END)")
                 .WithParam("newUser", entity)
                 .WithParam("newGroup", new Group { Name = "root", Id = entity.Username })
                 .ExecuteWithoutResultsAsync();

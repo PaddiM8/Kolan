@@ -1,5 +1,5 @@
 import { LitElement, html, customElement, property, TemplateResult } from 'lit-element';
-import "fa-icons";
+import { FaIcon } from "fa-icons";
 
 @customElement("input-list")
 export class InputList extends LitElement {
@@ -69,17 +69,25 @@ export class InputList extends LitElement {
      * @returns {TemplateResult}
      */
     private createItem(value: string): TemplateResult {
-        return html`
-            <li data-value="${value}">
-                <span class="itemValue">${value}</span>
-                <fa-icon class="fas fa-times"
-                         size="20px"
-                         path-prefix="/node_modules"
-                         @mouseover="${this.handleIconMouseOver}"
-                         @mouseout="${this.handleIconMouseOut}"
-                         @click="${this.onRemoveClick}"
-                         </fa-icon>
-            </li>`;
+        const li = document.createElement("LI");
+        li.dataset.value = value;
+
+        const span = document.createElement("SPAN");
+        span.className = "itemValue";
+        span.textContent = value;
+
+        const faIcon = document.createElement("FA-ICON") as FaIcon;
+        faIcon.className = "fas fa-times";
+        faIcon.size = "20px";
+        faIcon.pathPrefix = "/node_modules"
+        faIcon.addEventListener("mouseover", (e) => this.handleIconMouseOver(e))
+        faIcon.addEventListener("mouseout", (e) => this.handleIconMouseOut(e))
+        faIcon.addEventListener("click", (e) => this.onRemoveClick(e))
+
+        li.appendChild(span);
+        li.appendChild(faIcon);
+
+        return html`${li}`;
     }
 
     /**

@@ -73,11 +73,13 @@ export class Board {
      */
     private addGroup(group: IGroup): void {
         const listhead = document.getElementById("list-head");
-        listhead.insertAdjacentHTML("beforeend",
-            `<div class="item" data-id="${group.id}" data-name="${group.name}">
-                ${group.name}
-                <span class="plus">+</span>
-            </div>`);
+        const item = document.createElement("div");
+        item.className = "item";
+        item.dataset.id = group.id;
+        item.dataset.name = group.name;
+        item.textContent = group.name;
+        item.insertAdjacentHTML("beforeend", "<span class='plus'>+</span>")
+        listhead.appendChild(item);
 
         const tasklists = document.getElementById("tasklists");
         const tasklistElement = document.createElement("tasklist");

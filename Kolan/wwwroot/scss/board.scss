@@ -131,18 +131,22 @@ draggable-item {
     color: white;
     margin: 12px;
     overflow: hidden;
+    cursor: grabbing;
 
     a {
         color: white;
+        cursor: text;
     }
 
     h2 {
         display: inline-block; // to force it to be only the size of the text
         font-size: 1.2em;
+        cursor: text;
     }
 
     .description {
         word-wrap: break-word;
+        cursor: text;
         cursor: text;
     }
 
@@ -155,6 +159,7 @@ draggable-item {
         top: 0;
         right: 0;
         z-index: 100;
+        cursor: pointer;
     }
 
     .overlay-button {

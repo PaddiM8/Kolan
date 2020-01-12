@@ -60,9 +60,11 @@ export class DraggableItem extends LitElement {
 
     private onMouseDown(e): void {
         this.mouseIsDown = true && this.movable;
+        const rect = this.getBoundingClientRect();
+
         this.startPos = {
-            X: e.pageX - this.getBoundingClientRect().left,
-            Y: e.pageY - this.getBoundingClientRect().top
+            X: Math.floor(e.clientX - rect.left),
+            Y: Math.floor(e.clientY - rect.top),
         };
 
         this.currentTasklist = this.parentElement;

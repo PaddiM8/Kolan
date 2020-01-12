@@ -185,7 +185,7 @@ draggable-item {
     left: 0;
     opacity: 0;
     background-color: rgba(0, 0, 0, 0.5);
-    z-index: 500;
+    z-index: 999998;
 
     transition: .3s ease opacity;
 }

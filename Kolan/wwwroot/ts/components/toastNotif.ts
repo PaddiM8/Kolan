@@ -26,7 +26,7 @@ export class ToastNotif extends LitElement {
                 margin-left: 50%;
                 transform: translateX(-50%);
                 transition: 1s ease all;
-                z-index: 9999;
+                z-index: 999999;
             }
 
 

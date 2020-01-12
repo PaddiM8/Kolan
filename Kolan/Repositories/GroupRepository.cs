@@ -20,12 +20,12 @@ namespace Kolan.Repositories
             group.Id = id;
 
             await Client.Cypher
-                .Match("(board:Board)")
+                .Match("(board:BOARD)")
                 .Where((Board board) => board.Id == boardId)
-                .Create("(board)-[rel:ChildGroup]->(group:Group {group})-[:Next]->(:End)")
+                .Create("(board)-[rel:CHILD_GROUP]->(group:GROUP {group})-[:NEXT]->(:End)")
                 .WithParam("group", group)
                 .With("board, rel")
-                .Match("(board)-[:ChildGroup]->(existingGroup)")
+                .Match("(board)-[:CHILD_GROUP]->(existingGroup)")
                 .With("rel, count(existingGroup) AS groupAmount")
                 .Set("rel.order = groupAmount - 1")
                 .ExecuteWithoutResultsAsync();
@@ -36,7 +36,7 @@ namespace Kolan.Repositories
         public async Task RemoveAsync(string groupId)
         {
             await Client.Cypher
-                .Match("(:Board)-[rel:ChildGroup]->(group:Group)-[nextRel:Next]->(end:End)") // Only remove empty groups
+                .Match("(:BOARD)-[rel:CHILD_GROUP]->(group:GROUP)-[nextRel:NEXT]->(end:End)") // Only remove empty groups
                 .Where((Group group) => group.Id == groupId)
                 .Delete("rel, nextRel, group, end")
                 .ExecuteWithoutResultsAsync();

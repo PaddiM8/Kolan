@@ -39,9 +39,9 @@ namespace Kolan
             try
             {
                 // Constraints
-                Client.Cypher.CreateUniqueConstraint("u:User", "u.username")
+                Client.Cypher.CreateUniqueConstraint("u:USER", "u.username")
                              .ExecuteWithoutResults();
-                Client.Cypher.CreateUniqueConstraint("b:Board", "b.id")
+                Client.Cypher.CreateUniqueConstraint("b:BOARD", "b.id")
                              .ExecuteWithoutResults();
             }
             catch (NeoException)

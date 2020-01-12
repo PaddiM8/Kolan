@@ -27,9 +27,9 @@ namespace Kolan.Repositories
         public async Task<IEnumerable<Board>> GetAllAsync(string username)
         {
             var result = await Client.Cypher
-                .Match("(user:User)-[:ChildGroup]->(:Group)-[:Next*]->(boardOrLink)-[:Next*]->(:End)")
+                .Match("(user:USER)-[:CHILD_GROUP]->(:GROUP)-[:NEXT*]->(boardOrLink)-[:NEXT*]->(:End)")
                 .Where((User user) => user.Username == username)
-                .OptionalMatch("(boardOrLink)-[:SharedBoard]->(shared:Board)")
+                .OptionalMatch("(boardOrLink)-[:SHARED_BOARD]->(shared:BOARD)")
                 .Return((boardOrLink, shared) => Return.As<IEnumerable<Board>>(
                             "collect(boardOrLink) + collect(shared{.*, shared:true})"))
                 .ResultsAsync;
@@ -44,20 +44,20 @@ namespace Kolan.Repositories
         public async Task<dynamic> GetAsync(string id, string username)
         {
             var result = await Client.Cypher
-                .Match("(board:Board)")
+                .Match("(board:BOARD)")
                 .Where((Board board) => board.Id == id)
-                .OptionalMatch("(board)-[groupRel:ChildGroup]->(group:Group)")
-                .OptionalMatch("(group)-[:Next*]->(childBoard:Board)-[:Next*]->(:End)")
+                .OptionalMatch("(board)-[groupRel:CHILD_GROUP]->(group:GROUP)")
+                .OptionalMatch("(group)-[:NEXT*]->(childBoard:BOARD)-[:NEXT*]->(:End)")
                 .With("board, group, groupRel, {group: group, boards: collect(childBoard)} AS groups")
                 .OrderBy("groupRel.order")
-                .OptionalMatch("path=(board)<-[:ChildBoard*0..]-()<-[:ChildBoard|SharedBoard]-(user:User)")
+                .OptionalMatch("path=(board)<-[:CHILD_BOARD*0..]-()<-[:CHILD_BOARD|SHARED_BOARD]-(user:USER)")
                 .Where((User user) => user.Username == username)
                 .With("board, group, groups, path")
                 .Return((board, group, groups, path) => new
                 {
                     Board = board.As<Board>(),
                     Groups = Return.As<IEnumerable<Groups>>("CASE WHEN group IS NULL THEN NULL ELSE collect(groups) END"),
-                    Ancestors = Return.As<IEnumerable<Board>>("tail([b in nodes(path) WHERE (b:Board) | b])"),
+                    Ancestors = Return.As<IEnumerable<Board>>("tail([b in nodes(path) WHERE (b:BOARD) | b])"),
                     UserAccess = Return.As<int>("CASE WHEN path IS NULL AND board.public = false THEN 0 ELSE 1 END")
                 })
                 .ResultsAsync;
@@ -71,7 +71,7 @@ namespace Kolan.Repositories
         public async Task<bool> UserHasAccess(string boardId, string username)
         {
             var result = await Client.Cypher
-                .Match("path=(board:Board)<-[:ChildBoard*0..]-()<-[:ChildBoard|SharedBoard]-(user:User)")
+                .Match("path=(board:BOARD)<-[:CHILD_BOARD*0..]-()<-[:CHILD_BOARD|SHARED_BOARD]-(user:USER)")
                 .Where((User user) => user.Username == username)
                 .AndWhere((Board board) => board.Id == boardId)
                 .Return((path) => Return.As<string>("CASE WHEN path IS NULL THEN 'false' ELSE 'true' END"))
@@ -94,13 +94,13 @@ namespace Kolan.Repositories
             entity.Id = id;
 
             await Client.Cypher
-                .Match("(user:User)")
+                .Match("(user:USER)")
                 .Where((User user) => user.Username == username)
                 .Call("apoc.lock.nodes([user])")
-                .Match("(user)-[:ChildGroup]->(previous)-[oldRel:Next]->(next)")
-                .Create("(previous)-[:Next]->(board:Board {newBoard})-[:Next]->(next)")
+                .Match("(user)-[:CHILD_GROUP]->(previous)-[oldRel:NEXT]->(next)")
+                .Create("(previous)-[:NEXT]->(board:BOARD {newBoard})-[:NEXT]->(next)")
                 .WithParam("newBoard", entity)
-                .Create("(user)-[:ChildBoard]->(board)")
+                .Create("(user)-[:CHILD_BOARD]->(board)")
                 .Delete("oldRel")
                 .ExecuteWithoutResultsAsync();
 
@@ -122,14 +122,14 @@ namespace Kolan.Repositories
             entity.Id = id;
 
             await Client.Cypher
-                .Match("(parent:Board)-[:ChildGroup]->(group:Group)")
+                .Match("(parent:BOARD)-[:CHILD_GROUP]->(group:GROUP)")
                 .Where((Group group) => group.Id == groupId)
                 .Call("apoc.lock.nodes([group])")
-                .Match("(group)-[:Next*]->(next:End)")
-                .Match("(previous)-[oldRel:Next]->(next)")
-                .Create("(previous)-[:Next]->(board:Board {newBoard})-[:Next]->(next)")
+                .Match("(group)-[:NEXT*]->(next:End)")
+                .Match("(previous)-[oldRel:NEXT]->(next)")
+                .Create("(previous)-[:NEXT]->(board:BOARD {newBoard})-[:NEXT]->(next)")
                 .WithParam("newBoard", entity)
-                .Create("(parent)-[:ChildBoard]->(board)")
+                .Create("(parent)-[:CHILD_BOARD]->(board)")
                 .Delete("oldRel")
                 .ExecuteWithoutResultsAsync();
 
@@ -139,7 +139,7 @@ namespace Kolan.Repositories
         public async Task EditAsync(Board newBoardContents)
         {
             await Client.Cypher
-                .Match("(board:Board)")
+                .Match("(board:BOARD)")
                 .Where("board.id = {id}")
                 .WithParam("id", newBoardContents.Id)
                 .Set("board = {newBoardContents}")
@@ -150,7 +150,7 @@ namespace Kolan.Repositories
         public async Task SetPublicityAsync(string boardId, bool publicity)
         {
             await Client.Cypher
-                .Match("(board:Board)")
+                .Match("(board:BOARD)")
                 .Where("board.id = {id}")
                 .WithParam("id", boardId)
                 .Set("board.public = {publicity}")
@@ -161,7 +161,7 @@ namespace Kolan.Repositories
         public async Task<bool> ExistsAsync(string id)
         {
             var result = await Client.Cypher
-                .Match("(board:Board)")
+                .Match("(board:BOARD)")
                 .Where("board.id = {id}")
                 .WithParam("id", id)
                 .Return((board) => Return.As<int>("count(board)"))
@@ -173,13 +173,13 @@ namespace Kolan.Repositories
         public async Task DeleteAsync(string id)
         {
             await Client.Cypher
-                .Match("(prev)-[:Next]->(board:Board)")
+                .Match("(prev)-[:NEXT]->(board:BOARD)")
                 .Where("board.id = {id}")
                 .Call("apoc.lock.nodes([prev])")
-                .Match("(prev)-[prevRel:Next]->(board)-[nextRel:Next]->(next)")
+                .Match("(prev)-[prevRel:NEXT]->(board)-[nextRel:NEXT]->(next)")
                 .WithParam("id", id)
-                .Match("(:Board)-[childRel:ChildBoard]->(board)")
-                .Create("(prev)-[:Next]->(next)")
+                .Match("(:BOARD)-[childRel:CHILD_BOARD]->(board)")
+                .Create("(prev)-[:NEXT]->(next)")
                 .Delete("prevRel, nextRel, board, childRel")
                 .ExecuteWithoutResultsAsync();
         }
@@ -191,9 +191,9 @@ namespace Kolan.Repositories
         {
             var result =
                 await Client.Cypher
-                    .Match("(board:Board)")
+                    .Match("(board:BOARD)")
                     .Where((Board board) => board.Id == id)
-                    .OptionalMatch("(board)-[:ChildGroup]->(group:Group)")
+                    .OptionalMatch("(board)-[:CHILD_GROUP]->(group:GROUP)")
                     .Return<int>("count(group)")
                     .ResultsAsync;
 
@@ -218,14 +218,15 @@ namespace Kolan.Repositories
                 .Where(whereHostId)
                 .Call("apoc.lock.nodes([host])")
                 .WithParam("hostId", hostId)
-                .Match("(previous)-[previousRel:Next]->(board:Board)-[nextRel:Next]->(next)")
+                .Match("(previous)-[previousRel:NEXT]->(board:BOARD)-[nextRel:NEXT]->(next)")
                 .Where((Board board) => board.Id == boardId)
-                .Match("(newPrevious)-[rel:Next]->(newNext)")
+                .AndWhere((Board previous) => previous.Id != targetId)
+                .Match("(newPrevious)-[rel:NEXT]->(newNext)")
                 .Where("newPrevious.id = {targetId}")
                 .WithParam("targetId", targetId)
                 .Delete("previousRel, nextRel, rel")
-                .Create("(previous)-[:Next]->(next)")
-                .Create("(newPrevious)-[:Next]->(board)-[:Next]->(newNext)")
+                .Create("(previous)-[:NEXT]->(next)")
+                .Create("(newPrevious)-[:NEXT]->(board)-[:NEXT]->(newNext)")
                 .ExecuteWithoutResultsAsync();
         }
 
@@ -237,14 +238,14 @@ namespace Kolan.Repositories
         public async Task<bool> AddUserAsync(string boardId, string username)
         {
             var result = await Client.Cypher
-                .Match("(user:User)")
+                .Match("(user:USER)")
                 .Where((User user) => user.Username == username)
                 .Call("apoc.lock.nodes([user])")
-                .Match("(sharedBoard:Board)", "(user)-[:ChildGroup]->(previous)-[oldRel:Next]->(next)")
+                .Match("(sharedBoard:BOARD)", "(user)-[:CHILD_GROUP]->(previous)-[oldRel:NEXT]->(next)")
                 .Where((Board sharedBoard) => sharedBoard.Id == boardId)
-                .Create("(previous)-[:Next]->(link:Link)-[:Next]->(next)")
+                .Create("(previous)-[:NEXT]->(link:Link)-[:NEXT]->(next)")
                 .Delete("oldRel")
-                .Create("(link)-[:SharedBoard]->(sharedBoard)")
+                .Create("(link)-[:SHARED_BOARD]->(sharedBoard)")
                 .Return((user) => user.As<User>().Username)
                 .ResultsAsync;
 
@@ -259,14 +260,14 @@ namespace Kolan.Repositories
         public async Task RemoveUserAsync(string boardId, string username)
         {
             await Client.Cypher
-                .Match("(user:User)")
+                .Match("(user:USER)")
                 .Where((User user) => user.Username == username)
                 .Call("apoc.lock.nodes([user])")
-                .Match("(user)-[:ChildGroup]->()-[:Next*]->(link:Link)-[sharedRel:SharedBoard]->(board:Board)")
+                .Match("(user)-[:CHILD_GROUP]->()-[:NEXT*]->(link:Link)-[sharedRel:SHARED_BOARD]->(board:BOARD)")
                 .Where((Board board) => board.Id == boardId)
-                .Match("(previous)-[previousRel:Next]->(link)-[nextRel:Next]->(next)")
+                .Match("(previous)-[previousRel:NEXT]->(link)-[nextRel:NEXT]->(next)")
                 .Delete("previousRel, nextRel, sharedRel, link")
-                .Create("(previous)-[:Next]->(next)")
+                .Create("(previous)-[:NEXT]->(next)")
                 .ExecuteWithoutResultsAsync();
         }
 
@@ -277,9 +278,9 @@ namespace Kolan.Repositories
         public async Task<object> GetUsersAsync(string boardId)
         {
             return await Client.Cypher
-                .Match("(board:Board)")
+                .Match("(board:BOARD)")
                 .Where((Board board) => board.Id == boardId)
-                .Match("(user:User)-[:ChildGroup]->(:Group)-[:Next]->(:Link)-[:SharedBoard]->(board)")
+                .Match("(user:USER)-[:CHILD_GROUP]->(:GROUP)-[:NEXT]->(:Link)-[:SHARED_BOARD]->(board)")
                 .Return<string>("user.username")
                 .ResultsAsync;
         }
@@ -288,23 +289,23 @@ namespace Kolan.Repositories
         private async Task<IEnumerable<Group>> AddDefaultGroups(string id)
         {
             await Client.Cypher
-                .Match("(board:Board)")
+                .Match("(board:BOARD)")
                 .Where((Board board) => board.Id == id)
-                .Create("(board)-[:ChildGroup { order: 0 }]->(g1:Group { name: 'Backlog' })-[:Next]->(:End)")
+                .Create("(board)-[:CHILD_GROUP { order: 0 }]->(g1:GROUP { name: 'Backlog' })-[:NEXT]->(:End)")
                 .Set("g1.id = '" + _generator.NewId(id + "1") + "'")
 
-                .Create("(board)-[:ChildGroup { order: 1 }]->(g2:Group { name: 'Ready' })-[:Next]->(:End)")
+                .Create("(board)-[:CHILD_GROUP { order: 1 }]->(g2:GROUP { name: 'Ready' })-[:NEXT]->(:End)")
                 .Set("g2.id = '" + _generator.NewId(id + "2") + "'")
 
-                .Create("(board)-[:ChildGroup { order: 2 }]->(g3:Group { name: 'In Progress' })-[:Next]->(:End)")
+                .Create("(board)-[:CHILD_GROUP { order: 2 }]->(g3:GROUP { name: 'In Progress' })-[:NEXT]->(:End)")
                 .Set("g3.id = '" + _generator.NewId(id + "3") + "'")
 
-                .Create("(board)-[:ChildGroup { order: 3 }]->(g4:Group { name: 'Done' })-[:Next]->(:End)")
+                .Create("(board)-[:CHILD_GROUP { order: 3 }]->(g4:GROUP { name: 'Done' })-[:NEXT]->(:End)")
                 .Set("g4.id = '" + _generator.NewId(id + "4") + "'")
                 .ExecuteWithoutResultsAsync();
 
             return await Client.Cypher
-                .Match("(board:Board)-[groupRel:ChildGroup]->(group:Group)")
+                .Match("(board:BOARD)-[groupRel:CHILD_GROUP]->(group:GROUP)")
                 .Where((Board board) => board.Id == id)
                 .With("group, groupRel")
                 .OrderBy("groupRel.order")

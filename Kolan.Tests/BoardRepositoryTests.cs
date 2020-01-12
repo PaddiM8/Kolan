@@ -75,7 +75,7 @@ namespace Kolan.Tests
             Assert.That(returnedBoard.Board.Description, Is.EqualTo(_defaultBoard.Description));
             Assert.That(returnedBoard.Groups, Is.Null);
             Assert.That(returnedBoard.Ancestors, Is.Empty);
-            Assert.That(returnedBoard.UserAccess, Is.EqualTo("true"));
+            Assert.That(returnedBoard.UserAccess, Is.EqualTo(1));
         }
 
         [TestCase(_username2)]
@@ -88,7 +88,7 @@ namespace Kolan.Tests
             dynamic returnedBoard = await _uow.Boards.GetAsync(returnedId, unauthorizedUser);
 
             // Assert
-            Assert.That(returnedBoard.UserAccess, Is.EqualTo("false"));
+            Assert.That(returnedBoard.UserAccess, Is.EqualTo(0));
         }
 
         [TestCase(_username2)]
@@ -125,7 +125,7 @@ namespace Kolan.Tests
                 Assert.That(returnedGroup.Id, Is.Not.Null);
 
                 bool groupWasAdded = (await _graphClient.Cypher
-                    .Match("(board:Board)-[:ChildGroup]->(group:Group)")
+                    .Match("(board:BOARD)-[:CHILD_GROUP]->(group:GROUP)")
                     .Where((Board board) => board.Id == returnedId)
                     .AndWhere((Group group) => group.Id == returnedGroup.Id)
                     .Return((group) => Return.As<int>("count(group)"))
@@ -150,7 +150,7 @@ namespace Kolan.Tests
 
                 // Assert
                 bool childBoardRelExists = (await _graphClient.Cypher
-                    .Match("(parent:Board)-[:ChildBoard]->(child:Board)")
+                    .Match("(parent:BOARD)-[:CHILD_BOARD]->(child:BOARD)")
                     .Where((Board parent) => parent.Id == parentId)
                     .AndWhere((Board child) => child.Id == childId)
                     .Return((child) => Return.As<int>("count(child)"))
@@ -158,7 +158,7 @@ namespace Kolan.Tests
                     .Single() == 1;
 
                 bool wasAddedInLinkedList = (await _graphClient.Cypher
-                    .Match("(parent:Board)-[:ChildGroup]->(group:Group)-[:Next*]->(child:Board)-[:Next*]->(:End)")
+                    .Match("(parent:BOARD)-[:CHILD_GROUP]->(group:GROUP)-[:NEXT*]->(child:BOARD)-[:NEXT*]->(:End)")
                     .Where((Board parent) => parent.Id == parentId)
                     .AndWhere((Board group) => group.Id == parentGroup.Id)
                     .AndWhere((Board child) => child.Id == childId)
@@ -184,7 +184,7 @@ namespace Kolan.Tests
 
             // Assert
             var result = _graphClient.Cypher
-                .Match("(user:User)-[:ChildGroup]->(:Group)-[:Next]->(board:Board)")
+                .Match("(user:USER)-[:CHILD_GROUP]->(:GROUP)-[:NEXT]->(board:BOARD)")
                 .Where((User user) => user.Username == _username1)
                 .AndWhere((Board board) => board.Id == boardId)
                 .Return((board) => board.As<Board>().Id)
@@ -209,7 +209,7 @@ namespace Kolan.Tests
 
             // Assert
             var result = _graphClient.Cypher
-                .Match("(parent:Board)-[:ChildGroup]->(group:Group)-[:Next]->(board:Board)")
+                .Match("(parent:BOARD)-[:CHILD_GROUP]->(group:GROUP)-[:NEXT]->(board:BOARD)")
                 .Where((Board parent) => parent.Id == parentId)
                 .AndWhere((Group group) => group.Id == groupId)
                 .AndWhere((Board board) => board.Id == boardId)
@@ -231,10 +231,10 @@ namespace Kolan.Tests
 
             // Assert
             bool addedCorrectly = (await _graphClient.Cypher
-                .Match("(user1:User)-[:ChildBoard]->(board:Board)<-[:SharedBoard]-(link:Link)")
+                .Match("(user1:USER)-[:CHILD_BOARD]->(board:BOARD)<-[:SHARED_BOARD]-(link:Link)")
                 .Where((User user1) => user1.Username == _username1)
                 .AndWhere((Board board) => board.Id == boardId)
-                .Match("(user2:User)-[:ChildGroup]->(:Group)-[:Next]->(link)")
+                .Match("(user2:USER)-[:CHILD_GROUP]->(:GROUP)-[:NEXT]->(link)")
                 .Where((User user2) => user2.Username == _username2)
                 .Return((board) => Return.As<int>("count(board)"))
                 .ResultsAsync)
@@ -255,7 +255,7 @@ namespace Kolan.Tests
 
             // Assert
             bool removedCorrectly = (await _graphClient.Cypher
-                .Match("(user2:User)-[:ChildBoard]->(:Link)-[:SharedBoard]->(board:Board)")
+                .Match("(user2:USER)-[:CHILD_BOARD]->(:Link)-[:SHARED_BOARD]->(board:BOARD)")
                 .Where((User user2) => user2.Username == _username2)
                 .AndWhere((Board board) => board.Id == boardId)
                 .Return((board) => Return.As<int>("count(board)"))
@@ -282,7 +282,7 @@ namespace Kolan.Tests
         }
 
         [Test]
-        public async Task Get_AncestorsOfSharedBoard_ReturnsListOfBoards()
+        public async Task Get_AncestorsOfSHARED_BOARD_ReturnsListOfBoards()
         {
             // Arrange
             var nestedBoards = await CreateNestedBoards();

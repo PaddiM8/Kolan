@@ -15,23 +15,35 @@ main {
 header {
     display: flex;
     position: relative;
+    justify-content: space-between;
 
     hr {
         width: 100%;
         position: absolute;
         bottom: 20px;
     }
-}
 
-header h1 {
-    display: inline-block;
-    font-size: 3.5em;
-    font-family: 'Inter', sans-serif;
-    font-weight: 300;
-    line-height: 60px;
-    margin-top: 0;
-    user-select: none;
-    float: left;
+    h1 {
+        display: inline-block;
+        font-size: 3.5em;
+        font-family: 'Inter', sans-serif;
+        font-weight: 300;
+        line-height: 60px;
+        margin-top: 0;
+        user-select: none;
+    }
+
+    #addBoard {
+        height: 60px;
+        line-height: 60px;
+        font-size: 70px;
+        margin-left: auto;
+        color: black;
+        text-align: center;
+        font-weight: 200;
+        cursor: pointer;
+        user-select: none;
+    }
 }
 
 .gear {
@@ -41,17 +53,6 @@ header h1 {
     top: 0;
     right: 0;
     margin: 10px;
-}
-
-#addBoard {
-    $size: 60px;
-    cursor: pointer;
-    user-select: none;
-    float: right;
-    font-size: $size;
-    margin-left: auto;
-    color: black;
-    text-align: center;
 }
 
 .board-list {

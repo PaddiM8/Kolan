@@ -127,6 +127,8 @@ export class TasklistController {
     }
 
     private onInternalMove(item: HTMLElement, toItem: HTMLElement): void {
+        if (toItem == item.nextSibling) return; // If it was just dropped at the same place
+
         this.onExternalMove(item, toItem, this.tasklist);
     }
 

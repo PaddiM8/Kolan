@@ -147,7 +147,10 @@ draggable-item {
     .description {
         word-wrap: break-word;
         cursor: text;
-        cursor: text;
+    }
+
+    .description > *:first-child {
+        margin-top: 0;
     }
 
     .overlay {

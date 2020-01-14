@@ -19,7 +19,7 @@ namespace Kolan.Repositories
         public async Task AddAsync(User entity)
         {
             await Client.Cypher
-                .Create("(u:USER {newUser})-[:CHILD_GROUP]->(g:GROUP {newGroup})-[:NEXT]->(:END)")
+                .Create("(u:User {newUser})-[:CHILD_GROUP]->(g:Group {newGroup})-[:NEXT]->(:End)")
                 .WithParam("newUser", entity)
                 .WithParam("newGroup", new Group { Name = "root", Id = entity.Username })
                 .ExecuteWithoutResultsAsync();
@@ -28,7 +28,7 @@ namespace Kolan.Repositories
         public async Task<bool> ValidatePassword(string username, string password)
         {
             var result = await Client.Cypher
-                .Match("(user:USER)")
+                .Match("(user:User)")
                 .Where((User user) => user.Username == username)
                 .Return((user) => user.As<User>().Password)
                 .ResultsAsync;
@@ -39,7 +39,7 @@ namespace Kolan.Repositories
         public async Task ChangePassword(string username, string newPassword)
         {
             await Client.Cypher
-                .Match("(user:USER)")
+                .Match("(user:User)")
                 .Where((User user) => user.Username == username)
                 .Set("user.password = {password}")
                 .WithParam("password", PBKDF2.Hash(newPassword))

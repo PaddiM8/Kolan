@@ -7,6 +7,9 @@ using Kolan.Repositories;
 using Kolan.Hubs;
 using Kolan.Filters;
 using System;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Linq;
 
 namespace Kolan.Controllers.Api
 {
@@ -151,6 +154,15 @@ namespace Kolan.Controllers.Api
         {
             await _uow.Boards.MoveAsync(id, boardId, targetId, false);
             await _boardHubContext.Clients.Group(id).MoveBoard(boardId, targetId); // Send to client
+
+            return Ok();
+        }
+
+        [HttpPost("{id}/ChangeGroupOrder")]
+        [AuthorizeForBoard]
+        public async Task<IActionResult> ChangeGroupOrder(string id, [FromForm]string groupIds)
+        {
+            await _uow.Boards.SetGroupOrder(id, JsonConvert.DeserializeObject<string[]>(groupIds));
 
             return Ok();
         }

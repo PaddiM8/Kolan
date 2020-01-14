@@ -40,7 +40,7 @@ export class ShareDialog extends DialogBox {
     protected onOpen(): void {
         new ApiRequester().send("Boards", `${viewData.id}/Users`, RequestType.Get)
         .then(response => {
-            this.list.items = JSON.parse(response as string);
+            this.list.items = JSON.parse(response as string).map(x => ({ name: x }));
         });
     }
 
@@ -64,13 +64,13 @@ export class ShareDialog extends DialogBox {
         })
         .catch(() => {
             ToastController.new("Failed to add collaborator", ToastType.Error);
-            e.detail["object"].undo();
+            e.detail["object"].undoAdd();
         })
     }
 
     private onUserRemoved(e): void {
         new ApiRequester().send("Boards", `${viewData.id}/Users`, RequestType.Delete, {
-            username: e.detail["value"]
+            username: e.detail["item"].name
         })
         .then(() => {
             ToastController.new("Collaborator removed", ToastType.Info);

@@ -28,9 +28,9 @@ namespace Kolan.Controllers.Api
         [AuthorizeForBoard("boardId")]
         public async Task<IActionResult> Create([FromForm]string boardId, Group group)
         {
-            await _uow.Groups.AddAsync(boardId, group);
+            string id = await _uow.Groups.AddAsync(boardId, group);
 
-            return Ok();
+            return Ok(new { id = id });
         }
 
         [HttpDelete("{id}")]

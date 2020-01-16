@@ -126,7 +126,7 @@ export class Board {
         })
         .catch(() => {
             ToastController.new("Failed to add collaborator", ToastType.Error);
-            inputList.undo();
+            inputList.undoAdd();
         });
     }
 

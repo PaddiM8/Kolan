@@ -134,6 +134,7 @@ namespace Kolan.Controllers.Api
         /// <param name="boardId">Id of the board to move</param>
         /// <param name="targetId">Id of the board it will be placed under</param>
         [HttpPost("ChangeOrder")]
+        [AuthorizeForBoard("boardId")]
         public async Task<IActionResult> ChangeOrder([FromForm]string boardId, [FromForm]string targetId)
         {
             await _uow.Boards.MoveAsync(User.Identity.Name, boardId, targetId, true);

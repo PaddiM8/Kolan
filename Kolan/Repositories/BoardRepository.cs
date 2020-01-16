@@ -236,7 +236,7 @@ namespace Kolan.Repositories
                 .Match("(previous)-[previousRel:NEXT]->(board:Board)-[nextRel:NEXT]->(next)")
                 .Where((Board board) => board.Id == boardId)
                 .AndWhere((Board previous) => previous.Id != targetId)
-                .Match("(newPrevious)-[rel:NEXT]->(newNext)")
+                .Match("(host)-[:CHILD_GROUP]->()-[:NEXT*0..]->(newPrevious)-[rel:NEXT]->(newNext)")
                 .Where("newPrevious.id = {targetId}")
                 .WithParam("targetId", targetId)
                 .Delete("previousRel, nextRel, rel")

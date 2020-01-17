@@ -1,4 +1,5 @@
 import "../components/components";
+import { View } from "../views/view";
 import { BoardListController } from "../controllers/boardListController";
 import { DialogBox } from "../components/dialogBox";
 import { ApiRequester } from "../communication/apiRequester";
@@ -8,11 +9,13 @@ import { AddBoardDialog } from "../dialogs/addBoardDialog";
 
 window.addEventListener("load", () => new Boards());
 
-class Boards {
+class Boards extends View {
     /**
      * Add event listeners, dialogs that will be used, and more (on page load)
      */
     constructor() {
+        super();
+
         // Prepare dialog
         let addDialog = new AddBoardDialog();
         document.body.appendChild(addDialog);

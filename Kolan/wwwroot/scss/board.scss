@@ -45,18 +45,13 @@ header {
     .right {
         display: inline-block;
         height: 100%;
-        width: 128px;
         margin-left: auto;
+        margin-right: 10px;
 
-        img {
-            width: auto;
-            height: 100%;
+        .icon {
             cursor: pointer;
-        }
-
-        fa-icon {
-            margin-left: 15px;
-            cursor: pointer;
+            margin-left: 5px;
+            font-size: 38px;
         }
     }
 }
@@ -167,8 +162,7 @@ draggable-item {
 
     .overlay-button {
         position: absolute;
-        width: 21px;
-        height: 21px;
+        font-size: 21px;
         margin: 16px;
         cursor: pointer;
     }

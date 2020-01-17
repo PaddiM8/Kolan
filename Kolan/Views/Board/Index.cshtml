@@ -7,22 +7,19 @@
       <link rel="stylesheet" type="text/css" href="https://rsms.me/inter/inter.css">
       <link rel="stylesheet" type="text/css" href="~/css/board.css">
    </head>
-   <body>
+   <body id="board">
       <main>
          <header>
             <div id="title"></div>
             <div class="right">
-                <fa-icon id="shareButton"
-                         class="fas fa-share-alt share"
-                         size="42px"
-                         role="button"
-                         path-prefix="/node_modules">
-                         </fa-icon>
-                <fa-icon id="settingsButton"
-                         class="fas fa-cog gear"
-                         size="42px"
-                         path-prefix="/node_modules">
-                         </fa-icon>
+                <span id="shareButton"
+                      class="icon icon-share-alt share"
+                      role="button">
+                      </span>
+                <span id="settingsButton"
+                      class="icon icon-cog gear"
+                      role="button">
+                      </span>
             </div>
          </header>
          <div class="content">

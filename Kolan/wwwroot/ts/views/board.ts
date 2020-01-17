@@ -1,3 +1,4 @@
+import { View } from "../views/view"
 import { DialogBox } from "../components/dialogBox"
 import { InputList } from "../components/inputList"
 import { TasklistController } from "../controllers/tasklistController";
@@ -27,7 +28,7 @@ declare const viewData;
  * @name Board
  * @function
  */
-export class Board {
+export class Board extends View {
     public static content: IBoard;
     public static dialogs;
     public static tasklistControllers = {};
@@ -36,6 +37,8 @@ export class Board {
     private currentTasklistId: string;
 
     constructor() {
+        super();
+
         Board.viewData = viewData;
 
         // Load dialogs

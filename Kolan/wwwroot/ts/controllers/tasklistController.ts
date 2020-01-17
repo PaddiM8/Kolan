@@ -77,18 +77,12 @@ export class TasklistController {
          <h2 class="name"></h2>
          <span class="description">${task.description}</span>
          <div class="overlay">
-            <fa-icon class="fas fa-pen top-right edit overlay-button"
-                     size="21px"
-                     role="button"
-                     color="#fff"
-                     path-prefix="/node_modules">
-                     </fa-icon>
-            <fa-icon class="fas fa-trash bottom-right delete overlay-button"
-                     size="21px"
-                     role="button"
-                     color="#fff"
-                     path-prefix="/node_modules">
-                     </fa-icon>
+            <span class="icon icon-pen top-right edit overlay-button"
+                  role="button">
+                  </span>
+            <span class="icon icon-trash bottom-right delete overlay-button"
+                  role="button">
+                  </span>
          </div>
          `);
 

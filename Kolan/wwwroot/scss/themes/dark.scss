@@ -1,0 +1,45 @@
+:host, .dialog, body, #list, #list li {
+    background-color: #424242;
+    color: white;
+}
+
+a {
+    color: #0288D1;
+}
+
+header #title a:visited {
+    color: #0288D1;
+}
+
+header, .list-head .item, tasklist, #list {
+    border-color: #757575;
+}
+
+#list li {
+    border-color: #616161;
+}
+
+.plus, header #addBoard {
+    color: white;
+}
+
+draggable-item {
+    background-color: #3949AB;
+}
+
+input[type="submit"], button, #boards draggable-item {
+    box-shadow: 1px 1px 2px 1px #302f2f;
+}
+
+hr {
+    border-top: 1px solid rgba(255, 255, 255, 0.4);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.toast.info {
+    background-color: #212121;
+}
+
+.toast.warning {
+    background-color: #FF8F00;
+}

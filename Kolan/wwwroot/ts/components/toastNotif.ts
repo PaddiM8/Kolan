@@ -1,5 +1,6 @@
 import { LitElement, html, css, property, customElement } from "lit-element";
 import { ToastType } from "../enums/toastType";
+import { ThemeManager } from "../themes/themeManager";
 import "fa-icons";
 
 @customElement("toast-notif")
@@ -71,7 +72,8 @@ export class ToastNotif extends LitElement {
 
     render() {
         return html`
-        <div id="content" class="${this.type}" @click="${this.onClick}">
+        <link rel="stylesheet" type="text/css" href="../css/themes/${ThemeManager.getTheme()}.css">
+        <div id="content" class="toast ${this.type}" @click="${this.onClick}">
             <fa-icon class="fas fa-${this.getIconName()}" size="18px" color="#fff" path-prefix="/node_modules"></fa-icon>
             <span>${this.message}</span>
         </div>

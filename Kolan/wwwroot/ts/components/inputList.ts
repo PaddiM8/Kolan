@@ -1,5 +1,6 @@
 import { LitElement, html, customElement, property, TemplateResult } from 'lit-element';
 import { FaIcon } from "fa-icons";
+import { ThemeManager } from "../themes/themeManager";
 
 @customElement("input-list")
 export class InputList extends LitElement {
@@ -24,6 +25,7 @@ export class InputList extends LitElement {
     render() {
         return html`
         <link rel="stylesheet" type="text/css" href="../css/components/dialog.css">
+        <link rel="stylesheet" type="text/css" href="../css/themes/${ThemeManager.getTheme()}.css">
         <style>
             :host {
                 font-family: "Inter", sans-serif;
@@ -76,10 +78,18 @@ export class InputList extends LitElement {
                 vertical-align: middle;
             }
 
+            .icon {
+                font-size: 21px;
+            }
+
             .delete {
                 cursor: pointer;
                 margin-left: auto;
                 margin-bottom: -3px;
+            }
+
+            .delete:hover {
+                color: red;
             }
 
             .dragger {
@@ -107,25 +117,19 @@ export class InputList extends LitElement {
      * @returns {TemplateResult}
      */
     private createItem(value: string): TemplateResult {
-        const li = document.createElement("LI");
+        const li = document.createElement("li");
         li.dataset.value = value;
 
-        const dragger = document.createElement("FA-ICON") as FaIcon;
-        dragger.className = "fas fa-bars dragger";
-        dragger.size = "20px";
-        dragger.pathPrefix = "/node_modules"
+        const dragger = document.createElement("span") as FaIcon;
+        dragger.className = "icon icon-bars dragger";
         dragger.addEventListener("mousedown", e => this.onItemMouseDown(e));
 
-        const span = document.createElement("SPAN");
+        const span = document.createElement("span");
         span.className = "itemValue";
         span.textContent = value;
 
-        const deleteButton = document.createElement("FA-ICON") as FaIcon;
-        deleteButton.className = "fas fa-times delete";
-        deleteButton.size = "20px";
-        deleteButton.pathPrefix = "/node_modules";
-        deleteButton.addEventListener("mouseover", (e) => this.handleIconMouseOver(e));
-        deleteButton.addEventListener("mouseout", (e) => this.handleIconMouseOut(e));
+        const deleteButton = document.createElement("span") as FaIcon;
+        deleteButton.className = "icon icon-times delete";
         deleteButton.addEventListener("click", (e) => this.onRemoveClick(e));
 
         if (this.draggableItems) li.appendChild(dragger);
@@ -170,14 +174,6 @@ export class InputList extends LitElement {
 
     public undoRemove(): void {
         this.items.splice(this.lastRemoved.index, 0, this.lastRemoved.item);
-    }
-
-    private handleIconMouseOver(e): void {
-        e.target.color = "red";
-    }
-
-    private handleIconMouseOut(e): void {
-        e.target.color = "black";
     }
 
     private onRemoveClick(e: Event): void {

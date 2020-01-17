@@ -3,6 +3,7 @@ import { ApiRequester } from "../communication/apiRequester";
 import { RequestParameter } from "../communication/requestParameter";
 import { InputType } from "../enums/inputType"
 import { InputList } from "./inputList"
+import { ThemeManager } from "../themes/themeManager"
 
 /**
  * Dialog element that takes an IDialogTemplate as input and returns an object with the values as an event.
@@ -26,6 +27,7 @@ export class DialogBox extends LitElement {
     render() {
         return html`
          <link rel="stylesheet" type="text/css" href="../css/components/dialog.css">
+         <link rel="stylesheet" type="text/css" href="../css/themes/${ThemeManager.getTheme()}.css">
          <div class="dialogBackground"></div>
          <section class="dialog">
             <h2>${html`${this.options.title}`}</h2>

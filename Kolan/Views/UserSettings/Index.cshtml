@@ -8,15 +8,13 @@
         <link rel="stylesheet" type="text/css" href="https://rsms.me/inter/inter.css">
         <link rel="stylesheet" type="text/css" href="~/css/userSettings.css">
     </head>
-    <body>
+    <body id="userSettings">
         <header>
             <a href="../">
-                <fa-icon id="backButton"
-                         class="fas fa-arrow-left"
-                         size="36px"
-                         role="button"
-                         path-prefix="/node_modules">
-                         </fa-icon>
+                <span id="backButton"
+                      class="icon icon-arrow-left"
+                      role="button">
+                      </span>
             </a>
             <h1>User Settings</h1>
             <hr />
@@ -33,6 +31,9 @@
                 <input asp-for="RepeatPassword" class="input" placeholder="Repeat password..." />
                 <input type="submit" value="Change" />
             </form>
+
+            <h3>Appearance</h3>
+            <label>Theme: </label><select id="themeSelect"></select>
         </main>
         <script>
             const tempData = {

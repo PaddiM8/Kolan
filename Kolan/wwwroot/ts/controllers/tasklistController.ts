@@ -7,6 +7,7 @@ import { Board } from "../views/board";
 import { ContentFormatter } from "../processing/contentFormatter";
 import { BoardHub } from "../communication/boardHub";
 import { ConfirmDialog } from "../dialogs/confirmDialog";
+import { PermissionLevel } from "../enums/permissionLevel";
 
 /**
  * Controller to add/remove/edit/etc. tasks in a tasklist.
@@ -67,6 +68,7 @@ export class TasklistController {
      */
     public createTaskItem(task: ITask): HTMLElement {
         const item = new DraggableItem();
+        item.movable = Board.permissionLevel == PermissionLevel.Edit;
         item.dataset.id = task.id;
         item.dataset.description = task.description ? task.description : "";
         task.name = ContentFormatter.format(task.name);
@@ -86,13 +88,16 @@ export class TasklistController {
          </div>
          `);
 
-         item.querySelector(".name").textContent = task.name;
+        item.querySelector(".name").textContent = task.name;
 
         if (task.color != "") item.style.backgroundColor = task.color;
 
         item.addEventListener("draggableClick", e => this.onClickEvent(e));
-        item.addEventListener("mouseover", () => this.onHoverEvent(item));
-        item.addEventListener("mouseleave", () => this.onMouseLeaveEvent(item));
+
+        if (Board.permissionLevel == PermissionLevel.Edit) {
+            item.addEventListener("mouseover", () => this.onHoverEvent(item));
+            item.addEventListener("mouseleave", () => this.onMouseLeaveEvent(item));
+        }
 
         item.addEventListener("taskInternalMove", e =>
             this.onInternalMove(e.target as HTMLElement, e["detail"]["toItem"]));

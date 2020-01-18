@@ -59,7 +59,10 @@ namespace Kolan.Repositories
                     Board = board.As<Board>(),
                     Groups = Return.As<IEnumerable<Groups>>("CASE WHEN group IS NULL THEN NULL ELSE collect(groups) END"),
                     Ancestors = Return.As<IEnumerable<Board>>("tail([b in nodes(path) WHERE (b:Board) | b])"),
-                    UserAccess = Return.As<int>("CASE WHEN path IS NULL AND board.public = false THEN 0 ELSE 1 END")
+                    UserAccess = Return.As<int>(@"CASE WHEN path IS NULL
+                                                  THEN CASE WHEN board.public = false THEN 0 ELSE 1 END
+                                                  ELSE 2
+                                                  END")
                 })
                 .ResultsAsync;
 

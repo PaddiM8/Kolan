@@ -59,6 +59,6 @@ class Boards extends View {
             for (const item of boards) {
                 boardListController.addBoardToBottom(item);
             }
-        });
+        }).catch((err) => console.log(err));
     }
 }

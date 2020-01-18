@@ -6,11 +6,8 @@ using Kolan.Models;
 using Kolan.Repositories;
 using Kolan.Hubs;
 using Kolan.Filters;
-using System;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System.Linq;
-
+using Kolan.Enums;
 namespace Kolan.Controllers.Api
 {
     [Produces("application/json")]
@@ -48,7 +45,7 @@ namespace Kolan.Controllers.Api
         {
             dynamic result = await _uow.Boards.GetAsync(id, User.Identity.Name);
             if (result == null) return NotFound();
-            if (result.UserAccess == 0) return Unauthorized(); // No AuthorizeForBoard attribute here since this GetAsync() already retrieves this (for other reason). Also, later on users should be able to make boards visible to the public
+            if ((PermissionLevel)result.UserAccess == PermissionLevel.None) return Unauthorized(); // No AuthorizeForBoard attribute here since this GetAsync() already retrieves this (for other reason). Also, later on users should be able to make boards visible to the public
 
             return Ok(result);
         }

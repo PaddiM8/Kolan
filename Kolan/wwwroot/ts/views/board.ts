@@ -12,6 +12,7 @@ import { RequestType } from "../enums/requestType";
 import { ToastNotif } from "../components/toastNotif";
 import { ToastController } from "../controllers/toastController";
 import { IBoard } from "../models/IBoard";
+import { PermissionLevel } from "../enums/permissionLevel";
 
 // Dialogs
 import { AddTaskDialog } from "../dialogs/addTaskDialog";
@@ -30,6 +31,7 @@ declare const viewData;
  */
 export class Board extends View {
     public static content: IBoard;
+    public static permissionLevel: PermissionLevel;
     public static dialogs;
     public static tasklistControllers = {};
     public static viewData;
@@ -81,7 +83,10 @@ export class Board extends View {
         item.dataset.id = group.id;
         item.dataset.name = group.name;
         item.textContent = group.name;
-        item.insertAdjacentHTML("beforeend", "<span class='plus'>+</span>")
+
+        if (Board.permissionLevel == PermissionLevel.Edit)
+            item.insertAdjacentHTML("beforeend", "<span class='plus'>+</span>")
+
         listhead.appendChild(item);
 
         const tasklists = document.getElementById("tasklists");
@@ -163,7 +168,9 @@ export class Board extends View {
 
     private setTitle(title: string, ancestors: object[]) {
         document.title = title + " - Kolan";
-        let html = `<a href="/">Boards</a> / `;
+        let html = Board.permissionLevel == PermissionLevel.Edit
+            ? `<a href="/">Boards</a> / `
+            : `<a href="/">Kolan</a> / `;
 
         // Ancestors
         if (ancestors)
@@ -202,20 +209,22 @@ export class Board extends View {
         new ApiRequester().send("Boards", Board.viewData.id, RequestType.Get).then(result => {
             const boardContent = JSON.parse(result as string);
 
-            // Set title on the client side, both on the board page and in the document title.
-            this.setTitle(boardContent.board.name, boardContent.ancestors);
-
             // If the request returns nothing, the board hasn't been set up yet. Display the setup dialog.
             if (!boardContent.groups) {
                 const setupDialog = new SetupDialog();
                 document.body.appendChild(setupDialog);
                 setupDialog.shown = true;
                 setupDialog.addEventListener("submitDialog", (e: CustomEvent) => {
-                    for (const group of e.detail.output)
-                        this.addGroup(group);
+                    this.loadBoard();
                 });
                 return;
             }
+
+            // Get permission level
+            Board.permissionLevel = boardContent.userAccess as PermissionLevel;
+
+            // Set title on the client side, both on the board page and in the document title.
+            this.setTitle(boardContent.board.name, boardContent.ancestors);
 
             const tasklists = document.getElementById("tasklists");
             const listHead = document.getElementById("list-head");
@@ -230,6 +239,11 @@ export class Board extends View {
             }
 
             Board.content = boardContent.board;
+
+            if (Board.permissionLevel != PermissionLevel.Edit) {
+                const headerIcons = document.querySelector("header .right");
+                headerIcons.parentNode.removeChild(headerIcons);
+            }
 
             ToastController.new("Loaded board", ToastType.Info);
         }).catch((req) => {

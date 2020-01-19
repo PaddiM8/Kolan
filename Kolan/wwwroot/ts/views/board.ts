@@ -62,10 +62,6 @@ export class Board extends View {
             Board.dialogs.settings.shown = true;
         });
 
-        // Websockets
-        if (Board.permissionLevel == PermissionLevel.Edit)
-            new BoardHub().join(Board.viewData.id);
-
         window.onbeforeunload = () => {
             Board.pageReloadInProgress = true;
             return;
@@ -241,7 +237,12 @@ export class Board extends View {
 
             Board.content = boardContent.board;
 
-            if (Board.permissionLevel != PermissionLevel.Edit) {
+            if (Board.permissionLevel == PermissionLevel.Edit) {
+                // Connect to SignalR
+                if (Board.permissionLevel == PermissionLevel.Edit)
+                    new BoardHub().join(Board.viewData.id);
+            } else {
+                // Remove header icons
                 const headerIcons = document.querySelector("header .right");
                 headerIcons.parentNode.removeChild(headerIcons);
             }

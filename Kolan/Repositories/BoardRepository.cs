@@ -212,11 +212,44 @@ namespace Kolan.Repositories
                     .Match("(board:Board)")
                     .Where((Board board) => board.Id == id)
                     .OptionalMatch("(board)-[:CHILD_GROUP]->(group:Group)")
-                    .Return<int>("count(group)")
+                    .OptionalMatch("(parent:Board)-[:CHILD_BOARD]->(board)")
+                    .OptionalMatch("(parent)-[rel:CHILD_GROUP]->(parentGroup:Group)")
+                    .Set("board.public = CASE WHEN parent IS NULL THEN false ELSE parent.public END")
+                    .With("group, parent, parentGroup, rel")
+                    .OrderBy("rel.order")
+                    .Return((group, parent, parentGroup, rel) => new 
+                     {
+                        GroupCount = Return.As<int>("count(group)"),
+                        HasParent = Return.As<int>("CASE WHEN parent IS NULL THEN 0 ELSE 1 END"),
+                        ParentGroups = parentGroup.CollectAs<Group>()
+                     })
                     .ResultsAsync;
 
-            if (result.Single() == 0) return await AddDefaultGroups(id);
-            else                      throw new InvalidOperationException();
+            var resultObject = result.Single();
+            if (resultObject.GroupCount != 0) throw new InvalidOperationException();
+
+            // Inherit parent's groups if the board has a parent, otherwise add the default groups.
+            if (resultObject.HasParent == 1)
+            {
+                List<Group> groups = resultObject.ParentGroups.ToList();
+                groups.ForEach(x => x.Id = _generator.NewId(id));
+
+                await Client.Cypher
+                    .Match("(board:Board)")
+                    .Where((Board board) => board.Id == id)
+                    .With("board, {groups} AS groups")
+                    .WithParam("groups", groups)
+                    .Unwind("range(0, size(groups) - 1)", "index")
+                    .Create("(board)-[rel:CHILD_GROUP { order: index }]->(group:Group)")
+                    .Set("group = groups[rel.order]")
+                    .ExecuteWithoutResultsAsync();
+
+                return groups;
+            }
+            else
+            {
+                return await AddDefaultGroups(id);
+            }
         }
 
         /// <summary>

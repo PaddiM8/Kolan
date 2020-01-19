@@ -75,7 +75,7 @@ namespace Kolan.Tests
             Assert.That(returnedBoard.Board.Description, Is.EqualTo(_defaultBoard.Description));
             Assert.That(returnedBoard.Groups, Is.Null);
             Assert.That(returnedBoard.Ancestors, Is.Empty);
-            Assert.That(returnedBoard.UserAccess, Is.EqualTo(1));
+            Assert.That(returnedBoard.UserAccess, Is.EqualTo(2));
         }
 
         [TestCase(_username2)]
@@ -282,7 +282,7 @@ namespace Kolan.Tests
         }
 
         [Test]
-        public async Task Get_AncestorsOfSHARED_BOARD_ReturnsListOfBoards()
+        public async Task Get_AncestorsOfSharedBoard_ReturnsListOfBoards()
         {
             // Arrange
             var nestedBoards = await CreateNestedBoards();

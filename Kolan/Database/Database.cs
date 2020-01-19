@@ -41,6 +41,8 @@ namespace Kolan
                 // Constraints
                 Client.Cypher.CreateUniqueConstraint("u:User", "u.username")
                              .ExecuteWithoutResults();
+                Client.Cypher.CreateUniqueConstraint("g:Group", "g.id")
+                             .ExecuteWithoutResults();
                 Client.Cypher.CreateUniqueConstraint("b:Board", "b.id")
                              .ExecuteWithoutResults();
             }

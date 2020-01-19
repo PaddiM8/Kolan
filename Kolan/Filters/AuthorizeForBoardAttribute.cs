@@ -1,15 +1,15 @@
 using System.Threading.Tasks;
 using Kolan.Repositories;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Primitives;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Kolan.Filters
 {
     class AuthorizeForBoardAttribute : AuthorizeAttribute, IAsyncAuthorizationFilter
     {
-        private static readonly UnitOfWork _uow = new UnitOfWork(Database.Client); // Couldn't dependency inject...
+        private static readonly UnitOfWork _uow = new UnitOfWork(Database.Client); // Temporary
         private readonly string _idParameterName;
 
         public AuthorizeForBoardAttribute(string idParameterName = "id")

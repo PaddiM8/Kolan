@@ -63,7 +63,8 @@ export class Board extends View {
         });
 
         // Websockets
-        new BoardHub().join(Board.viewData.id);
+        if (Board.permissionLevel == PermissionLevel.Edit)
+            new BoardHub().join(Board.viewData.id);
 
         window.onbeforeunload = () => {
             Board.pageReloadInProgress = true;

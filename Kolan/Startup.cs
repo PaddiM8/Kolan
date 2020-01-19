@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.OpenApi.Models;
 using Kolan.Repositories;
 using Kolan.Hubs;
+using Kolan.Filters;
 using System.Reflection;
 using Newtonsoft.Json.Serialization;
 
@@ -94,6 +95,14 @@ namespace Kolan
 
             services.AddMvc(options => options.Filters.Add(new AuthorizeFilter()));
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("BoardRestricted", policy =>
+                {
+                    policy.Requirements.Add(new BoardRestrictedRequirement());
+                });
+            });
 
             services.AddSwaggerGen(c =>
             {

@@ -78,10 +78,10 @@ namespace Kolan.Repositories
                 .Match("path=(board:Board)<-[:CHILD_BOARD*0..]-()<-[:CHILD_BOARD|SHARED_BOARD]-(user:User)")
                 .Where((User user) => user.Username == username)
                 .AndWhere((Board board) => board.Id == boardId)
-                .Return((path) => Return.As<string>("CASE WHEN path IS NULL THEN 'false' ELSE 'true' END"))
+                .Return((path) => Return.As<int>("CASE WHEN path IS NULL THEN 0 ELSE 1 END"))
                 .ResultsAsync;
 
-            return result.SingleOrDefault() == "true";
+            return result.SingleOrDefault() == 1;
         }
 
         /// <summary>

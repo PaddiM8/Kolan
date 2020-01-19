@@ -98,9 +98,9 @@ namespace Kolan
 
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("BoardRestricted", policy =>
+                options.AddPolicy("BoardHubRestricted", policy =>
                 {
-                    policy.Requirements.Add(new BoardRestrictedRequirement());
+                    policy.Requirements.Add(new BoardHubRestrictedRequirement());
                 });
             });
 

@@ -18,7 +18,7 @@ namespace Kolan.Hubs
             _uow = uow;
         }
 
-        [Authorize("BoardRestricted")]
+        [Authorize("BoardHubRestricted")]
         public async Task<IActionResult> Join(string boardId)
         {
             if (await _uow.Boards.UserHasAccess(boardId, Context.User.Identity.Name))

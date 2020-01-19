@@ -4,14 +4,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 namespace Kolan.Filters
 {
-    public class BoardRestrictedRequirement :
-        AuthorizationHandler<BoardRestrictedRequirement, HubInvocationContext>,
+    public class BoardHubRestrictedRequirement :
+        AuthorizationHandler<BoardHubRestrictedRequirement, HubInvocationContext>,
         IAuthorizationRequirement
     {
         private static readonly UnitOfWork _uow = new UnitOfWork(Database.Client); // Temporary
 
         protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context,
-            BoardRestrictedRequirement requirement, HubInvocationContext resource)
+            BoardHubRestrictedRequirement requirement, HubInvocationContext resource)
         {
             string boardId = (string)resource.HubMethodArguments[0];
             string username = context.User.Identity.Name;

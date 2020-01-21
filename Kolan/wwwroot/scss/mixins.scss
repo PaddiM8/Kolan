@@ -55,7 +55,7 @@
     }
 }
 
-@mixin misc($size) {
+@mixin checkbox($size) {
     .checkboxLabel {
         display: inline-block;
 
@@ -76,5 +76,5 @@
 @mixin ui-elements($font-size: 1.2em) {
     @include text-input($font-size);
     @include button($font-size);
-    @include misc($font-size);
+    @include checkbox($font-size);
 }

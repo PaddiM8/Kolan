@@ -33,26 +33,35 @@ header {
         user-select: none;
     }
 
-    #addBoard {
+    .plus {
         height: 60px;
+
         line-height: 60px;
         font-size: 70px;
         margin-left: auto;
-        color: black;
         text-align: center;
         font-weight: 200;
+
         cursor: pointer;
         user-select: none;
     }
 }
 
-.gear {
+.icon.gear {
     position: absolute;
-    width: 58px;
-    height: auto;
     top: 0;
     right: 0;
-    margin: 10px;
+
+    margin: 15px;
+    padding: 0;
+    font-size: 50px;
+
+    cursor: pointer;
+    transition: .3s ease transform;
+
+    &:hover {
+        transform: rotate(20deg);
+    }
 }
 
 .board-list {

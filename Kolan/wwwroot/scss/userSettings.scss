@@ -23,24 +23,28 @@ header {
     grid-area: 1 / 2;
     margin-top: 50px;
 
-    a {
+    .iconLink {
         text-decoration: none;
+        color: black;
 
         &:active {
             outline: none;
         }
     }
 
-    fa-icon {
+    .icon {
         display: inline-block;
+
         margin-right: 10px;
         margin-top: 6px;
         vertical-align: middle;
+        font-size: 30px;
+
         cursor: pointer;
         transition: .2s ease transform;
     }
 
-    fa-icon:hover {
+    .icon:hover {
         transform: translateX(-8px);
     }
 
@@ -74,5 +78,10 @@ main {
 
     input[type="submit"] {
         margin-left: auto;
+    }
+
+    drop-down {
+        width: 400px;
+        margin-left: 10px;
     }
 }

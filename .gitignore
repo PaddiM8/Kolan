@@ -7,6 +7,8 @@ Kolan/wwwroot/js
 Kolan/wwwroot/css
 Kolan/wwwroot/dist
 
+server-config.json
+
 # User-specific files
 *.suo
 *.user

@@ -25,5 +25,11 @@ namespace Kolan.Models
 
         [JsonProperty("public")]
         public bool Public { get; set; } = false;
+
+        [JsonProperty("tags")]
+        public string Tags { get; set; }
+
+        [JsonProperty("color")]
+        public string Color { get; set; }
     }
 }

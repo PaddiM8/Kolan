@@ -4,4 +4,5 @@ export interface IBoard {
     description: string;
     color?: string;
     public?: boolean;
+    tags?: string;
 }

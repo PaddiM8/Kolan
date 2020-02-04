@@ -20,11 +20,13 @@ export class EditTaskDialog extends DialogBox {
         {
             key: "tags",
             value: "Tags (separated by comma)",
+            placeholder: "some, example, tags",
             inputType: InputType.Text
         },
         {
             key: "color",
-            value: "Color (HEX value)",
+            value: "Color",
+            placeholder: "#d3d3d3",
             inputType: InputType.Text
         }
     ];

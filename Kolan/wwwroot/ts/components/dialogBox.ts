@@ -32,7 +32,7 @@ export class DialogBox extends LitElement {
          <section class="dialog">
             <h2>${html`${this.options.title}`}</h2>
             <div id="inputs">
-                ${this.fields.map(x => html`${this.getComponentHtml(x.inputType, x.key, x.value, x.title)}`)}
+                ${this.fields.map(x => html`${this.getComponentHtml(x.inputType, x.key, x.value, x.title, x.placeholder)}`)}
             </div>
             <button @click="${this.submitHandler}">${html`${this.options.primaryButton}`}</button>
             <button class="secondary" @click="${this.cancelHandler}">Cancel</button>
@@ -154,16 +154,18 @@ export class DialogBox extends LitElement {
      * @param {string} value
      * @returns {TemplateResult}
      */
-    private getComponentHtml(inputType: InputType, name: string, value: string, title: string = null): TemplateResult {
+    private getComponentHtml(inputType: InputType, name: string, value: string, title: string = null, placeholder: string = null): TemplateResult {
+        placeholder = placeholder == null ? value + "..." : placeholder; // Set placeholder to title if it's not specified
+
         switch (inputType) {
             case InputType.Text:
                 return html`<p>${value}:</p>
                             <label for="${name}"></label>
-                            <input type="text" name="${name}" placeholder="${value}..." /><br />`;
+                            <input type="text" name="${name}" placeholder="${placeholder}" /><br />`;
             case InputType.TextArea:
                 return html`<p>${value}:</p>
                             <label for="${name}"></label>
-                            <textarea name="${name}" placeholder="${value}"></textarea>`;
+                            <textarea name="${name}" placeholder="${placeholder}"></textarea>`;
             case InputType.InputList:
                 this.list = new InputList(value);
                 let listElement = this.list as HTMLElement;

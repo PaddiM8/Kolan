@@ -16,6 +16,16 @@ export class EditTaskDialog extends DialogBox {
             key: "description",
             value: "Task description",
             inputType: InputType.TextArea
+        },
+        {
+            key: "tags",
+            value: "Tags (separated by comma)",
+            inputType: InputType.Text
+        },
+        {
+            key: "color",
+            value: "Color (HEX value)",
+            inputType: InputType.Text
         }
     ];
     @property({type: Object}) options = {

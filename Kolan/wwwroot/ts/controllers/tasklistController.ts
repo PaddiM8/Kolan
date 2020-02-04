@@ -89,6 +89,8 @@ export class TasklistController {
          `);
 
         item.querySelector(".name").textContent = task.name;
+        item.dataset.tags = task.tags;
+        item.dataset.color = task.color;
 
         if (task.color != "") item.style.backgroundColor = task.color;
 
@@ -139,11 +141,6 @@ export class TasklistController {
     }
 
     private sendMoveRequest(boardId: string, targetId: string): void {
-        /*new ApiRequester().send("Boards", Board.viewData.id + "/ChangeOrder", "POST", [
-            new RequestParameter("boardId", boardId),
-            new RequestParameter("targetId", targetId),
-        ]);*/
-
        new BoardHub().moveTask(boardId, targetId);
     }
 
@@ -168,9 +165,12 @@ export class TasklistController {
     private onEditClick(item: DraggableItem): void {
         Board.dialogs.editTask.shown = true;
         Board.dialogs.editTask.boardId = item.dataset.id;
+        console.log(item.querySelector(".tags"));
         Board.dialogs.editTask.setValues({
             name: item.querySelector(".name").innerHTML,
-            description: item.dataset.description
+            description: item.dataset.description,
+            tags: item.dataset.tags,
+            color: item.dataset.color
         });
     }
 

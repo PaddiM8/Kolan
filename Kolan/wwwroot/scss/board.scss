@@ -65,12 +65,9 @@ header {
     overflow-x: auto;
 }
 
-.list-head {
-    width: calc(100vw - 10px);
-}
-
 .tasklists, .list-head {
     display: grid;
+    width: calc(100vw - 10px);
     font-family: "Inter", sans-serif;
     grid-template-columns: repeat(4, 1fr);
 }

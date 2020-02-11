@@ -16,6 +16,8 @@ server-config.json
 *.sln.docstates
 
 tags
+tags.*
+tags.temp
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

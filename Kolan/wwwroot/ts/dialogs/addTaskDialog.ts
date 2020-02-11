@@ -2,6 +2,7 @@ import { DialogBox } from "../components/dialogBox";
 import { LitElement, property, customElement } from "lit-element";
 import { InputType } from "../enums/inputType";
 import { BoardHub } from "../communication/boardHub";
+import { ITask } from "../models/ITask";
 
 @customElement("add-task-dialog")
 export class AddTaskDialog extends DialogBox {
@@ -27,7 +28,7 @@ export class AddTaskDialog extends DialogBox {
             key: "color",
             value: "Color",
             placeholder: "#d3d3d3",
-            inputType: InputType.Text
+            inputType: InputType.Color
         }
     ];
     @property({type: Object}) options = {
@@ -35,9 +36,31 @@ export class AddTaskDialog extends DialogBox {
         primaryButton: "Add"
     }
 
+    onOpen() {
+        const tagsElement = this.shadowRoot.querySelector("input[name='tags']") as HTMLInputElement;
+        tagsElement.addEventListener("blur", () => {
+            const tags = tagsElement.value;
+            const tagColor = localStorage.getItem("tag_" + this.getFirstTag(tags));
+            const colorElement = this.shadowRoot.querySelector("input[name='color']") as HTMLInputElement;
+
+            colorElement.value = tagColor;
+        });
+    }
+
     submitHandler(): void {
-        const task = this.getFormData();
+        const task = this.getFormData() as ITask;
         new BoardHub().addTask(task, this.groupId);
+
+        // Save the tag-colour combination
+        if (!localStorage.getItem(task.color)) {
+            localStorage.setItem("tag_" + this.getFirstTag(task.tags), task.color);
+        }
+
         this.hide();
+    }
+
+    private getFirstTag(tags: string): string {
+        const firstComma = tags.indexOf(",");
+        return firstComma > 0 ? tags.substring(0, firstComma) : tags; // If there is no comma, that means there is only one tag, so just get the entire value
     }
 }

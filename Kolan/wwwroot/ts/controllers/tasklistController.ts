@@ -57,6 +57,7 @@ export class TasklistController {
         item.dataset.description = newBoardContent.description ? newBoardContent.description : "";
         name.textContent = ContentFormatter.format(newBoardContent.name);
         description.innerHTML = ContentFormatter.formatWithMarkdown(newBoardContent.description);
+        item.style.backgroundColor = newBoardContent.color;
     }
 
     /**
@@ -165,7 +166,6 @@ export class TasklistController {
     private onEditClick(item: DraggableItem): void {
         Board.dialogs.editTask.shown = true;
         Board.dialogs.editTask.boardId = item.dataset.id;
-        console.log(item.querySelector(".tags"));
         Board.dialogs.editTask.setValues({
             name: item.querySelector(".name").innerHTML,
             description: item.dataset.description,

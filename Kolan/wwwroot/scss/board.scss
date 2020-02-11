@@ -1,5 +1,9 @@
 @import "./common";
 
+body {
+    overflow-y: scroll;
+}
+
 main {
     display: grid;
     grid-template-rows: 75px calc(100% - 75px);
@@ -61,13 +65,14 @@ header {
     overflow-x: auto;
 }
 
+.list-head {
+    width: calc(100vw - 10px);
+}
+
 .tasklists, .list-head {
     display: grid;
     font-family: "Inter", sans-serif;
     grid-template-columns: repeat(4, 1fr);
-}
-
-.tasklists {
 }
 
 tasklist, .list-head .item {

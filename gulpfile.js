@@ -19,8 +19,8 @@ gulp.task("sass", function() {
             browsers: ['last 2 versions'],
             cascade: false
         }))
-        .pipe(gulp.dest("./Kolan/wwwroot/css"))
-        .pipe(notify("Sass compilation complete."));
+        .pipe(gulp.dest("./Kolan/wwwroot/css"));
+        //.pipe(notify("Sass compilation complete."));
 });
 
 gulp.task("ts", function() {
@@ -40,8 +40,8 @@ gulp.task("compress", () => {
 gulp.task('webpack', function() {
     return gulp.src('Kolan/wwwroot/js/views/boards.js')
         .pipe(webpack(require('./webpack.config.js')))
-        .pipe(gulp.dest('Kolan/wwwroot/dist/'))
-        .pipe(notify({ title: "Webpack complete", onLast: true }));
+        .pipe(gulp.dest('Kolan/wwwroot/dist/'));
+        //.pipe(notify({ title: "Webpack complete", onLast: true }));
 });
 
 gulp.task('doc', function (cb) {

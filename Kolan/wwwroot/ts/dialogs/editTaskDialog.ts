@@ -27,7 +27,7 @@ export class EditTaskDialog extends DialogBox {
             key: "color",
             value: "Color",
             placeholder: "#d3d3d3",
-            inputType: InputType.Text
+            inputType: InputType.Color
         }
     ];
     @property({type: Object}) options = {

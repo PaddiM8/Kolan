@@ -7,5 +7,6 @@ export enum InputType {
     Text,
     TextArea,
     InputList,
-    Checkbox
+    Checkbox,
+    Color
 }

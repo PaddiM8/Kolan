@@ -173,6 +173,10 @@ export class DialogBox extends LitElement {
                 return html`<h3>${title}</h3>${listElement}`;
             case InputType.Checkbox:
                 return html`<label class="checkboxLabel"><input type="checkbox" name="${name}" />${value}</label>`
+            case InputType.Color:
+                return html`<p style="display: inline-block;">${value}:</p>
+                            <label for="${name}"></label>
+                            <input type="color" name="${name}" /><br />`;
             default:
                 return html``;
         }

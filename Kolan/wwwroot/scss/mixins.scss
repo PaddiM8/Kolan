@@ -73,8 +73,25 @@
     }
 }
 
+@mixin colorpicker($size) {
+    input[type="color"] {
+        width: 50px;
+        height: 40px;
+        padding: 10px;
+        border: 1px solid black;
+        border-radius: 3px;
+        background-color: white;
+
+        &:hover {
+            cursor: pointer;
+            background-color: #d3d3d3;
+        }
+    }
+}
+
 @mixin ui-elements($font-size: 1.2em) {
     @include text-input($font-size);
     @include button($font-size);
     @include checkbox($font-size);
+    @include colorpicker($font-size);
 }

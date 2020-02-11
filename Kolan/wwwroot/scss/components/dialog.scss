@@ -14,6 +14,10 @@ input[type="text"], textarea {
     width: 100%;
 }
 
+input[type="color"] {
+    display: inline-block;
+    margin-left: 10px;
+}
 
 .dialog {
     position: absolute;

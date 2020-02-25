@@ -38,10 +38,7 @@ export class ShareDialog extends DialogBox {
     }
 
     protected onOpen(): void {
-        new ApiRequester().send("Boards", `${viewData.id}/Users`, RequestType.Get)
-        .then(response => {
-            this.list.items = JSON.parse(response as string).map(x => ({ name: x }));
-        });
+        this.list.items = Board.collaborators.map(x => ({ name: x }));
     }
 
     submitHandler(): void {

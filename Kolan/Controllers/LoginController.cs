@@ -64,5 +64,13 @@ namespace Kolan.Controllers
 
             return RedirectToAction("Index", "Boards");
         }
+
+        [HttpGet("Logout")]
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync();
+
+            return RedirectToAction("Index", "Login");
+        }
     }
 }

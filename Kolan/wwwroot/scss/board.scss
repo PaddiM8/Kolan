@@ -149,6 +149,12 @@ draggable-item {
     .description > *:first-child {
         margin-top: 0;
     }
+    
+    .assignee {
+        position: absolute;
+        bottom: 9px;
+        right: 45px;
+    }
 
     .overlay {
         display: none;

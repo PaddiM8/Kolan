@@ -3,6 +3,9 @@ import { LitElement, property, customElement } from "lit-element";
 import { InputType } from "../enums/inputType";
 import { BoardHub } from "../communication/boardHub";
 import { ITask } from "../models/ITask";
+import { Board } from "../views/board";
+
+declare const viewData;
 
 @customElement("add-task-dialog")
 export class AddTaskDialog extends DialogBox {
@@ -29,6 +32,12 @@ export class AddTaskDialog extends DialogBox {
             value: "Color",
             placeholder: "#d3d3d3",
             inputType: InputType.Color
+        },
+        {
+            key: "assignee",
+            value: "Assigned to",
+            placeholder: "Username...",
+            inputType: InputType.Text
         }
     ];
     @property({type: Object}) options = {
@@ -45,6 +54,22 @@ export class AddTaskDialog extends DialogBox {
 
             colorElement.value = tagColor;
         });
+
+        // Populate data list with available users
+        const userDataList = document.createElement("datalist");
+        userDataList.id = "userDataList";
+
+        const users = [ viewData.username, ...Board.collaborators ];
+        for (const collaborator of users) {
+            const option = document.createElement("option");
+            option.value = collaborator;
+            userDataList.appendChild(option);
+        }
+
+        // Set the assignee input's list to the new data list
+        const assigneeElement = this.shadowRoot.querySelector("input[name='assignee']") as HTMLInputElement;
+        assigneeElement.parentNode.appendChild(userDataList);
+        assigneeElement.setAttribute("list", "userDataList");
     }
 
     submitHandler(): void {

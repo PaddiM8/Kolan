@@ -31,5 +31,8 @@ namespace Kolan.Models
 
         [JsonProperty("color")]
         public string Color { get; set; }
+
+        [JsonProperty("assignee")]
+        public string Assignee { get; set; }
     }
 }

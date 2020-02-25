@@ -4,6 +4,16 @@ body {
     margin: 0;
 }
 
+.icon.logout {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 50px;
+    margin: 15px;
+    padding: 0;
+    cursor: pointer;
+}
+
 main {
     position: absolute;
     margin-left: 50%;

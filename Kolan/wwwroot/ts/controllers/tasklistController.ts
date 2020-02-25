@@ -49,15 +49,17 @@ export class TasklistController {
         }
     }
 
-    public editTask(newBoardContent: IBoard): void {
-        const item = document.querySelector(`#tasklists [data-id="${newBoardContent.id}"]`) as HTMLElement;
+    public editTask(newTaskContent: ITask): void {
+        const item = document.querySelector(`#tasklists [data-id="${newTaskContent.id}"]`) as HTMLElement;
         const name = item.querySelector(".name") as HTMLElement;
         const description = item.querySelector(".description") as HTMLElement;
+        const assignee = item.querySelector(".assignee") as HTMLElement;
 
-        item.dataset.description = newBoardContent.description ? newBoardContent.description : "";
-        name.textContent = ContentFormatter.format(newBoardContent.name);
-        description.innerHTML = ContentFormatter.formatWithMarkdown(newBoardContent.description);
-        item.style.backgroundColor = newBoardContent.color;
+        item.dataset.description = newTaskContent.description ? newTaskContent.description : "";
+        name.textContent = ContentFormatter.format(newTaskContent.name);
+        description.innerHTML = ContentFormatter.formatWithMarkdown(newTaskContent.description);
+        item.style.backgroundColor = newTaskContent.color;
+        assignee.textContent = newTaskContent.assignee;
     }
 
     /**
@@ -74,9 +76,9 @@ export class TasklistController {
         item.dataset.description = task.description ? task.description : "";
         task.name = ContentFormatter.format(task.name);
         task.description = ContentFormatter.formatWithMarkdown(task.description);
+        task.assignee = ContentFormatter.format(task.assignee);
 
-        item.insertAdjacentHTML("afterbegin",
-            `
+        item.insertAdjacentHTML("afterbegin", `
          <h2 class="name"></h2>
          <span class="description">${task.description}</span>
          <div class="overlay">
@@ -87,6 +89,7 @@ export class TasklistController {
                   role="button">
                   </span>
          </div>
+         <span class="assignee">${task.assignee}</span>
          `);
 
         item.querySelector(".name").textContent = task.name;
@@ -170,7 +173,8 @@ export class TasklistController {
             name: item.querySelector(".name").innerHTML,
             description: item.dataset.description,
             tags: item.dataset.tags,
-            color: item.dataset.color
+            color: item.dataset.color,
+            assignee: item.querySelector(".assignee").innerHTML
         });
     }
 

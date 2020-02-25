@@ -31,6 +31,7 @@ declare const viewData;
  */
 export class Board extends View {
     public static content: IBoard;
+    public static collaborators: string[];
     public static permissionLevel: PermissionLevel;
     public static dialogs;
     public static tasklistControllers = {};
@@ -246,6 +247,12 @@ export class Board extends View {
                 const headerIcons = document.querySelector("header .right");
                 headerIcons.parentNode.removeChild(headerIcons);
             }
+
+            // Get collaborators
+            new ApiRequester().send("Boards", `${viewData.id}/Users`, RequestType.Get)
+            .then(response => {
+                Board.collaborators = JSON.parse(response as string);
+            });
 
             ToastController.new("Loaded board", ToastType.Info);
         }).catch((req) => {

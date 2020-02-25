@@ -46,6 +46,7 @@ export class DialogBox extends LitElement {
         if (this.shown) {
             this.dispatchEvent(new CustomEvent("openDialog"));
             this.onOpen();
+            window.scrollTo(0, 0);
         }
     }
 

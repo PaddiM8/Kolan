@@ -28,10 +28,10 @@ namespace Kolan
                 Setup();
 
             // Debugging users
-            new UserController(new UnitOfWork(Client)).Create("bakk", "pass");
-            new UserController(new UnitOfWork(Client)).Create("domi", "pass");
-            new UserController(new UnitOfWork(Client)).Create("liv", "pass");
-            new UserController(new UnitOfWork(Client)).Create("bakk2", "pass");
+            new UserController(new UnitOfWork(Client)).Create("email", "bakk", "pass");
+            new UserController(new UnitOfWork(Client)).Create("email", "domi", "pass");
+            new UserController(new UnitOfWork(Client)).Create("email", "liv", "pass");
+            new UserController(new UnitOfWork(Client)).Create("email", "bakk2", "pass");
         }
 
         public void Setup()

@@ -125,6 +125,10 @@ export class DialogBox extends LitElement {
         return input;
     }
 
+    protected getInputElement(name: string): HTMLInputElement {
+        return this.shadowRoot.querySelector(`input[name="${name}"]`);
+    }
+
     /**
      * Hide the dialog and clear the values.
      *

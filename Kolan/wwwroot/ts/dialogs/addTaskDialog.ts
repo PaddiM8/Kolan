@@ -46,11 +46,11 @@ export class AddTaskDialog extends DialogBox {
     }
 
     onOpen() {
-        const tagsElement = this.shadowRoot.querySelector("input[name='tags']") as HTMLInputElement;
+        const tagsElement = this.getInputElement("tags");
         tagsElement.addEventListener("blur", () => {
             const tags = tagsElement.value;
             const tagColor = localStorage.getItem("tag_" + this.getFirstTag(tags));
-            const colorElement = this.shadowRoot.querySelector("input[name='color']") as HTMLInputElement;
+            const colorElement = this.getInputElement("color");
 
             colorElement.value = tagColor;
         });
@@ -67,7 +67,7 @@ export class AddTaskDialog extends DialogBox {
         }
 
         // Set the assignee input's list to the new data list
-        const assigneeElement = this.shadowRoot.querySelector("input[name='assignee']") as HTMLInputElement;
+        const assigneeElement = this.getInputElement("assignee");
         assigneeElement.parentNode.appendChild(userDataList);
         assigneeElement.setAttribute("list", "userDataList");
     }

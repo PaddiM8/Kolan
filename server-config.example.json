@@ -4,5 +4,6 @@
    "databasePassword": "pass",
    "securityKey": "insert_security_key",
    "hashIterations": 20000,
-   "saltLength": 16
+   "saltLength": 16,
+   "allowRegistrations": "true"
 }

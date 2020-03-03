@@ -57,7 +57,7 @@ export class EditTaskDialog extends DialogBox {
         }
 
         // Set the assignee input's list to the new data list
-        const assigneeElement = this.shadowRoot.querySelector("input[name='assignee']") as HTMLInputElement;
+        const assigneeElement = this.getInputElement("assignee");
         assigneeElement.parentNode.appendChild(userDataList);
         assigneeElement.setAttribute("list", "userDataList");
     }

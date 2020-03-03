@@ -67,6 +67,12 @@ export class Board extends View {
             Board.pageReloadInProgress = true;
             return;
         }
+
+        window.onfocus = () => {
+            if (BoardHub.state == "Disconnected") {
+                new BoardHub().join(Board.viewData.id);
+            }
+        }
     }
 
     /**

@@ -24,13 +24,15 @@ namespace Kolan.Controllers.Api
         }
 
         /// <summary>
-        /// Create a new user. TODO: Create a registration form
+        /// Create a new user.
         /// </summary>
         /// <param name="username">Chosen username</param>
         /// <param name="password">Chosen password</param>
         [HttpPost("Create")]
-        public async Task<IActionResult> Create(string username, string password)
+        public async Task<IActionResult> Create(string email, string username, string password)
         {
+            if (!Config.Values.AllowRegistrations) return Unauthorized();
+
             string passwordHash = PBKDF2.Hash(password);
             await _uow.Users.AddAsync(new User { Username = username, Password = passwordHash });
             return Ok();

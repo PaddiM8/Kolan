@@ -11,6 +11,12 @@ header h1  {
    font-style: normal;
 }
 
+.logo {
+    margin: 40px;
+    width: 200px;
+    height: auto;
+}
+
 main {
    position: absolute;
    width: 500px;
@@ -32,6 +38,10 @@ main {
 
       input[type="submit"] {
          float: right;
+      }
+
+      a.registerLink {
+          font-size: 1.3em;
       }
    }
 }

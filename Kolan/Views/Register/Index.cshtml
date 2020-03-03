@@ -3,7 +3,7 @@
    <head>
       <meta charset="utf-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-      <title>Login - Kolan</title>
+      <title>Register - Kolan</title>
       <link rel="stylesheet" type="text/css" href="https://rsms.me/inter/inter.css">
       <link rel="stylesheet" type="text/css" href="~/css/login.css">
       <script src="~/dist/components.js"></script>
@@ -12,18 +12,20 @@
       <img class="logo" src="/res/logo.png" />
       <main>
          <header>
-            <h1>Kolan</h1>
+            <h1>Register</h1>
          </header>
          <section>
-            @model LoginViewModel
-            <form asp-action="Login" method="post">
+            @model RegisterViewModel
+            <form asp-action="Register" method="post">
+               <label class="error">@Html.ValidationMessageFor(m => m.Username)</label>
+               <input asp-for="Email" class="input" placeholder="Email..." /><br />
                <label class="error">@Html.ValidationMessageFor(m => m.Username)</label>
                <input asp-for="Username" class="input" placeholder="Username..." /><br />
                <label class="error">@Html.ValidationMessageFor(m => m.Password)</label>
                <input asp-for="Password" class="input" placeholder="Password..." /><br />
-
-               @if (Config.Values.AllowRegistrations) { <a class="registerLink" href="/Register">Create account</a> }
-               <input type="submit" value="Login" />
+               <label class="error">@Html.ValidationMessageFor(m => m.RepeatPassword)</label>
+               <input asp-for="RepeatPassword" class="input" placeholder="Repeat Password..." /><br />
+               <input type="submit" value="Register" />
             </form>
          </section>
       </main>

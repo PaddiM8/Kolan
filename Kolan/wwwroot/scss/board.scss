@@ -206,6 +206,10 @@ draggable-item {
         width: 100%;
     }
 
+    #list-head > .item.selected {
+        background-color: #616161;
+    }
+
     .draggableContainer {
         display: none;
     }
@@ -213,6 +217,6 @@ draggable-item {
 
 @media screen and(min-width: 1000px) {
     .draggableContainer {
-        display: block; !important // Important to override any javascript
+        display: block !important; // Important to override any javascript
     }
 }

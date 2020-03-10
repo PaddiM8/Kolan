@@ -38,6 +38,7 @@ export class Board extends View {
     public static viewData;
     public static pageReloadInProgress = false;
     private currentTasklistId: string;
+    private previousTasklist: HTMLElement;
 
     constructor() {
         super();
@@ -74,23 +75,26 @@ export class Board extends View {
             }
         }
 
+        // Change structure on smaller screens
         if (window.screen.width < 1000) {
             const listhead = document.getElementById("list-head");
 
+            // Click the group heads to show the tasklist
             listhead.addEventListener("click", e => {
-                const id = (e.target as HTMLElement).dataset.id;
+                const headItem = e.target as HTMLElement;
+                const id = headItem.dataset.id;
                 const tasklists = document.getElementById("tasklists");
                 const tasklist = tasklists.querySelector(`tasklist[data-id="${id}"`) as HTMLElement;
-                if (tasklist.style.display == "none") {
-                    tasklist.style.display = "block";
 
-                    for (const tasklistChild of tasklists.children) {
-                        const item = tasklistChild as HTMLElement;
-                        if (item.dataset.id != tasklist.dataset.id) item.style.display = "none";
-                    }
-                } else {
-                    tasklist.style.display = "none";
+                tasklist.style.display = "block";
+                headItem.classList.toggle("selected");
+                if (this.previousTasklist) {
+                    this.previousTasklist.style.display = "none";
+                    const previousHeadItem = listhead.querySelector(`[data-id="${this.previousTasklist.dataset.id}"]`)
+                    previousHeadItem.classList.toggle("selected");
                 }
+
+                this.previousTasklist = tasklist;
             });
         }
     }

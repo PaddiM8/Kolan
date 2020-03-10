@@ -58,3 +58,12 @@ input[type="color"] {
     background-color: black;
     opacity: 0.4;
 }
+
+@media screen and (max-width: 1000px) {
+    .dialog {
+        right: 0;
+        border-radius: 0;
+        width: 100%;
+        height: 100vh;
+    }
+}

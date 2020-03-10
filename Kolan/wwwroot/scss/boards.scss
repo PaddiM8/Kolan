@@ -130,3 +130,10 @@ placeholder {
     z-index: 9;
     margin: 10px;
 }
+
+@media screen and (max-width: 800px) {
+    main {
+        width: calc(100% - 85px);
+        margin-top: 110px;
+    }
+}

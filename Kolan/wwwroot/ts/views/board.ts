@@ -70,8 +70,28 @@ export class Board extends View {
 
         window.onfocus = () => {
             if (BoardHub.state == "Disconnected") {
-                new BoardHub().join(Board.viewData.id);
+                window.location.reload();
             }
+        }
+
+        if (window.screen.width < 1000) {
+            const listhead = document.getElementById("list-head");
+
+            listhead.addEventListener("click", e => {
+                const id = (e.target as HTMLElement).dataset.id;
+                const tasklists = document.getElementById("tasklists");
+                const tasklist = tasklists.querySelector(`tasklist[data-id="${id}"`) as HTMLElement;
+                if (tasklist.style.display == "none") {
+                    tasklist.style.display = "block";
+
+                    for (const tasklistChild of tasklists.children) {
+                        const item = tasklistChild as HTMLElement;
+                        if (item.dataset.id != tasklist.dataset.id) item.style.display = "none";
+                    }
+                } else {
+                    tasklist.style.display = "none";
+                }
+            });
         }
     }
 

@@ -199,3 +199,20 @@ draggable-item {
 
     transition: .3s ease opacity;
 }
+
+@media screen and (max-width: 1000px) {
+    #list-head, .tasklists {
+        display: block;
+        width: 100%;
+    }
+
+    .draggableContainer {
+        display: none;
+    }
+}
+
+@media screen and(min-width: 1000px) {
+    .draggableContainer {
+        display: block; !important // Important to override any javascript
+    }
+}

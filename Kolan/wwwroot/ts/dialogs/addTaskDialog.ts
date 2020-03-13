@@ -47,13 +47,16 @@ export class AddTaskDialog extends DialogBox {
 
     onOpen() {
         const tagsElement = this.getInputElement("tags");
+        const colorElement = this.getInputElement("color");
         tagsElement.addEventListener("blur", () => {
             const tags = tagsElement.value;
             const tagColor = localStorage.getItem("tag_" + this.getFirstTag(tags));
-            const colorElement = this.getInputElement("color");
 
             colorElement.value = tagColor;
         });
+
+        // Default color
+        colorElement.value = "#1565C0";
 
         // Populate data list with available users
         const userDataList = document.createElement("datalist");

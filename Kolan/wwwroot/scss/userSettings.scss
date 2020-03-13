@@ -65,7 +65,6 @@ main {
     form {
         display: flex;
         flex-direction: column;
-        width: 400px;
     }
 
     input {
@@ -81,7 +80,32 @@ main {
     }
 
     drop-down {
-        width: 400px;
         margin-left: 10px;
+    }
+}
+
+@media screen and (min-width: 500px) {
+    form {
+        width: 400px;
+    }
+
+    drop-down {
+        width: 400px;
+    }
+}
+
+@media screen and (max-width: 500px) {
+    body {
+        display: block;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    form {
+        width: 100%;
+    }
+
+    drop-down {
+        width: 100%;
     }
 }

@@ -61,7 +61,9 @@ input[type="color"] {
 
 @media screen and (max-width: 1000px) {
     .dialog {
-        right: 0;
+        top: 0;
+        left: 0;
+        transform: none;
         border-radius: 0;
         width: 100%;
         min-height: 100vh;

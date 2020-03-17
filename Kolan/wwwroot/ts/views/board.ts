@@ -31,6 +31,7 @@ declare const viewData;
  */
 export class Board extends View {
     public static content: IBoard;
+    public static parentId: string;
     public static collaborators: string[];
     public static permissionLevel: PermissionLevel;
     public static dialogs;
@@ -267,6 +268,7 @@ export class Board extends View {
             }
 
             Board.content = boardContent.board;
+            if (boardContent.ancestors.length > 0) Board.parentId = boardContent.ancestors[0]["id"];
 
             if (Board.permissionLevel == PermissionLevel.Edit) {
                 // Connect to SignalR

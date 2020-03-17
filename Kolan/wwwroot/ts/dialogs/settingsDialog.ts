@@ -14,6 +14,16 @@ declare const viewData;
 export class SettingsDialog extends DialogBox {
     @property({type: Array<object>()}) fields = [
         {
+            key: "name",
+            value: "Title",
+            inputType: InputType.Text
+        },
+        {
+            key: "description",
+            value: "Description",
+            inputType: InputType.TextArea
+        },
+        {
             key: "inputList",
             title: "Edit columns",
             value: "Choose a column name...",
@@ -25,6 +35,7 @@ export class SettingsDialog extends DialogBox {
         primaryButton: "Done"
     }
     private itemHasBeenMoved = false;
+    private contentHasChanged = false;
 
     constructor() {
         super();
@@ -35,17 +46,38 @@ export class SettingsDialog extends DialogBox {
     }
 
     submitHandler() {
+        if (this.contentHasChanged) {
+            const formData = this.getFormData();
+            Board.content.name = formData["name"];
+            Board.content.description = formData["description"];
+
+            // Board.parentId is empty if there is no parent. The backend will understand this.
+            console.log({parentId: Board.parentId, newBoardContent: JSON.stringify(Board.content)});
+            new ApiRequester().send("Boards", `${viewData.id}`, RequestType.Put, {
+                parentId: Board.parentId,
+                newBoardContent: JSON.stringify(Board.content)
+            });
+        }
+
         if (this.itemHasBeenMoved) {
             new ApiRequester().send("Boards", `${viewData.id}/ChangeGroupOrder`, RequestType.Post, {
                 groupIds: JSON.stringify(this.list.items.map(x => x.id))
             })
             .then(() => location.reload());
         } else {
-            location.reload();
+            //location.reload();
         }
     }
 
     onOpen() {
+        const name = this.shadowRoot.querySelector("[name='name']") as HTMLInputElement;
+        const description = this.shadowRoot.querySelector("[name='description']") as HTMLInputElement;
+
+        name.value = Board.content.name;
+        description.value = Board.content.description;
+        name.oninput = () => this.contentHasChanged = true;
+        description.oninput = () => this.contentHasChanged = true;
+
         // Collect group names into a list
         const groupNames = [];
         for (const key in Board.tasklistControllers)

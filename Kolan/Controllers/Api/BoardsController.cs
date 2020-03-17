@@ -8,6 +8,8 @@ using Kolan.Hubs;
 using Kolan.Filters;
 using Newtonsoft.Json;
 using Kolan.Enums;
+using System;
+
 namespace Kolan.Controllers.Api
 {
     [Produces("application/json")]
@@ -95,17 +97,23 @@ namespace Kolan.Controllers.Api
         }
 
         /// <summary>
-        /// Edit a child board.
+        /// Edit a board. (root or child)
         /// </summary>
+        /// <param name="id">Board id</param>
         /// <param name="parentId">Parent board id</param>
         /// <param name="newBoardContent">Board object with the new values, containing the board id</param>
-        [HttpPut("{parentId}")]
+        [HttpPut("{id}")]
         [ValidateModel]
         [AuthorizeForBoard]
-        public async Task<IActionResult> Edit(string parentId, [FromForm]Board newBoardContent)
+        public async Task<IActionResult> Edit(string id, [FromForm]string parentId, [FromForm]string newBoardContent)
         {
-            await _uow.Boards.EditAsync(newBoardContent);
-            await _boardHubContext.Clients.Group(parentId).EditBoard(newBoardContent);
+            var board = JsonConvert.DeserializeObject<Board>(newBoardContent); // For some reason it could not automatically get deserialized
+            await _uow.Boards.EditAsync(board);
+
+            if (parentId != null)
+            {
+                await _boardHubContext.Clients.Group(parentId).EditBoard(board);
+            }
 
             return Ok();
         }

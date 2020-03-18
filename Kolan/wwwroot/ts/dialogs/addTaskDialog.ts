@@ -28,16 +28,16 @@ export class AddTaskDialog extends DialogBox {
             inputType: InputType.Text
         },
         {
-            key: "color",
-            value: "Color",
-            placeholder: "#d3d3d3",
-            inputType: InputType.Color
-        },
-        {
             key: "assignee",
             value: "Assigned to",
             placeholder: "Username...",
             inputType: InputType.Text
+        },
+        {
+            key: "color",
+            value: "Color",
+            placeholder: "#d3d3d3",
+            inputType: InputType.Color
         }
     ];
     @property({type: Object}) options = {
@@ -48,11 +48,19 @@ export class AddTaskDialog extends DialogBox {
     onOpen() {
         const tagsElement = this.getInputElement("tags");
         const colorElement = this.getInputElement("color");
-        tagsElement.addEventListener("blur", () => {
-            const tags = tagsElement.value;
-            const tagColor = localStorage.getItem("tag_" + this.getFirstTag(tags));
 
-            colorElement.value = tagColor;
+        // Automatically set the color when the tags input is de-selected
+        tagsElement.addEventListener("blur", () => {
+            const color = this.getTagsColor(tagsElement.value);
+            if (color) colorElement.value = color;
+        });
+
+        // Automatically set the color when the user presses comma in the tags input
+        tagsElement.addEventListener("keydown", e => {
+            if (e.key == ",") {
+                const color = this.getTagsColor(tagsElement.value);
+                if (color) colorElement.value = color;
+            }
         });
 
         // Default color
@@ -90,5 +98,11 @@ export class AddTaskDialog extends DialogBox {
     private getFirstTag(tags: string): string {
         const firstComma = tags.indexOf(",");
         return firstComma > 0 ? tags.substring(0, firstComma) : tags; // If there is no comma, that means there is only one tag, so just get the entire value
+    }
+
+    private getTagsColor(tags: string): string {
+        const tagColor = localStorage.getItem("tag_" + this.getFirstTag(tags));
+
+        return tagColor;
     }
 }

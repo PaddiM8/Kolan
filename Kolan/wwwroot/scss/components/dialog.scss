@@ -17,6 +17,7 @@ input[type="text"], textarea {
 input[type="color"] {
     display: inline-block;
     margin-left: 10px;
+    transform: translateY(7px);
 }
 
 .dialog {

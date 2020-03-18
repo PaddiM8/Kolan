@@ -61,6 +61,7 @@ export class DialogBox extends LitElement {
     public setValues(values: object): void { // TODO: Type safety
         for (const name in values) {
             const element = this.shadowRoot.querySelector(`[name="${name}"]`);
+            if (!values[name]) continue;
 
             if (element instanceof InputList) {
                 element.items = values[name];

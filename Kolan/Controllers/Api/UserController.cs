@@ -1,11 +1,10 @@
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Kolan.Repositories;
-using System.Security.Claims;
-using Kolan.Security;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication;
+using Kolan.ViewModels;
+using Kolan.Filters;
+using System;
+using Newtonsoft.Json;
 
 namespace Kolan.Controllers.Api
 {
@@ -29,23 +28,25 @@ namespace Kolan.Controllers.Api
         /// <param name="username">Chosen username</param>
         /// <param name="password">Chosen password</param>
         [HttpPost("Create")]
-        public async Task<IActionResult> Create(string email, string username, string password)
+        [ValidateModel]
+        public async Task<IActionResult> Create(RegisterViewModel model)
         {
             if (!Config.Values.AllowRegistrations) return Unauthorized();
 
-            string passwordHash = PBKDF2.Hash(password);
-            await _uow.Users.AddAsync(new User { Username = username, Password = passwordHash });
+            string passwordHash = PBKDF2.Hash(model.Password);
+            await _uow.Users.AddAsync(new User { Username = model.Username, Password = passwordHash });
             return Ok();
         }
 
-        public async Task<IActionResult> ChangePassword(string username, string currentPassword, string newPassword)
+        [ValidateModel]
+        public async Task<IActionResult> ChangePassword(string username, ChangePasswordViewModel model)
         {
-            if (await _uow.Users.ValidatePassword(username, currentPassword) == false)
+            if (await _uow.Users.ValidatePassword(username, model.CurrentPassword) == false)
             {
                 return BadRequest("Invalid password.");
             }
 
-            _uow.Users.ChangePassword(username, newPassword);
+            await _uow.Users.ChangePassword(username, model.NewPassword);
 
             return Ok();
         }

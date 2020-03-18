@@ -5,6 +5,7 @@ using Kolan.Controllers.Api;
 using Kolan.Repositories;
 using System;
 using Neo4jClient.Transactions;
+using Kolan.ViewModels;
 
 namespace Kolan
 {
@@ -28,10 +29,10 @@ namespace Kolan
                 Setup();
 
             // Debugging users
-            new UserController(new UnitOfWork(Client)).Create("email", "bakk", "pass");
-            new UserController(new UnitOfWork(Client)).Create("email", "domi", "pass");
-            new UserController(new UnitOfWork(Client)).Create("email", "liv", "pass");
-            new UserController(new UnitOfWork(Client)).Create("email", "bakk2", "pass");
+            new UserController(new UnitOfWork(Client)).Create(new RegisterViewModel() { Email = "email", Username = "bakk", Password = "pass" });
+            new UserController(new UnitOfWork(Client)).Create(new RegisterViewModel() { Email = "email", Username = "domi", Password = "pass" });
+            new UserController(new UnitOfWork(Client)).Create(new RegisterViewModel() { Email = "email", Username = "liv", Password = "pass" });
+            new UserController(new UnitOfWork(Client)).Create(new RegisterViewModel() { Email = "email", Username = "bakk2", Password = "pass" });
         }
 
         public void Setup()

@@ -1,16 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
-using System.Security.Claims;
 using Kolan.Models;
 using Kolan.ViewModels;
-using Kolan.Security;
 using Kolan.Repositories;
 using Kolan.Controllers.Api;
+using Kolan.Filters;
 
 namespace Kolan.Controllers
 {
@@ -46,10 +42,11 @@ namespace Kolan.Controllers
             if (model.Password != model.RepeatPassword)
             {
                 ModelState.AddModelError("RepeatPassword", "Passwords don't match.");
-                return View("Index", model);
             }
 
-            new UserController(_uow).Create(model.Email, model.Username, model.Password);
+            if (!ModelState.IsValid) return View("Index", model);
+
+            new UserController(_uow).Create(model);
 
             return RedirectToAction("Index", "Login");
         }

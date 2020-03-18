@@ -4,7 +4,7 @@ using Kolan.Models;
 using Kolan.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using System;
+using Kolan.Filters;
 
 namespace Kolan.Hubs
 {

@@ -3,7 +3,6 @@ import { LitElement, property, customElement } from "lit-element";
 import { InputType } from "../enums/inputType";
 import { BoardHub } from "../communication/boardHub";
 import { Board } from "../views/board";
-import { IModelError } from "../models/IModelError";
 
 declare const viewData;
 
@@ -77,8 +76,8 @@ export class EditTaskDialog extends DialogBox {
         task["id"] = this.boardId;
 
         new BoardHub().editTask(task).then(x => {
-            if (x.statusCode < 200 || x.statusCode > 200) {
-                this.showErrors(x.value as IModelError[]);
+            if (x.statusCode != 200) {
+                this.showErrors(x.value);
             } else {
                 this.hide();
             }

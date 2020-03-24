@@ -7,7 +7,6 @@ import { ApiRequester } from "../communication/apiRequester";
 import { RequestType } from "../enums/requestType";
 import { ToastType } from "../enums/toastType";
 import { ToastController } from "../controllers/toastController";
-import { IModelError } from "../models/IModelError";
 
 declare const viewData;
 
@@ -59,7 +58,7 @@ export class SettingsDialog extends DialogBox {
             }).then(x => {
                 location.reload();
             }).catch(err => {
-                this.showErrors(JSON.parse(err.response) as IModelError[]);
+                this.showErrors(JSON.parse(err.response));
             });
         }
 

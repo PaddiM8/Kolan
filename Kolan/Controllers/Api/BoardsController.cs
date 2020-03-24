@@ -110,7 +110,7 @@ namespace Kolan.Controllers.Api
         {
             var board = JsonConvert.DeserializeObject<Board>(newBoardContent);
             var validation = ModelValidator.Validate(board);
-            if (!validation.isValid) return BadRequest(validation.results);
+            if (!validation.isValid) return BadRequest(validation.errors);
 
             await _uow.Boards.EditAsync(board);
 

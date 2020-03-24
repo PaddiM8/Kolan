@@ -131,15 +131,14 @@ export class DialogBox extends LitElement {
         return this.shadowRoot.querySelector(`input[name="${name}"]`);
     }
 
-    protected showErrors(errors: IModelError[]): void {
-        for (const error of errors) {
-            for (let memberName of error.memberNames) {
-                memberName = memberName.charAt(0).toLowerCase() + memberName.slice(1);
-                const label = this.shadowRoot.querySelector(`label[for="${memberName}"]`) as HTMLLabelElement;
-                label.innerHTML = error.errorMessage;
+    protected showErrors(errorString: string): void {
+        const errors = JSON.parse(errorString);
 
-                label.style.display = error.errorMessage ? "inline" : "none";
-            }
+        for (const name in errors) {
+            const label = this.shadowRoot.querySelector(`label[for="${name}"]`) as HTMLLabelElement;
+            label.innerHTML = errors[name].join("\n");
+
+            label.style.display = errors[name] ? "inline" : "none";
         }
     }
 

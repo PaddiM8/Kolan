@@ -35,7 +35,7 @@ namespace Kolan.Hubs
         public async Task<IActionResult> AddBoard(string parentId, Board board, string groupId)
         {
             var validation = ModelValidator.Validate(board);
-            if (!validation.isValid) return new BadRequestObjectResult(validation.results);
+            if (!validation.isValid) return new BadRequestObjectResult(validation.errors);
 
             string id = await _uow.Boards.AddAsync(board, groupId, Context.User.Identity.Name);
             board.Id = id;
@@ -53,7 +53,7 @@ namespace Kolan.Hubs
         public async Task<IActionResult> EditBoard(string parentId, Board newBoardContents)
         {
             var validation = ModelValidator.Validate(newBoardContents);
-            if (!validation.isValid) return new BadRequestObjectResult(validation.results);
+            if (!validation.isValid) return new BadRequestObjectResult(validation.errors);
 
             await Clients.Group(parentId).EditBoard(newBoardContents);
             await _uow.Boards.EditAsync(newBoardContents);

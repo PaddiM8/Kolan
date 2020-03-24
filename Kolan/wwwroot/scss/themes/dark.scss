@@ -25,6 +25,14 @@ header, .list-head .item, tasklist, #list {
 
 draggable-item {
     background-color: #1565Ce;
+
+    .dragger {
+        background-color: #1565Ce;
+    }
+
+    &:hover {
+        background-color: #2962FF;
+    }
 }
 
 input[type="submit"], button, #boards draggable-item {

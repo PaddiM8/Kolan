@@ -60,6 +60,10 @@ input[type="color"] {
     opacity: 0.4;
 }
 
+.error {
+    color: red;
+}
+
 @media screen and (max-width: 1000px) {
     .dialog {
         top: 0;

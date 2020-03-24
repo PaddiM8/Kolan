@@ -4,6 +4,7 @@ import { RequestParameter } from "../communication/requestParameter";
 import { InputType } from "../enums/inputType"
 import { InputList } from "./inputList"
 import { ThemeManager } from "../themes/themeManager"
+import { IModelError } from "../models/IModelError"
 
 /**
  * Dialog element that takes an IDialogTemplate as input and returns an object with the values as an event.
@@ -130,6 +131,18 @@ export class DialogBox extends LitElement {
         return this.shadowRoot.querySelector(`input[name="${name}"]`);
     }
 
+    protected showErrors(errors: IModelError[]): void {
+        for (const error of errors) {
+            for (let memberName of error.memberNames) {
+                memberName = memberName.charAt(0).toLowerCase() + memberName.slice(1);
+                const label = this.shadowRoot.querySelector(`label[for="${memberName}"]`) as HTMLLabelElement;
+                label.innerHTML = error.errorMessage;
+
+                label.style.display = error.errorMessage ? "inline" : "none";
+            }
+        }
+    }
+
     /**
      * Hide the dialog and clear the values.
      *
@@ -166,11 +179,11 @@ export class DialogBox extends LitElement {
         switch (inputType) {
             case InputType.Text:
                 return html`<p>${value}:</p>
-                            <label for="${name}"></label>
+                            <label for="${name}" class="error"></label>
                             <input type="text" name="${name}" placeholder="${placeholder}" /><br />`;
             case InputType.TextArea:
                 return html`<p>${value}:</p>
-                            <label for="${name}"></label>
+                            <label for="${name}" class="error"></label>
                             <textarea name="${name}" placeholder="${placeholder}"></textarea>`;
             case InputType.InputList:
                 this.list = new InputList(value);
@@ -178,10 +191,10 @@ export class DialogBox extends LitElement {
                 listElement.setAttribute("name", name);
                 return html`<h3>${title}</h3>${listElement}`;
             case InputType.Checkbox:
-                return html`<label class="checkboxLabel"><input type="checkbox" name="${name}" />${value}</label>`
+                return html`<label class="checkboxLabel" class="error"><input type="checkbox" name="${name}" />${value}</label>`
             case InputType.Color:
                 return html`<p style="display: inline-block;">${value}:</p>
-                            <label for="${name}"></label>
+                            <label for="${name}" class="error"></label>
                             <input type="color" name="${name}" /><br />`;
             default:
                 return html``;

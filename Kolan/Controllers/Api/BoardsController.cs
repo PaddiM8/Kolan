@@ -8,7 +8,8 @@ using Kolan.Hubs;
 using Kolan.Filters;
 using Newtonsoft.Json;
 using Kolan.Enums;
-using System;
+using System.Linq;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Kolan.Controllers.Api
 {
@@ -105,9 +106,12 @@ namespace Kolan.Controllers.Api
         [HttpPut("{id}")]
         [ValidateModel]
         [AuthorizeForBoard]
-        public async Task<IActionResult> Edit(string id, [FromForm]string parentId, [FromForm]string newBoardContent)
+        public async Task<IActionResult> Edit(string id, string parentId, [FromForm]string newBoardContent)
         {
-            var board = JsonConvert.DeserializeObject<Board>(newBoardContent); // For some reason it could not automatically get deserialized
+            var board = JsonConvert.DeserializeObject<Board>(newBoardContent);
+            var validation = ModelValidator.Validate(board);
+            if (!validation.isValid) return BadRequest(validation.results);
+
             await _uow.Boards.EditAsync(board);
 
             if (parentId != null)

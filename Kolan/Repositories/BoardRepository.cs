@@ -6,9 +6,8 @@ using Neo4jClient;
 using Neo4jClient.Cypher;
 using Kolan.Models;
 using System.Runtime.CompilerServices;
-using Newtonsoft.Json;
 
-[assembly:InternalsVisibleTo("Kolan.Tests")]
+[assembly: InternalsVisibleTo("Kolan.Tests")]
 namespace Kolan.Repositories
 {
     public class BoardRepository : Repository<Board>
@@ -106,6 +105,8 @@ namespace Kolan.Repositories
                 .WithParam("newBoard", entity)
                 .Create("(user)-[:CHILD_BOARD]->(board)")
                 .Delete("oldRel")
+                .With("user")
+                .Set("user.boardCount = user.boardCount + 1")
                 .ExecuteWithoutResultsAsync();
 
             return id;

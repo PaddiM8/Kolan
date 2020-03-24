@@ -4,6 +4,7 @@ import { InputType } from "../enums/inputType";
 import { BoardHub } from "../communication/boardHub";
 import { ITask } from "../models/ITask";
 import { Board } from "../views/board";
+import { IModelError } from "../models/IModelError";
 
 declare const viewData;
 
@@ -85,14 +86,18 @@ export class AddTaskDialog extends DialogBox {
 
     submitHandler(): void {
         const task = this.getFormData() as ITask;
-        new BoardHub().addTask(task, this.groupId);
+        new BoardHub().addTask(task, this.groupId).then(x => {
+            if (x.statusCode == 200) {
+                this.showErrors(x.value as IModelError[]);
+            } else {
+                // Save the tag-colour combination
+                if (!localStorage.getItem(task.color)) {
+                    localStorage.setItem("tag_" + this.getFirstTag(task.tags), task.color);
+                }
 
-        // Save the tag-colour combination
-        if (!localStorage.getItem(task.color)) {
-            localStorage.setItem("tag_" + this.getFirstTag(task.tags), task.color);
-        }
-
-        this.hide();
+                this.hide();
+            }
+        });
     }
 
     private getFirstTag(tags: string): string {

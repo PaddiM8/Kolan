@@ -43,14 +43,12 @@ export class BoardHub implements IHub {
         BoardHub.connection.onreconnected(() => BoardHub.onConnected());
     }
 
-    public addTask(task: object, boardId: string): string {
-        const result = BoardHub.connection.invoke("addBoard", BoardHub.boardId, task, boardId);
-
-        return result["id"];
+    public addTask(task: object, boardId: string) {
+        return BoardHub.connection.invoke("addBoard", BoardHub.boardId, task, boardId);
     }
 
     public editTask(task: object) {
-        BoardHub.connection.invoke("editBoard", BoardHub.boardId, task);
+        return BoardHub.connection.invoke("editBoard", BoardHub.boardId, task);
     }
 
     public moveTask(taskId: string, targetId: string): void {

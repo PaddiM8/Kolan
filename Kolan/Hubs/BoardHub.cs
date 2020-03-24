@@ -4,7 +4,10 @@ using Kolan.Models;
 using Kolan.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using Kolan.Filters;
+using System.ComponentModel.DataAnnotations;
+using System.Collections.Generic;
+using System;
+using Newtonsoft.Json;
 
 namespace Kolan.Hubs
 {
@@ -31,6 +34,9 @@ namespace Kolan.Hubs
 
         public async Task<IActionResult> AddBoard(string parentId, Board board, string groupId)
         {
+            var validation = ModelValidator.Validate(board);
+            if (!validation.isValid) return new BadRequestObjectResult(validation.results);
+
             string id = await _uow.Boards.AddAsync(board, groupId, Context.User.Identity.Name);
             board.Id = id;
             await Clients.Group(parentId).ReceiveNewBoard(board, groupId);
@@ -44,10 +50,15 @@ namespace Kolan.Hubs
             await _uow.Boards.MoveAsync(parentId, boardId, targetId, false);
         }
 
-        public async Task EditBoard(string parentId, Board newBoardContents)
+        public async Task<IActionResult> EditBoard(string parentId, Board newBoardContents)
         {
+            var validation = ModelValidator.Validate(newBoardContents);
+            if (!validation.isValid) return new BadRequestObjectResult(validation.results);
+
             await Clients.Group(parentId).EditBoard(newBoardContents);
             await _uow.Boards.EditAsync(newBoardContents);
+
+            return new OkObjectResult("");
         }
 
         public async Task DeleteBoard(string parentId, string id)
@@ -55,5 +66,13 @@ namespace Kolan.Hubs
             await Clients.Group(parentId).DeleteBoard(id);
             await _uow.Boards.DeleteAsync(id);
         }
+
+        /*private async Task<(bool isValid, List<ValidationResult> results)> ValidateModel(object obj)
+        {
+            var results = new List<ValidationResult>();
+            bool isValid = Validator.TryValidateObject(obj, new ValidationContext(obj), results, true);
+
+            return (isValid, results);
+        }*/
     }
 }

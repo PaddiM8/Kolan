@@ -7,6 +7,7 @@ import { ApiRequester } from "../communication/apiRequester";
 import { RequestType } from "../enums/requestType";
 import { ToastType } from "../enums/toastType";
 import { ToastController } from "../controllers/toastController";
+import { IModelError } from "../models/IModelError";
 
 declare const viewData;
 
@@ -52,10 +53,13 @@ export class SettingsDialog extends DialogBox {
             Board.content.description = formData["description"];
 
             // Board.parentId is empty if there is no parent. The backend will understand this.
-            console.log({parentId: Board.parentId, newBoardContent: JSON.stringify(Board.content)});
             new ApiRequester().send("Boards", `${viewData.id}`, RequestType.Put, {
                 parentId: Board.parentId,
                 newBoardContent: JSON.stringify(Board.content)
+            }).then(x => {
+                location.reload();
+            }).catch(err => {
+                this.showErrors(JSON.parse(err.response) as IModelError[]);
             });
         }
 
@@ -64,9 +68,9 @@ export class SettingsDialog extends DialogBox {
                 groupIds: JSON.stringify(this.list.items.map(x => x.id))
             })
             .then(() => location.reload());
-        } else {
-            //location.reload();
         }
+
+        if (!this.contentHasChanged && !this.itemHasBeenMoved) this.hide();
     }
 
     onOpen() {

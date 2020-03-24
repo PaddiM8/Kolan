@@ -30,8 +30,8 @@ export class ApiRequester {
             req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
             req.onerror = (e) => reject(Error(`Network Error: ${e}`));
             req.onload = () => {
-                if (req.status === 200) resolve(req.response);
-                else                    reject(req);
+                if (req.status == 200) resolve(req.response);
+                else                   reject(req);
             }
 
             // Send data

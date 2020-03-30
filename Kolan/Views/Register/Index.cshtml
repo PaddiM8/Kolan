@@ -17,7 +17,7 @@
          <section>
             @model RegisterViewModel
             <form asp-action="Register" method="post">
-               <label class="error">@Html.ValidationMessageFor(m => m.Username)</label>
+               <label class="error">@Html.ValidationMessageFor(m => m.Email)</label>
                <input asp-for="Email" class="input" placeholder="Email..." /><br />
                <label class="error">@Html.ValidationMessageFor(m => m.Username)</label>
                <input asp-for="Username" class="input" placeholder="Username..." /><br />

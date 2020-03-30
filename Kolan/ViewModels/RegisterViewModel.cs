@@ -5,22 +5,21 @@ namespace Kolan.ViewModels
 {
    public class RegisterViewModel
    {
-      [Range(5, 512)]
+      [StringLength(512, MinimumLength = 5)]
       [Required]
       [DataType(DataType.EmailAddress)]
       public string Email { get; set; }
 
-      [Range(3, 40)]
+      [StringLength(40, MinimumLength = 3, ErrorMessage = "{0} must be between {2} and {1} characters.")]
       [Required]
       public string Username { get; set; }
 
-      [Range(6, 1024)]
+      [StringLength(1024, MinimumLength = 6, ErrorMessage = "{0} must be between {2} and {1} characters.")]
       [Required]
       [DataType(DataType.Password)]
       public string Password { get; set; }
 
-      [Range(6, 1024)]
-      [Required]
+      [Compare("Password")]
       [DataType(DataType.Password)]
       public string RepeatPassword { get; set; }
    }

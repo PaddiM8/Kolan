@@ -65,6 +65,10 @@ header {
     overflow-x: auto;
 }
 
+.tasklists {
+    position: relative;
+}
+
 .tasklists, .list-head {
     display: grid;
     width: calc(100vw - 10px);

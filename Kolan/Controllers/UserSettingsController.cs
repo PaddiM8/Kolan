@@ -5,8 +5,7 @@ using Kolan.ViewModels;
 using Kolan.Repositories;
 using Kolan.Controllers.Api;
 using System.Threading.Tasks;
-using Kolan.Filters;
-
+using System;
 namespace Kolan.Controllers
 {
     public class UserSettingsController : Controller
@@ -39,6 +38,8 @@ namespace Kolan.Controllers
                 ModelState.AddModelError("RepeatPassword", "Passwords don't match.");
             }
 
+            if (!ModelState.IsValid) return View("Index", model);
+
             // Change the password
             var userController = new UserController(_uow);
             IActionResult result = await userController.ChangePassword(User.Identity.Name, model);
@@ -46,9 +47,8 @@ namespace Kolan.Controllers
             if (result is BadRequestObjectResult)
             {
                 ModelState.AddModelError("CurrentPassword", "Invalid password.");
+                return View("Index", model);
             }
-
-            if (!ModelState.IsValid) return View("Index", model);
 
             TempData["message"] = "Password changed successfully.";
 

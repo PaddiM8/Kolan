@@ -38,6 +38,7 @@ namespace Kolan.Controllers.Api
             return Ok();
         }
 
+        [HttpPost("ChangePassword")]
         [ValidateModel]
         public async Task<IActionResult> ChangePassword(string username, ChangePasswordViewModel model)
         {

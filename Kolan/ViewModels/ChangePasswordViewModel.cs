@@ -9,13 +9,11 @@ namespace Kolan.ViewModels
         [DataType(DataType.Password)]
         public string CurrentPassword { get; set; }
 
-        [Range(6, 1024)]
-        [Required]
+        [StringLength(1024, MinimumLength = 6, ErrorMessage = "Password length must be between {2} and {1}.")]
         [DataType(DataType.Password)]
         public string NewPassword { get; set; }
 
-        [Range(6, 1024)]
-        [Required]
+        [Compare("NewPassword", ErrorMessage = "Passwords don't match.")]
         [DataType(DataType.Password)]
         public string RepeatPassword { get; set; }
     }

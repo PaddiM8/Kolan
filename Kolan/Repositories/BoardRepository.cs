@@ -6,6 +6,7 @@ using Neo4jClient;
 using Neo4jClient.Cypher;
 using Kolan.Models;
 using System.Runtime.CompilerServices;
+using Newtonsoft.Json;
 
 [assembly: InternalsVisibleTo("Kolan.Tests")]
 namespace Kolan.Repositories
@@ -27,14 +28,12 @@ namespace Kolan.Repositories
         public async Task<IEnumerable<Board>> GetAllAsync(string username)
         {
             var result = await Client.Cypher
-                .Match("(user:User)-[:CHILD_GROUP]->(:Group)-[:NEXT*]->(boardOrLink)-[:NEXT*]->(:End)")
+                .Match("(user:User)-[:CHILD_BOARD]->(board:Board)")
                 .Where((User user) => user.Username == username)
-                .OptionalMatch("(boardOrLink)-[:SHARED_BOARD]->(shared:Board)")
-                .Return((boardOrLink, shared) => Return.As<IEnumerable<Board>>(
-                            "collect(boardOrLink) + collect(shared{.*, shared:true})"))
+                .Return(board => board.As<Board>())
                 .ResultsAsync;
 
-            return result.Single();
+            return result;
         }
 
         /// <summary>
@@ -300,6 +299,7 @@ namespace Kolan.Repositories
                 .Match("(sharedBoard:Board)", "(user)-[:CHILD_GROUP]->(previous)-[oldRel:NEXT]->(next)")
                 .Where((Board sharedBoard) => sharedBoard.Id == boardId)
                 .Create("(previous)-[:NEXT]->(link:Link)-[:NEXT]->(next)")
+                .Create("(user)-[:CHILD_BOARD]->(sharedBoard)")
                 .Delete("oldRel")
                 .Create("(link)-[:SHARED_BOARD]->(sharedBoard)")
                 .Return((user) => user.As<User>().Username)
@@ -319,10 +319,11 @@ namespace Kolan.Repositories
                 .Match("(user:User)")
                 .Where((User user) => user.Username == username)
                 .Call("apoc.lock.nodes([user])")
-                .Match("(user)-[:CHILD_GROUP]->()-[:NEXT*]->(link:Link)-[sharedRel:SHARED_BOARD]->(board:Board)")
+                .Match("(user)-[:CHILD_GROUP]->()-[:NEXT*]->(link:Link)-[sharedRel:SHARED_BOARD]->(board:Board)",
+                       "(user)-[childBoardRel:CHILD_BOARD]->(board)")
                 .Where((Board board) => board.Id == boardId)
                 .Match("(previous)-[previousRel:NEXT]->(link)-[nextRel:NEXT]->(next)")
-                .Delete("previousRel, nextRel, sharedRel, link")
+                .Delete("previousRel, nextRel, sharedRel, link, childBoardRel")
                 .Create("(previous)-[:NEXT]->(next)")
                 .ExecuteWithoutResultsAsync();
         }

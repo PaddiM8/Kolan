@@ -21,7 +21,6 @@ export class BoardListController {
      * Add a board to the top of the list.
      * @param   name        {string} Board name.
      * @param   description {string} Board description.
-     * @param   color       {string} Board background color as HEX value.
      */
     public addBoard(board: IBoard): void {
         const item = this.createBoard(board);
@@ -32,7 +31,6 @@ export class BoardListController {
      * Add a board to the bottom of the list.
      * @param   name        {string} Board name.
      * @param   description {string} Board description.
-     * @param   color       {string} Board background color as HEX value.
      */
     public addBoardToBottom(board: IBoard): void {
         const item = this.createBoard(board);
@@ -44,7 +42,6 @@ export class BoardListController {
      * @param id Board id
      * @param name Board name
      * @param description Board description
-     * @param color Optional board color
      */
     private createBoard(board: IBoard): HTMLElement {
         const item = new DraggableItem();
@@ -54,7 +51,6 @@ export class BoardListController {
         item.insertAdjacentHTML("beforeend", `<span class="dragger"></span><h2></h2><p></p>`);
         item.querySelector("h2").textContent = board.name;
         item.querySelector("p").textContent = board.description;
-        if (board.color != "") item.style.backgroundColor = board.color;
 
         item.addEventListener("draggableClick", e => this.onClickEvent(e));
         item.addEventListener("taskInternalMove", e  =>

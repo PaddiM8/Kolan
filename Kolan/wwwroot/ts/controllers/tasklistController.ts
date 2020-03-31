@@ -25,9 +25,11 @@ export class TasklistController {
     constructor(tasklist: HTMLElement, name: string, boardHub: BoardHub, taskColorSeed: string) {
         this.tasklist = tasklist;
         this.name = name;
+        this.boardHub = boardHub;
+        this.taskColorSeed = taskColorSeed;
+
         this.backgroundLuminance = this.getLuminance(window.getComputedStyle(document.body, null)
                                                    .getPropertyValue("background-color"));
-        this.taskColorSeed = taskColorSeed;
     }
 
     /**
@@ -48,9 +50,8 @@ export class TasklistController {
         if (target.tagName == "DRAGGABLE-ITEM") {
             target.parentNode.insertBefore(item, target.nextSibling); // Insert the board under the target inside its parent
         } else {
-            // If a board with the targetId does not exist, assume it's for a tasklist and place it at the top of that.
-            if (this.tasklist.childElementCount > 0) this.tasklist.insertBefore(item, this.tasklist.firstChild);
-            else this.tasklist.appendChild(item);
+            if (target.children.length > 0) target.insertBefore(item, target.firstChild);
+            else target.appendChild(item);
         }
     }
 

@@ -12,5 +12,6 @@ namespace Kolan
       public int    SaltLength         { get; set; }
       public int    HashIterations     { get; set; }
       public bool   AllowRegistrations { get; set; }
+      public string TaskColorSalt      { get; set; }
    }
 }

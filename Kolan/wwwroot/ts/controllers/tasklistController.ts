@@ -20,12 +20,14 @@ export class TasklistController {
     private inEditMode: boolean;
     private boardHub: BoardHub;
     private backgroundLuminance: number;
+    private taskColorSalt: string;
 
-    constructor(tasklist: HTMLElement, name: string, boardHub: BoardHub) {
+    constructor(tasklist: HTMLElement, name: string, boardHub: BoardHub, taskColorSalt: string) {
         this.tasklist = tasklist;
         this.name = name;
         this.backgroundLuminance = this.getLuminance(window.getComputedStyle(document.body, null)
                                                    .getPropertyValue("background-color"));
+        this.taskColorSalt = taskColorSalt;
     }
 
     /**
@@ -199,7 +201,7 @@ export class TasklistController {
     }
 
     private generateColor(input: string): string {
-        const rnd = seedrandom.alea(input);
+        const rnd = seedrandom.alea(input + this.taskColorSalt);
         const h = Math.floor(rnd() * Math.floor(360));
         const s = this.backgroundLuminance > 125 ? "62%" : "72%";
         const l = this.backgroundLuminance > 125 ? "50%" : "42%";

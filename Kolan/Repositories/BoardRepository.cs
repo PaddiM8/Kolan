@@ -207,8 +207,7 @@ namespace Kolan.Repositories
         /// </summary>
         public async Task<IEnumerable<Group>> SetupAsync(string id)
         {
-            var result =
-                await Client.Cypher
+            var result = await Client.Cypher
                     .Match("(board:Board)")
                     .Where((Board board) => board.Id == id)
                     .OptionalMatch("(board)-[:CHILD_GROUP]->(group:Group)")
@@ -232,7 +231,7 @@ namespace Kolan.Repositories
             if (resultObject.HasParent == 1)
             {
                 List<Group> groups = resultObject.ParentGroups.ToList();
-                groups.ForEach(x => x.Id = _generator.NewId(id));
+                groups.ForEach(x => x.Id = _generator.NewId(id + x.Name));
 
                 await Client.Cypher
                     .Match("(board:Board)")

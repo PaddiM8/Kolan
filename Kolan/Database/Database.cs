@@ -27,12 +27,6 @@ namespace Kolan
                                      .Limit(1);
             if (query.Results.Count() == 0)
                 Setup();
-
-            // Debugging users
-            new UserController(new UnitOfWork(Client)).Create(new RegisterViewModel() { Email = "email", Username = "bakk", Password = "pass" });
-            new UserController(new UnitOfWork(Client)).Create(new RegisterViewModel() { Email = "email", Username = "domi", Password = "pass" });
-            new UserController(new UnitOfWork(Client)).Create(new RegisterViewModel() { Email = "email", Username = "liv", Password = "pass" });
-            new UserController(new UnitOfWork(Client)).Create(new RegisterViewModel() { Email = "email", Username = "bakk2", Password = "pass" });
         }
 
         public void Setup()

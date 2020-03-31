@@ -12,6 +12,7 @@ namespace Kolan.ViewModels
 
       [StringLength(40, MinimumLength = 3, ErrorMessage = "{0} must be between {2} and {1} characters.")]
       [Required]
+      [RegularExpression(@"\w+", ErrorMessage = "Username can only contain letters, numbers and underscores.")]
       public string Username { get; set; }
 
       [StringLength(1024, MinimumLength = 6, ErrorMessage = "{0} must be between {2} and {1} characters.")]

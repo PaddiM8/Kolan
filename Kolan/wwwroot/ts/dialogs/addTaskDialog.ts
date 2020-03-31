@@ -33,12 +33,6 @@ export class AddTaskDialog extends DialogBox {
             value: "Assigned to",
             placeholder: "Username...",
             inputType: InputType.Text
-        },
-        {
-            key: "color",
-            value: "Color",
-            placeholder: "#d3d3d3",
-            inputType: InputType.Color
         }
     ];
     @property({type: Object}) options = {
@@ -56,24 +50,6 @@ export class AddTaskDialog extends DialogBox {
 
     onOpen() {
         const tagsElement = this.getInputElement("tags");
-        const colorElement = this.getInputElement("color");
-
-        // Automatically set the color when the tags input is de-selected
-        tagsElement.addEventListener("blur", () => {
-            const color = this.getTagsColor(tagsElement.value);
-            if (color) colorElement.value = color;
-        });
-
-        // Automatically set the color when the user presses comma in the tags input
-        tagsElement.addEventListener("keydown", e => {
-            if (e.key == ",") {
-                const color = this.getTagsColor(tagsElement.value);
-                if (color) colorElement.value = color;
-            }
-        });
-
-        // Default color
-        colorElement.value = "#1565C0";
 
         // Populate data list with available users
         const userDataList = document.createElement("datalist");
@@ -95,27 +71,8 @@ export class AddTaskDialog extends DialogBox {
     submitHandler(): void {
         const task = this.getFormData() as ITask;
         this.boardHub.addTask(task, this.groupId).then(x => {
-            if (x.statusCode != 200) {
-                this.showErrors(x.value);
-            } else {
-                // Save the tag-colour combination
-                if (!localStorage.getItem(task.color)) {
-                    localStorage.setItem("tag_" + this.getFirstTag(task.tags), task.color);
-                }
-
-                this.hide();
-            }
+            if (x.statusCode != 200) this.showErrors(x.value);
+            else                     this.hide();
         });
-    }
-
-    private getFirstTag(tags: string): string {
-        const firstComma = tags.indexOf(",");
-        return firstComma > 0 ? tags.substring(0, firstComma) : tags; // If there is no comma, that means there is only one tag, so just get the entire value
-    }
-
-    private getTagsColor(tags: string): string {
-        const tagColor = localStorage.getItem("tag_" + this.getFirstTag(tags));
-
-        return tagColor;
     }
 }

@@ -9,35 +9,35 @@
       <link rel="stylesheet" type="text/css" href="~/css/board.css">
    </head>
    <body id="board">
-      <main>
-         <header>
-            <div id="title"></div>
-            <div class="right">
-                <span id="shareButton"
-                      class="icon icon-share-alt share"
-                      role="button">
-                      </span>
-                <span id="settingsButton"
-                      class="icon icon-cog gear"
-                      role="button">
-                      </span>
-            </div>
-         </header>
-         <div class="content">
-             <div id="list-head" class="list-head"></div>
-             <section id="tasklists" class="tasklists">
-                 <placeholder></placeholder>
-             </section>
-         </div>
-      </main>
-      <div id="uiBlocker"></div>
+       <main>
+           <header>
+               <div id="title"></div>
+               <div class="right">
+                   <span id="shareButton"
+                         class="icon icon-share-alt share"
+                         role="button">
+                   </span>
+                   <span id="settingsButton"
+                         class="icon icon-cog gear"
+                         role="button">
+                   </span>
+               </div>
+           </header>
+           <div class="content">
+               <div id="list-head" class="list-head"></div>
+               <section id="tasklists" class="tasklists">
+                   <placeholder></placeholder>
+               </section>
+           </div>
+       </main>
+       <div id="uiBlocker"></div>
 
-      <script>
-          const viewData = {
-              id: '@ViewData["id"]',
-              username: '@ViewData["username"]'
-          };
-      </script>
-      <script src="~/dist/board.js"></script>
+       <script>
+           const viewData = {
+               id: '@ViewData["id"]',
+               username: '@ViewData["username"]'
+           };
+       </script>
+       <script src="~/dist/board.js"></script>
    </body>
 </html>

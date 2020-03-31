@@ -42,6 +42,7 @@
     "@types/node": "^12.12.14",
     "dompurify": "^2.0.7",
     "lit-element": "^2.2.1",
-    "markdown-it": "^10.0.0"
+    "markdown-it": "^10.0.0",
+    "seedrandom": "^3.0.5"
   }
 }

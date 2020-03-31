@@ -1,3 +1,4 @@
+const seedrandom = require("seedrandom");
 import { DraggableItem } from "../components/draggableItem";
 import { RequestParameter } from "../communication/requestParameter";
 import { ApiRequester } from "../communication/apiRequester";
@@ -18,17 +19,18 @@ export class TasklistController {
     public name: string;
     private inEditMode: boolean;
     private boardHub: BoardHub;
+    private backgroundLuminance: number;
 
     constructor(tasklist: HTMLElement, name: string, boardHub: BoardHub) {
         this.tasklist = tasklist;
         this.name = name;
+        this.backgroundLuminance = this.getLuminance(window.getComputedStyle(document.body, null)
+                                                   .getPropertyValue("background-color"));
     }
 
     /**
      * Add a task to bottom of the tasklist.
-     * @param   name        {string} Task title.
-     * @param   description {string} Task description.
-     * @param   color       {string} Task background color as HEX value.
+     * @param   task        {ITask} Task.
      */
     public addTask(task: ITask): void {
         const item = this.createTaskItem(task);
@@ -59,16 +61,13 @@ export class TasklistController {
         item.dataset.description = newTaskContent.description ? newTaskContent.description : "";
         name.textContent = ContentFormatter.format(newTaskContent.name);
         description.innerHTML = ContentFormatter.formatWithMarkdown(newTaskContent.description);
-        item.style.backgroundColor = newTaskContent.color;
+        if (newTaskContent.tags) item.style.backgroundColor = this.generateColor(this.firstTag(newTaskContent.tags))
         assignee.textContent = newTaskContent.assignee;
     }
 
     /**
      * Create the HTML element of a task item.
-     * @param id Board id
-     * @param name Board name
-     * @param description Board description
-     * @param color Board color
+     * @param task ITask task
      */
     public createTaskItem(task: ITask): HTMLElement {
         const item = new DraggableItem();
@@ -95,9 +94,8 @@ export class TasklistController {
 
         item.querySelector(".name").textContent = task.name;
         item.dataset.tags = task.tags;
-        item.dataset.color = task.color;
 
-        if (task.color != "") item.style.backgroundColor = task.color;
+        if (task.tags) item.style.backgroundColor = this.generateColor(this.firstTag(task.tags));
 
         item.addEventListener("draggableClick", e => this.onClickEvent(e));
 
@@ -174,7 +172,6 @@ export class TasklistController {
             name: item.querySelector(".name").innerHTML,
             description: item.dataset.description,
             tags: item.dataset.tags,
-            color: item.dataset.color,
             assignee: item.querySelector(".assignee").innerHTML
         });
     }
@@ -188,5 +185,31 @@ export class TasklistController {
             item.parentNode.removeChild(item);
             document.body.removeChild(confirmDialog);
         });
+    }
+
+    private firstTag(input: string): string {
+        const commaIndex = input.indexOf(",");
+
+        if (commaIndex == -1) {
+            return input;
+        } else {
+            console.log(input.substring(0, commaIndex));
+            return input.substring(0, commaIndex);
+        }
+    }
+
+    private generateColor(input: string): string {
+        const rnd = seedrandom.alea(input);
+        const h = Math.floor(rnd() * Math.floor(360));
+        const l = this.backgroundLuminance > 125 ? "40%" : "45%";
+        console.log(this.backgroundLuminance);
+
+        return `hsl(${h}, 65%, ${l})`;
+    }
+
+    private getLuminance(rgbString: string) {
+        const rgb: string[] = rgbString.substring(4, rgbString.length - 2).split(", ");
+
+        return 0.2126 * parseInt(rgb[0]) + 0.7152 * parseInt(rgb[1]) + 0.0722 * parseInt(rgb[2]);
     }
 }

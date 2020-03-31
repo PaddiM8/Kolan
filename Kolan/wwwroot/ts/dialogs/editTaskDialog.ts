@@ -31,12 +31,6 @@ export class EditTaskDialog extends DialogBox {
             value: "Assign to",
             placeholder: "Username...",
             inputType: InputType.Text
-        },
-        {
-            key: "color",
-            value: "Color",
-            placeholder: "#d3d3d3",
-            inputType: InputType.Color
         }
     ];
     @property({type: Object}) options = {
@@ -54,13 +48,6 @@ export class EditTaskDialog extends DialogBox {
 
     onOpen() {
         const tagsElement = this.getInputElement("tags");
-        const colorElement = this.getInputElement("color");
-        tagsElement.addEventListener("blur", () => {
-            const tags = tagsElement.value;
-            const tagColor = localStorage.getItem("tag_" + this.getFirstTag(tags));
-
-            if (tagColor) colorElement.value = tagColor;
-        });
 
         // Populate data list with available users
         const userDataList = document.createElement("datalist");
@@ -90,11 +77,5 @@ export class EditTaskDialog extends DialogBox {
                 this.hide();
             }
         });
-    }
-
-    private getFirstTag(tags: string): string {
-        const firstComma = tags.indexOf(",");
-
-        return firstComma > 0 ? tags.substring(0, firstComma) : tags;
     }
 }

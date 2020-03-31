@@ -29,9 +29,6 @@ namespace Kolan.Models
         [JsonProperty("tags")]
         public string Tags { get; set; }
 
-        [JsonProperty("color")]
-        public string Color { get; set; }
-
         [JsonProperty("assignee")]
         public string Assignee { get; set; }
     }

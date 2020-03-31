@@ -289,6 +289,10 @@ namespace Kolan.Repositories
         /// <param name="username">Username of user to add</param>
         public async Task<bool> AddUserAsync(string boardId, string username)
         {
+            // Don't add user if it already has access to the board
+            bool userHasAccess = await UserHasAccess(boardId, username);
+            if (userHasAccess) return false;
+
             var result = await Client.Cypher
                 .Match("(user:User)")
                 .Where((User user) => user.Username == username)

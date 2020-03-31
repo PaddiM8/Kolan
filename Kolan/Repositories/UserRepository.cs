@@ -33,6 +33,8 @@ namespace Kolan.Repositories
                 .Return((user) => user.As<User>().Password)
                 .ResultsAsync;
 
+            if (result.Count() == 0) return false;
+
             return PBKDF2.Validate(password, result.SingleOrDefault());
         }
 

@@ -6,5 +6,5 @@
    "hashIterations": 20000,
    "saltLength": 16,
    "allowRegistrations": "true",
-   "taskColorSalt": "abc123"
+   "taskColorSeed": "abc123"
 }

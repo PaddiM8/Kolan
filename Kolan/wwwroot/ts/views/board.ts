@@ -124,7 +124,12 @@ export class Board extends View {
         tasklistElement.className = "draggableContainer";
         tasklistElement.dataset.id = group.id;
         tasklists.appendChild(tasklistElement);
-        Board.tasklistControllers[group.id] = new TasklistController(tasklistElement, group.name, this.boardHub, viewData.taskColorSalt);
+        Board.tasklistControllers[group.id] = new TasklistController(
+            tasklistElement,
+            group.name,
+            this.boardHub,
+            viewData.taskColorSeed
+        );
 
         // Events
         const plusElements = listhead.getElementsByClassName("plus");

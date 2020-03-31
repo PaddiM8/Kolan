@@ -78,27 +78,25 @@ export class Board extends View {
         }
 
         // Change structure on smaller screens
-        if (window.screen.width < 1000) {
-            const listhead = document.getElementById("list-head");
+        // Click the group heads to show the tasklist
+        const tasklists = document.getElementById("tasklists");
+        const listhead = document.getElementById("list-head");
+        listhead.addEventListener("click", e => {
+            if (window.innerWidth > 1000) return;
+            const headItem = e.target as HTMLElement;
+            const id = headItem.dataset.id;
+            const tasklist = tasklists.querySelector(`tasklist[data-id="${id}"`) as HTMLElement;
 
-            // Click the group heads to show the tasklist
-            listhead.addEventListener("click", e => {
-                const headItem = e.target as HTMLElement;
-                const id = headItem.dataset.id;
-                const tasklists = document.getElementById("tasklists");
-                const tasklist = tasklists.querySelector(`tasklist[data-id="${id}"`) as HTMLElement;
+            tasklist.style.display = "block";
+            headItem.classList.toggle("selected");
+            if (this.previousTasklist) {
+                this.previousTasklist.style.display = "none";
+                const previousHeadItem = listhead.querySelector(`[data-id="${this.previousTasklist.dataset.id}"]`)
+                previousHeadItem.classList.toggle("selected");
+            }
 
-                tasklist.style.display = "block";
-                headItem.classList.toggle("selected");
-                if (this.previousTasklist) {
-                    this.previousTasklist.style.display = "none";
-                    const previousHeadItem = listhead.querySelector(`[data-id="${this.previousTasklist.dataset.id}"]`)
-                    previousHeadItem.classList.toggle("selected");
-                }
-
-                this.previousTasklist = tasklist;
-            });
-        }
+            this.previousTasklist = tasklist;
+        });
     }
 
     /**
@@ -119,8 +117,8 @@ export class Board extends View {
 
         listhead.appendChild(item);
 
-        const tasklists = document.getElementById("tasklists");
-        const tasklistElement = document.createElement("tasklist");
+        const tasklists = document.getElementById("tasklists") as HTMLElement;
+        const tasklistElement = document.createElement("tasklist") as HTMLElement;
         tasklistElement.className = "draggableContainer";
         tasklistElement.dataset.id = group.id;
         tasklists.appendChild(tasklistElement);
@@ -130,6 +128,13 @@ export class Board extends View {
             this.boardHub,
             viewData.taskColorSeed
         );
+
+        // Select first group automatically (this will be shown when on a small screen)
+        if (tasklists.children.length == 2) {
+            tasklistElement.style.display = "block";
+            item.classList.toggle("selected");
+            this.previousTasklist = tasklistElement;
+        }
 
         // Events
         const plusElements = listhead.getElementsByClassName("plus");

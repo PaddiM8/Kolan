@@ -52,7 +52,7 @@ export class SettingsDialog extends DialogBox {
             Board.content.description = formData["description"];
 
             // Board.parentId is empty if there is no parent. The backend will understand this.
-            new ApiRequester().send("Boards", `${viewData.id}`, RequestType.Put, {
+            ApiRequester.send("Boards", `${viewData.id}`, RequestType.Put, {
                 parentId: Board.parentId,
                 newBoardContent: JSON.stringify(Board.content)
             }).then(x => {
@@ -63,7 +63,7 @@ export class SettingsDialog extends DialogBox {
         }
 
         if (this.itemHasBeenMoved) {
-            new ApiRequester().send("Boards", `${viewData.id}/ChangeGroupOrder`, RequestType.Post, {
+            ApiRequester.send("Boards", `${viewData.id}/ChangeGroupOrder`, RequestType.Post, {
                 groupIds: JSON.stringify(this.list.items.map(x => x.id))
             })
             .then(() => location.reload());
@@ -94,7 +94,7 @@ export class SettingsDialog extends DialogBox {
     }
 
     private onItemAdded(e): void {
-        new ApiRequester().send("Groups", "", RequestType.Post, {
+        ApiRequester.send("Groups", "", RequestType.Post, {
             boardId: viewData.id,
             name: e.detail["value"]
         })
@@ -112,7 +112,7 @@ export class SettingsDialog extends DialogBox {
             e.detail["object"].undoRemove();
         }
 
-        new ApiRequester().send("Groups", `${groupId}`, RequestType.Delete, {
+        ApiRequester.send("Groups", `${groupId}`, RequestType.Delete, {
             boardId: viewData.id
         })
         .catch((err) => console.log(err));

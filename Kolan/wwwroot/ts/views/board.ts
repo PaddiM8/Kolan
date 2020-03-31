@@ -156,7 +156,7 @@ export class Board extends View {
     }
 
     private onUserAdded(username: string, inputList: InputList): void {
-        new ApiRequester().send("Boards", `${Board.viewData.id}/Users`, RequestType.Post, {
+        ApiRequester.send("Boards", `${Board.viewData.id}/Users`, RequestType.Post, {
             username: username
         })
         .then(() => {
@@ -169,7 +169,7 @@ export class Board extends View {
     }
 
     private onUserRemoved(username: string): void {
-        new ApiRequester().send("Boards", `${Board.viewData.id}/Users`, RequestType.Delete, {
+        ApiRequester.send("Boards", `${Board.viewData.id}/Users`, RequestType.Delete, {
             username: username
         });
     }
@@ -236,7 +236,7 @@ export class Board extends View {
         const boardNameElement = document.getElementById("boardName");
 
         // Get board content
-        new ApiRequester().send("Boards", Board.viewData.id, RequestType.Get).then(result => {
+        ApiRequester.send("Boards", Board.viewData.id, RequestType.Get).then(result => {
             const boardContent = JSON.parse(result as string);
 
             // If the request returns nothing, the board hasn't been set up yet. Display the setup dialog.
@@ -282,7 +282,7 @@ export class Board extends View {
             }
 
             // Get collaborators
-            new ApiRequester().send("Boards", `${viewData.id}/Users`, RequestType.Get)
+            ApiRequester.send("Boards", `${viewData.id}/Users`, RequestType.Get)
             .then(response => {
                 Board.collaborators = JSON.parse(response as string);
             });

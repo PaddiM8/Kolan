@@ -54,7 +54,7 @@ class Boards extends View {
         const boardListController = new BoardListController(document
             .querySelector(".board-list .draggableContainer"));
 
-        new ApiRequester().send("Boards", "", RequestType.Get).then(result => {
+        ApiRequester.send("Boards", "", RequestType.Get).then(result => {
             const boards = JSON.parse(result as string);
             for (const item of boards) {
                 boardListController.addBoardToBottom(item);

@@ -20,7 +20,7 @@ export class ApiRequester {
      * @param {RequestParameter[]} requestParameters=null
      * @returns {undefined}
      */
-    public send(action: string, method: string, requestType: RequestType, requestObject: object = []): Promise<any> {
+    public static send(action: string, method: string, requestType: RequestType, requestObject: object = []): Promise<any> {
         return new Promise((resolve, reject) => {
             const req = new XMLHttpRequest();
             let url = "/api/" + action;
@@ -51,7 +51,7 @@ export class ApiRequester {
      * @param {RequestParameter[]} requestParameters
      * @returns {URLSearchParams}
      */
-    private createURLSearchParams(requestObject: object): URLSearchParams {
+    private static createURLSearchParams(requestObject: object): URLSearchParams {
         let params = new URLSearchParams();
         for (const key in requestObject) {
             params.append(key, requestObject[key]);

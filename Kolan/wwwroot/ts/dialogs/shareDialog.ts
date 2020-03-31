@@ -43,7 +43,7 @@ export class ShareDialog extends DialogBox {
 
     submitHandler(): void {
         const isPublic = this.getFormData()["public"];
-        new ApiRequester().send("Boards", `${viewData.id}/ChangePublicity`, RequestType.Post, {
+        ApiRequester.send("Boards", `${viewData.id}/ChangePublicity`, RequestType.Post, {
             publicity: isPublic
         });
 
@@ -53,7 +53,7 @@ export class ShareDialog extends DialogBox {
     }
 
     private onUserAdded(e): void {
-        new ApiRequester().send("Boards", `${viewData.id}/Users`, RequestType.Post, {
+        ApiRequester.send("Boards", `${viewData.id}/Users`, RequestType.Post, {
             username: e.detail["value"]
         })
         .then(() => {
@@ -66,7 +66,7 @@ export class ShareDialog extends DialogBox {
     }
 
     private onUserRemoved(e): void {
-        new ApiRequester().send("Boards", `${viewData.id}/Users`, RequestType.Delete, {
+        ApiRequester.send("Boards", `${viewData.id}/Users`, RequestType.Delete, {
             username: e.detail["item"].name
         })
         .then(() => {

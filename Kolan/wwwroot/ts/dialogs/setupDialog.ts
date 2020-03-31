@@ -16,7 +16,7 @@ export class SetupDialog extends DialogBox {
     }
 
     submitHandler(): void {
-        const result = new ApiRequester().send("Boards", `${viewData.id}/Setup`, RequestType.Post)
+        const result = ApiRequester.send("Boards", `${viewData.id}/Setup`, RequestType.Post)
         .then((response) => {
             this.dispatchEvent(new CustomEvent("submitDialog", {
                 detail: {

@@ -81,7 +81,7 @@ export class BoardListController {
         if (toItem) target = toItem.dataset.id;
         else        target = viewData.username; // If there is no item above, set the target to the user's username.
 
-        new ApiRequester().send("Boards", "ChangeOrder", RequestType.Post, {
+        ApiRequester.send("Boards", "ChangeOrder", RequestType.Post, {
             boardId: item.dataset.id,
             targetId: target
         });

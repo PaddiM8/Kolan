@@ -4,6 +4,7 @@ import { InputType } from "../enums/inputType";
 import { BoardHub } from "../communication/boardHub";
 import { ITask } from "../models/ITask";
 import { Board } from "../views/board";
+import { IHub } from "../communication/IHub";
 
 declare const viewData;
 
@@ -43,6 +44,14 @@ export class AddTaskDialog extends DialogBox {
     @property({type: Object}) options = {
         title: "Add Task",
         primaryButton: "Add"
+    };
+
+    private boardHub: BoardHub;
+
+    constructor(boardHub: BoardHub) {
+        super();
+
+        this.boardHub = boardHub;
     }
 
     onOpen() {
@@ -85,7 +94,7 @@ export class AddTaskDialog extends DialogBox {
 
     submitHandler(): void {
         const task = this.getFormData() as ITask;
-        new BoardHub().addTask(task, this.groupId).then(x => {
+        this.boardHub.addTask(task, this.groupId).then(x => {
             if (x.statusCode != 200) {
                 this.showErrors(x.value);
             } else {

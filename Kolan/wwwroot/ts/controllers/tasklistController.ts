@@ -17,8 +17,9 @@ export class TasklistController {
     public tasklist: HTMLElement;
     public name: string;
     private inEditMode: boolean;
+    private boardHub: BoardHub;
 
-    constructor(tasklist: HTMLElement, name: string) {
+    constructor(tasklist: HTMLElement, name: string, boardHub: BoardHub) {
         this.tasklist = tasklist;
         this.name = name;
     }
@@ -145,7 +146,7 @@ export class TasklistController {
     }
 
     private sendMoveRequest(boardId: string, targetId: string): void {
-       new BoardHub().moveTask(boardId, targetId);
+       this.boardHub.moveTask(boardId, targetId);
     }
 
     /**
@@ -183,7 +184,7 @@ export class TasklistController {
         document.body.appendChild(confirmDialog);
         confirmDialog.shown = true;
         confirmDialog.addEventListener("submitDialog", () => {
-            new BoardHub().deleteTask(item.dataset.id);
+            this.boardHub.deleteTask(item.dataset.id);
             item.parentNode.removeChild(item);
             document.body.removeChild(confirmDialog);
         });

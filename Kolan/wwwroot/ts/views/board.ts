@@ -40,6 +40,7 @@ export class Board extends View {
     public static pageReloadInProgress = false;
     private currentTasklistId: string;
     private previousTasklist: HTMLElement;
+    private boardHub: BoardHub = new BoardHub();
 
     constructor() {
         super();
@@ -123,7 +124,7 @@ export class Board extends View {
         tasklistElement.className = "draggableContainer";
         tasklistElement.dataset.id = group.id;
         tasklists.appendChild(tasklistElement);
-        Board.tasklistControllers[group.id] = new TasklistController(tasklistElement, group.name);
+        Board.tasklistControllers[group.id] = new TasklistController(tasklistElement, group.name, this.boardHub);
 
         // Events
         const plusElements = listhead.getElementsByClassName("plus");
@@ -182,8 +183,8 @@ export class Board extends View {
      */
     private loadDialogs(): void {
         const dialogs = {
-            addTask: new AddTaskDialog(),
-            editTask: new EditTaskDialog(),
+            addTask: new AddTaskDialog(this.boardHub),
+            editTask: new EditTaskDialog(this.boardHub),
             share: new ShareDialog(),
             settings: new SettingsDialog()
         }
@@ -273,7 +274,7 @@ export class Board extends View {
             if (Board.permissionLevel == PermissionLevel.Edit) {
                 // Connect to SignalR
                 if (Board.permissionLevel == PermissionLevel.Edit)
-                    new BoardHub().join(Board.viewData.id);
+                    this.boardHub.join(Board.viewData.id);
             } else {
                 // Remove header icons
                 const headerIcons = document.querySelector("header .right");

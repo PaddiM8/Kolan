@@ -201,10 +201,10 @@ export class TasklistController {
     private generateColor(input: string): string {
         const rnd = seedrandom.alea(input);
         const h = Math.floor(rnd() * Math.floor(360));
-        const l = this.backgroundLuminance > 125 ? "40%" : "45%";
-        console.log(this.backgroundLuminance);
+        const s = this.backgroundLuminance > 125 ? "62%" : "72%";
+        const l = this.backgroundLuminance > 125 ? "50%" : "42%";
 
-        return `hsl(${h}, 65%, ${l})`;
+        return `hsl(${h}, ${s}, ${l})`;
     }
 
     private getLuminance(rgbString: string) {

@@ -10,11 +10,14 @@
         <link rel="stylesheet" type="text/css" href="~/css/boards.css">
     </head>
     <body id="boards">
-        <div class="topleft">
+        <div class="top left">
             <a href="/Logout" class="iconLink"><span class="icon icon-sign-out logout" alt="logout" role="button"></span></a>
-            <span class="username">@ViewData["username"]</span>
+            <label>Logout</label>
         </div>
-        <a href="/UserSettings" class="iconLink"><span class="icon icon-cog gear" alt="settings" role="button"></span></a>
+        <div class="top right">
+            <label>@ViewData["username"] - Settings</label>
+            <a href="/UserSettings" class="iconLink"><span class="icon icon-cog gear" alt="settings" role="button"></span></a>
+        </div>
         <main>
             <header>
                 <h1>Boards</h1>

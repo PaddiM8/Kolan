@@ -4,14 +4,13 @@ body {
     margin: 0;
 }
 
-.topleft {
+.top {
     display: flex;
     justify-content: center;
     align-items: center;
 
     position: absolute;
     top: 10px;
-    left: 10px;
     margin: 15px;
     border: 0;
 
@@ -19,15 +18,30 @@ body {
         text-decoration: none;
     }
 
-    .logout {
+    .icon {
         padding: 0;
         font-size: 50px;
         cursor: pointer;
     }
 
-    .username {
+    label {
         font-size: 1.4em;
-        margin-left: 20px;
+    }
+}
+
+.top.left {
+    left: 10px;
+
+    label {
+        margin-left: 15px;
+    }
+}
+
+.top.right {
+    right: 10px;
+
+    label {
+        margin-right: 15px;
     }
 }
 
@@ -75,15 +89,6 @@ header {
 }
 
 .icon.gear {
-    position: absolute;
-    top: 0;
-    right: 0;
-
-    margin: 15px;
-    padding: 0;
-    font-size: 50px;
-
-    cursor: pointer;
     transition: .3s ease transform;
 
     &:hover {

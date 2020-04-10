@@ -32,17 +32,12 @@ namespace Kolan.Controllers
         [HttpPost]
         public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
         {
-            // Make sure passwords match
-            if (model.NewPassword != model.RepeatPassword)
-            {
-                ModelState.AddModelError("RepeatPassword", "Passwords don't match.");
-            }
-
             if (!ModelState.IsValid) return View("Index", model);
 
             // Change the password
             var userController = new UserController(_uow);
             IActionResult result = await userController.ChangePassword(User.Identity.Name, model);
+
             // Check for failure
             if (result is BadRequestObjectResult)
             {

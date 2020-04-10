@@ -190,6 +190,18 @@ namespace Kolan.Repositories
 
         public async Task DeleteAsync(string id)
         {
+            var collaborators = await Client.Cypher
+                .Match("(user:User)-[:CHILD_BOARD]->(board)")
+                .Where((Board board) => board.Id == id)
+                .Return<string>("user.username")
+                .ResultsAsync;
+
+            // Remove protential collaborators before removing board
+            foreach (string collaborator in collaborators)
+            {
+                RemoveUserAsync(id, collaborator);
+            }
+
             await Client.Cypher
                 .Match("(prev)-[:NEXT]->(board:Board)")
                 .Where("board.id = {id}")
@@ -198,7 +210,12 @@ namespace Kolan.Repositories
                 .WithParam("id", id)
                 .Match("(:Board)-[childRel:CHILD_BOARD]->(board)")
                 .Create("(prev)-[:NEXT]->(next)")
-                .Delete("prevRel, nextRel, board, childRel")
+                .Delete("prevRel, nextRel, childRel")
+                .With("board")
+                .Match("path=(board)-[:CHILD_GROUP|CHILD_BOARD|NEXT]-(n1)-[:CHILD_GROUP|CHILD_BOARD|NEXT*0..]->(n2)")
+                .With("relationships(path) as rels, n1, n2, board")
+                .Unwind("rels", "rel")
+                .Delete("rel, n1, n2, board")
                 .ExecuteWithoutResultsAsync();
         }
 
@@ -239,7 +256,7 @@ namespace Kolan.Repositories
                     .With("board, {groups} AS groups")
                     .WithParam("groups", groups)
                     .Unwind("range(0, size(groups) - 1)", "index")
-                    .Create("(board)-[rel:CHILD_GROUP { order: index }]->(group:Group)")
+                    .Create("(board)-[rel:CHILD_GROUP { order: index }]->(group:Group)-[:NEXT]->(:End)")
                     .Set("group = groups[rel.order]")
                     .ExecuteWithoutResultsAsync();
 

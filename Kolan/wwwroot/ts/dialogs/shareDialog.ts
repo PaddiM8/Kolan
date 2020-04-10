@@ -57,6 +57,7 @@ export class ShareDialog extends DialogBox {
             username: e.detail["value"]
         })
         .then(() => {
+            Board.collaborators.push(e.detail["value"])
             ToastController.new("Collaborator added", ToastType.Info);
         })
         .catch(() => {

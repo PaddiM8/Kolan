@@ -20,13 +20,14 @@ export class DialogBox extends LitElement {
     @property({type: Array<object>()}) fields;
     @property({type: String}) options;
     protected list: InputList;
+    private enterToSubmit = true;
 
     constructor() {
         super();
     }
 
     render() {
-        return html`
+        const componentHtml = html`
          <link rel="stylesheet" type="text/css" href="../css/components/dialog.css">
          <link rel="stylesheet" type="text/css" href="../css/themes/${ThemeManager.getTheme()}.css">
          <div class="dialogBackground"></div>
@@ -38,6 +39,16 @@ export class DialogBox extends LitElement {
             <button @click="${this.submitHandler}">${html`${this.options.primaryButton}`}</button>
             <button class="secondary" @click="${this.cancelHandler}">Cancel</button>
          </section>`;
+
+         // Make the form submit when enter is pressed
+         // this.enterToSubmit is set to false if an InputList or textarea is present in the form.
+         if (this.enterToSubmit) {
+             this.addEventListener("keyup", e => {
+                 if (e.keyCode == 13) this.submitHandler();
+             });
+         }
+
+         return componentHtml;
     }
 
     updated() {
@@ -181,10 +192,14 @@ export class DialogBox extends LitElement {
                             <label for="${name}" class="error"></label>
                             <input type="text" name="${name}" placeholder="${placeholder}" /><br />`;
             case InputType.TextArea:
+                this.enterToSubmit = false;
+
                 return html`<p>${value}:</p>
                             <label for="${name}" class="error"></label>
                             <textarea name="${name}" placeholder="${placeholder}"></textarea>`;
             case InputType.InputList:
+                this.enterToSubmit = false;
+
                 this.list = new InputList(value);
                 let listElement = this.list as HTMLElement;
                 listElement.setAttribute("name", name);

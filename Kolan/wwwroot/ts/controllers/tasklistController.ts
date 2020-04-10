@@ -201,7 +201,7 @@ export class TasklistController {
         }
     }
 
-    private generateColor(input: string): string {
+    private generateColorPair(input: string): string {
         const rnd = seedrandom.alea(input + this.taskColorSeed);
         const h = Math.floor(rnd() * 360);
         const s = this.backgroundLuminance > 125 ? "62%" : "72%";

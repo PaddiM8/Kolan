@@ -134,6 +134,10 @@ draggable-item {
     overflow: hidden;
     cursor: grabbing;
 
+    &:hover {
+        filter: brightness(92%);
+    }
+
     a {
         color: white;
         cursor: text;

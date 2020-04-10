@@ -29,10 +29,14 @@ draggable-item {
     .dragger {
         background-color: #1565Ce;
     }
+}
 
-    &:hover {
-        background-color: #2962FF;
-    }
+.board-list draggable-item:hover {
+    background-color: #2962FF;
+}
+
+.tasklists draggable-item:hover {
+    filter: brightness(108%);
 }
 
 input[type="submit"], button, #boards draggable-item {

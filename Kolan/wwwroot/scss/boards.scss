@@ -158,4 +158,8 @@ placeholder {
         width: calc(100% - 85px);
         margin-top: 110px;
     }
+
+    .top.right label {
+        display: none;
+    }
 }

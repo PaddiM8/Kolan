@@ -163,9 +163,11 @@ export class DialogBox extends LitElement {
     public hide(): void {
         let dialogItems = <any>this.shadowRoot.getElementById("inputs").children;
         for (let element of dialogItems) {
-            if (element.name) {
+            if (element.classList.contains("checkboxLabel")) {
+                element.querySelector("input[type='checkbox']").checked = false;
+            } else if (element.name) {
                 element.value = "";
-            } else if (element.tagName == "LABEL" && !element.classList.contains("checkboxLabel")) {
+            } else if (element.tagName == "LABEL") {
                 element.textContent = "";
             }
         }

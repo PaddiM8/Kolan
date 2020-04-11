@@ -33,6 +33,11 @@ export class AddTaskDialog extends DialogBox {
             value: "Assigned to",
             placeholder: "Username...",
             inputType: InputType.Text
+        },
+        {
+            key: "onTop",
+            value: "Put on top",
+            inputType: InputType.Checkbox
         }
     ];
     @property({type: Object}) options = {
@@ -69,10 +74,18 @@ export class AddTaskDialog extends DialogBox {
     }
 
     submitHandler(): void {
-        const task = this.getFormData() as ITask;
-        this.boardHub.addTask(task, this.groupId).then(x => {
-            if (x.statusCode != 200) this.showErrors(x.value);
-            else                     this.hide();
+        const data = this.getFormData();
+        this.boardHub.addTask(data as ITask, this.groupId).then(x => {
+            if (x.statusCode != 200) {
+                this.showErrors(x.value);
+                return;
+            }
+
+            if (data["onTop"]) {
+                this.boardHub.moveTask(x.value["id"], this.groupId);
+            }
+
+            this.hide();
         });
     }
 }

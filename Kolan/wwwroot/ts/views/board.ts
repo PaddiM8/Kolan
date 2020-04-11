@@ -300,6 +300,8 @@ export class Board extends View {
             ToastController.new("Loaded board", ToastType.Info);
         }).catch((req) => {
             if (req.status == 404) this.setTitle("404 - Board does not exist", []);
+            else if (req.status > 400 && req.status < 499) this.setTitle(`${req.status} - Client error`, []);
+            else if (req.status > 500 && req.status < 599) this.setTitle(`${req.status} - Server error`, []);
             console.log(req);
         });
     }

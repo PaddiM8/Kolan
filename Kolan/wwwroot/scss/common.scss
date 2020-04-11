@@ -43,3 +43,9 @@ hr {
 .error {
     color: red;
 }
+
+@media (prefers-color-scheme: dark) {
+    #themeTester {
+        background-color: #000000;
+    }
+}

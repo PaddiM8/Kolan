@@ -161,6 +161,7 @@ export class DraggableItem extends LitElement {
 
         // Show where item will be dropped
         const elementsUnder = this.getRelatedElementsUnder();
+        if (!elementsUnder.tasklist) return;
         const placeholder: HTMLElement = this.parentElement.parentElement.querySelector(this.placeholder);
         const tasklistElements = elementsUnder.tasklist.children;
         let lastRect = undefined;

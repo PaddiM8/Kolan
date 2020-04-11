@@ -215,16 +215,20 @@ draggable-item {
     }
 
     #list-head > .item.selected {
-        background-color: #616161;
+        background-color: #D3D3D3;
     }
 
     .draggableContainer {
         display: none;
     }
+
+    draggable-item .overlay {
+        display: block !important; // !important, to keep *always* display it. The JavaScript should not be able to affect this.
+    }
 }
 
 @media screen and(min-width: 1000px) {
     .draggableContainer {
-        display: block !important; // Important to override any javascript
+        display: block !important; // !important, to override any javascript
     }
 }

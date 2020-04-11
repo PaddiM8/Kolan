@@ -55,3 +55,9 @@ hr {
 .toast.warning {
     background-color: #FF8F00;
 }
+
+@media screen and(max-width: 1000px) {
+    #list-head > .item.selected {
+        background-color: #616161;
+    }
+}

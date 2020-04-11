@@ -15,3 +15,14 @@ Kolan is a self-hostable project management website, that is built around the co
 * Both a light theme and a dark theme, with the possibility of creating your own themes if you know CSS and host your own instnace.
 * Fairly good support for small devices (eg. phones, tablets). However, you cannot move tasks around on these.
 * Open source and easy to self-host.
+
+## Setting up
+### Dependencies:
+* dotnet core - 3.1
+* neo4j (with the APOC procedures plugin) - 3.5
+
+### Note
+You will need to append the following line to `neo4j.conf`: `cypher.lenient_create_relationship=true`
+
+### Process
+Clone this repository and `cd` into it with a terminal. Write `./node_module/gulp/bin/gulp.js produce` to the frontend up. After that, copy `server-config.example.json` as `server-config.json` and edit it to fit your needs. Then, `cd` into the `Kolan` folder that lies right in the repository root and compile and run the dotnet core backend. These instructions are a bit vague at the moment, since Kolan is not ready for production yet. Later on, there will likely be some sort of docker image or docker-compose file.

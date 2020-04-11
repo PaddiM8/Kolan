@@ -38,12 +38,8 @@ export class EditTaskDialog extends DialogBox {
         primaryButton: "Edit"
     }
 
-    private boardHub: BoardHub;
-
-    constructor(boardHub: BoardHub) {
+    constructor() {
         super();
-
-        this.boardHub = boardHub;
     }
 
     onOpen() {
@@ -70,7 +66,7 @@ export class EditTaskDialog extends DialogBox {
         let task = this.getFormData();
         task["id"] = this.boardId;
 
-        this.boardHub.editTask(task).then(x => {
+        Board.boardHub.editTask(task).then(x => {
             if (x.statusCode != 200) {
                 this.showErrors(x.value);
             } else {

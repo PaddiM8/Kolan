@@ -12,53 +12,58 @@ import { ToastType } from "../enums/toastType";
  * @function
  */
 export class BoardHub implements IHub {
-    private static connection;
-    private static boardId;
-    private static stateToast;
+    private connection;
+    private boardId;
+    private stateToast;
 
-    public static get state() {
-        return BoardHub.connection.state;
+    public get state() {
+        return this.connection.state;
     }
 
     public join(boardId: string) {
-        BoardHub.boardId = boardId;
+        this.boardId = boardId;
 
-        BoardHub.connection = new signalR.HubConnectionBuilder()
+        this.connection = new signalR.HubConnectionBuilder()
             .withUrl("/hub")
             .withAutomaticReconnect()
             .configureLogging(signalR.LogLevel.Information)
             .build();
 
-        BoardHub.connection.start().then(() => {
-            BoardHub.connection.invoke("join", boardId).catch(err => console.log(err));
+        this.connection.start().then(() => {
+            this.connection.invoke("join", boardId).catch(err => console.log(err));
         });
 
-        BoardHub.connection.on("receiveNewBoard", this.onReceiveNewBoard);
-        BoardHub.connection.on("moveBoard", this.onMoveBoard);
-        BoardHub.connection.on("editBoard", this.onEditBoard);
-        BoardHub.connection.on("deleteBoard", this.onDeleteBoard);
+        this.connection.on("receiveNewBoard", this.onReceiveNewBoard);
+        this.connection.on("moveBoard", this.onMoveBoard);
+        this.connection.on("editBoard", this.onEditBoard);
+        this.connection.on("deleteBoard", this.onDeleteBoard);
+        this.connection.on("requestReload", this.onRequestReload);
 
-        BoardHub.connection.onclose(() => BoardHub.onDisconnected());
-        BoardHub.connection.onreconnecting(() => BoardHub.onReconnecting());
-        BoardHub.connection.onreconnected(() => BoardHub.onConnected());
+        this.connection.onclose(() => this.onDisconnected());
+        this.connection.onreconnecting(() => this.onReconnecting());
+        this.connection.onreconnected(() => this.onConnected());
     }
 
     public addTask(task: object, boardId: string) {
-        return BoardHub.connection.invoke("addBoard", BoardHub.boardId, task, boardId);
+        return this.connection.invoke("addBoard", this.boardId, task, boardId);
     }
 
     public editTask(task: object) {
-        return BoardHub.connection.invoke("editBoard", BoardHub.boardId, task);
+        return this.connection.invoke("editBoard", this.boardId, task);
     }
 
     public moveTask(taskId: string, targetId: string): void {
-        BoardHub.connection.invoke("moveBoard", BoardHub.boardId, taskId, targetId)
+        this.connection.invoke("moveBoard", this.boardId, taskId, targetId)
             .catch(err => console.log(err));
     }
 
     public deleteTask(taskId: string): void {
-        BoardHub.connection.invoke("deleteBoard", BoardHub.boardId, taskId)
+        this.connection.invoke("deleteBoard", this.boardId, taskId)
             .catch(err => console.log(err));
+    }
+
+    public requestReload() {
+        return this.connection.invoke("requestReload", this.boardId);
     }
 
     private onReceiveNewBoard(board: IBoard, groupId: string): void {
@@ -84,17 +89,21 @@ export class BoardHub implements IHub {
         if (item) item.parentNode.removeChild(item);
     }
 
-    private static onDisconnected(): void {
-        if (BoardHub.stateToast) BoardHub.stateToast.hide();
+    private onRequestReload(id: string): void {
+        Board.reload();
+    }
+
+    private onDisconnected(): void {
+        if (this.stateToast) this.stateToast.hide();
 
         const uiBlocker = document.getElementById("uiBlocker");
         uiBlocker.style.display = "block";
         uiBlocker.style.opacity = "1";
-        BoardHub.stateToast = ToastController.new("Disconnected", ToastType.Warning, true);
+        this.stateToast = ToastController.new("Disconnected", ToastType.Warning, true);
     }
 
-    private static onConnected(): void {
-        if (BoardHub.stateToast) BoardHub.stateToast.hide();
+    private onConnected(): void {
+        if (this.stateToast) this.stateToast.hide();
 
         const uiBlocker = document.getElementById("uiBlocker");
         uiBlocker.style.opacity = "0";
@@ -104,13 +113,13 @@ export class BoardHub implements IHub {
         }, 300);
     }
 
-    private static onReconnecting(): void {
+    private onReconnecting(): void {
         if (Board.pageReloadInProgress) return;
-        if (BoardHub.stateToast) BoardHub.stateToast.hide();
+        if (this.stateToast) this.stateToast.hide();
 
         const uiBlocker = document.getElementById("uiBlocker");
         uiBlocker.style.display = "block";
         uiBlocker.style.opacity = "1";
-        BoardHub.stateToast = ToastController.new("Reconnecting...", ToastType.Warning, true);
+        this.stateToast = ToastController.new("Reconnecting...", ToastType.Warning, true);
     }
 }

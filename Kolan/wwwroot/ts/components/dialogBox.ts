@@ -182,6 +182,7 @@ export class DialogBox extends LitElement {
             }
         }
 
+        this.dispatchEvent(new CustomEvent("hideDialog"));
         this.shown = false;
     }
 

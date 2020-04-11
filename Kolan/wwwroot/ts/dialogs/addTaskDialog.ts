@@ -45,12 +45,8 @@ export class AddTaskDialog extends DialogBox {
         primaryButton: "Add"
     };
 
-    private boardHub: BoardHub;
-
-    constructor(boardHub: BoardHub) {
+    constructor() {
         super();
-
-        this.boardHub = boardHub;
     }
 
     onOpen() {
@@ -75,14 +71,14 @@ export class AddTaskDialog extends DialogBox {
 
     submitHandler(): void {
         const data = this.getFormData();
-        this.boardHub.addTask(data as ITask, this.groupId).then(x => {
+        Board.boardHub.addTask(data as ITask, this.groupId).then(x => {
             if (x.statusCode != 200) {
                 this.showErrors(x.value);
                 return;
             }
 
             if (data["onTop"]) {
-                this.boardHub.moveTask(x.value["id"], this.groupId);
+                Board.boardHub.moveTask(x.value["id"], this.groupId);
             }
 
             this.hide();

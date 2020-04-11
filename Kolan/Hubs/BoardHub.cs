@@ -67,12 +67,9 @@ namespace Kolan.Hubs
             await _uow.Boards.DeleteAsync(id);
         }
 
-        /*private async Task<(bool isValid, List<ValidationResult> results)> ValidateModel(object obj)
+        public async Task RequestReload(string id)
         {
-            var results = new List<ValidationResult>();
-            bool isValid = Validator.TryValidateObject(obj, new ValidationContext(obj), results, true);
-
-            return (isValid, results);
-        }*/
+            await Clients.Group(id).RequestReload();
+        }
     }
 }

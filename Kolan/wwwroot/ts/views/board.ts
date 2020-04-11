@@ -38,9 +38,9 @@ export class Board extends View {
     public static tasklistControllers = {};
     public static viewData;
     public static pageReloadInProgress = false;
+    public static boardHub: BoardHub = new BoardHub();
     private currentTasklistId: string;
     private previousTasklist: HTMLElement;
-    private boardHub: BoardHub = new BoardHub();
 
     constructor() {
         super();
@@ -72,7 +72,7 @@ export class Board extends View {
         }
 
         window.onfocus = () => {
-            if (BoardHub.state == "Disconnected") {
+            if (Board.boardHub.state == "Disconnected") {
                 window.location.reload();
             }
         }
@@ -97,6 +97,20 @@ export class Board extends View {
 
             this.previousTasklist = tasklist;
         });
+    }
+
+    public static reload(): void {
+        for (const dialogName in Board.dialogs) {
+            const dialog = Board.dialogs[dialogName];
+
+            if (dialog.shown) {
+                console.log(dialog);
+                dialog.addEventListener("hideDialog", () => location.reload());
+                return;
+            }
+        }
+
+        location.reload();
     }
 
     /**
@@ -125,7 +139,6 @@ export class Board extends View {
         Board.tasklistControllers[group.id] = new TasklistController(
             tasklistElement,
             group.name,
-            this.boardHub,
             viewData.taskColorSeed
         );
 
@@ -193,8 +206,8 @@ export class Board extends View {
      */
     private loadDialogs(): void {
         const dialogs = {
-            addTask: new AddTaskDialog(this.boardHub),
-            editTask: new EditTaskDialog(this.boardHub),
+            addTask: new AddTaskDialog(),
+            editTask: new EditTaskDialog(),
             share: new ShareDialog(),
             settings: new SettingsDialog()
         }
@@ -284,7 +297,7 @@ export class Board extends View {
             if (Board.permissionLevel == PermissionLevel.Edit) {
                 // Connect to SignalR
                 if (Board.permissionLevel == PermissionLevel.Edit)
-                    this.boardHub.join(Board.viewData.id);
+                    Board.boardHub.join(Board.viewData.id);
             } else {
                 // Remove header icons
                 const headerIcons = document.querySelector("header .right");

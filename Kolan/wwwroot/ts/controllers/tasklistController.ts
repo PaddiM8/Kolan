@@ -18,14 +18,12 @@ export class TasklistController {
     public tasklist: HTMLElement;
     public name: string;
     private inEditMode: boolean;
-    private boardHub: BoardHub;
     private backgroundLuminance: number;
     private taskColorSeed: string;
 
-    constructor(tasklist: HTMLElement, name: string, boardHub: BoardHub, taskColorSeed: string) {
+    constructor(tasklist: HTMLElement, name: string, taskColorSeed: string) {
         this.tasklist = tasklist;
         this.name = name;
-        this.boardHub = boardHub;
         this.taskColorSeed = taskColorSeed;
 
         this.backgroundLuminance = this.getLuminance(window.getComputedStyle(document.body, null)
@@ -147,7 +145,7 @@ export class TasklistController {
     }
 
     private sendMoveRequest(boardId: string, targetId: string): void {
-       this.boardHub.moveTask(boardId, targetId);
+       Board.boardHub.moveTask(boardId, targetId);
     }
 
     /**
@@ -175,7 +173,6 @@ export class TasklistController {
             name: item.querySelector(".name").innerHTML,
             description: item.dataset.description,
             tags: item.dataset.tags,
-            deadline: (item.querySelector(".date") as HTMLInputElement).value,
             assignee: item.querySelector(".assignee").innerHTML
         });
     }
@@ -185,7 +182,7 @@ export class TasklistController {
         document.body.appendChild(confirmDialog);
         confirmDialog.shown = true;
         confirmDialog.addEventListener("submitDialog", () => {
-            this.boardHub.deleteTask(item.dataset.id);
+            Board.boardHub.deleteTask(item.dataset.id);
             item.parentNode.removeChild(item);
             document.body.removeChild(confirmDialog);
         });

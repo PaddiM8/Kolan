@@ -66,7 +66,7 @@ export class SettingsDialog extends DialogBox {
             ApiRequester.send("Boards", `${viewData.id}/ChangeGroupOrder`, RequestType.Post, {
                 groupIds: JSON.stringify(this.list.items.map(x => x.id))
             })
-            .then(() => location.reload());
+            .then(() => Board.boardHub.requestReload().then(() => location.reload())); // It won't automatically reload since the dialog is open
         }
 
         if (!this.contentHasChanged && !this.itemHasBeenMoved) this.hide();

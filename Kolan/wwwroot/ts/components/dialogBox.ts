@@ -48,6 +48,14 @@ export class DialogBox extends LitElement {
              });
          }
 
+         // Set the default date if relevant
+         const dateElements = this.shadowRoot.querySelectorAll("input[type='date']");
+         for (const element of dateElements) {
+             const dateElement = element as HTMLInputElement;
+             dateElement.valueAsDate = new Date();
+             dateElement.min = dateElement.value;
+         }
+
          return componentHtml;
     }
 
@@ -127,7 +135,9 @@ export class DialogBox extends LitElement {
         let input = {};
         const inputs = <any>this.shadowRoot.getElementById("inputs").children;
         for (const element of inputs) {
-            if (element.name) {
+            if (element.type == "date") {
+                input[element.name] = element.valueAsDate;
+            } else if (element.name) {
                 input[element.name] = element.value;
             } else if (element.classList.contains("checkboxLabel")) {
                 const checkbox = element.children[0];
@@ -212,6 +222,10 @@ export class DialogBox extends LitElement {
                 return html`<p style="display: inline-block;">${value}:</p>
                             <label for="${name}" class="error"></label>
                             <input type="color" name="${name}" /><br />`;
+            case InputType.Date:
+                return html`<p>Deadline:</p>
+                            <label for="${name}" class="error"></label>
+                            <input type="date" name="${name}" /><br />`;
             default:
                 return html``;
         }

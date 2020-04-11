@@ -8,5 +8,6 @@ export enum InputType {
     TextArea,
     InputList,
     Checkbox,
-    Color
+    Color,
+    Date,
 }

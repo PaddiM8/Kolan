@@ -175,6 +175,7 @@ export class TasklistController {
             name: item.querySelector(".name").innerHTML,
             description: item.dataset.description,
             tags: item.dataset.tags,
+            deadline: (item.querySelector(".date") as HTMLInputElement).value,
             assignee: item.querySelector(".assignee").innerHTML
         });
     }

@@ -1,5 +1,5 @@
 @mixin text-input($size) {
-    input[type="text"], input[type="password"], input[type="email"], textarea {
+    input[type="text"], input[type="password"], input[type="email"], textarea, input[type="date"] {
         padding: 10px 12px 10px 12px;
         margin-bottom: 15px;
         box-sizing: border-box;

@@ -136,7 +136,7 @@ export class TasklistController {
      * Fires when the board item is clicked, ends if the clicked part was the dragger.
      */
     private onClickEvent(e): void {
-        if (!e.detail["childClicked"]) { // Only redirect if the background was clicked
+        if (e.detail["target"].classList.contains("content")) { // Only redirect if the background was clicked
             const id = e.target.dataset.id;
             window.location.href = "./" + id;
         }

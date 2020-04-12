@@ -84,7 +84,8 @@ export class DraggableItem extends LitElement {
             this.mouseDownPos.Y == e.pageY) {
             this.dispatchEvent(new CustomEvent("draggableClick", {
                 detail: {
-                    childClicked: e.target != this
+                    childClicked: e.target != this,
+                    target: e.target
                 }
             }));
         }

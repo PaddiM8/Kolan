@@ -99,6 +99,7 @@ export class DraggableItem extends LitElement {
         element.style.userSelect = "";
         element.style.top = "";
         element.style.left = "";
+        element.style.zIndex = "";
 
         // Move to placeholder
         const placeholder: HTMLElement = this.currentTasklist.parentElement.querySelector(this.placeholder);
@@ -147,8 +148,10 @@ export class DraggableItem extends LitElement {
             // Draggable
             this.style.width = this.offsetWidth + "px";
             this.style.position = "absolute";
+            this.classList.toggle("dragged");
             this.ownerDocument.body.appendChild(this); // Move task out from tasklists, then get position: absolute
             this.detached = true;
+            this.style.zIndex = "150";
         }
 
         const newPos = {

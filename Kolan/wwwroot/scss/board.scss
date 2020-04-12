@@ -166,7 +166,7 @@ draggable-item {
 
     .deadline {
         position: absolute;
-        bottom: 9px;
+        top: 13px;
         left: 15px;
         font-size: 0.8em;
     }
@@ -191,7 +191,6 @@ draggable-item {
         top: 0;
         left: 0;
         z-index: 99;
-        cursor: pointer;
     }
 
     .overlay-button {
@@ -221,6 +220,20 @@ draggable-item.overdue {
 
     .overdue-icon {
         display: block;
+    }
+
+    .deadline {
+        left: 35px;
+    }
+}
+
+draggable-item.dragged {
+    .content {
+        z-index: 102;
+    }
+
+    .overlay {
+        z-index: 101;
     }
 }
 

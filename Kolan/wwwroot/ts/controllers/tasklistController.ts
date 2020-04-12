@@ -79,7 +79,7 @@ export class TasklistController {
               role="button">
               </span>
 
-         <div class="content">
+         <div class="content dragger">
             <h2 class="name"></h2>
             <span class="description">${task.description}</span>
          </div>

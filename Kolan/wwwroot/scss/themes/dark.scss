@@ -25,10 +25,10 @@ header, .list-head .item, tasklist, #list {
 
 draggable-item {
     background-color: #1565Ce;
+}
 
-    .dragger {
-        background-color: #1565Ce;
-    }
+.board-list .dragger {
+    background-color: #1565Ce;
 }
 
 .board-list draggable-item:hover {

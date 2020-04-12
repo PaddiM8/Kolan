@@ -3,12 +3,13 @@
     color: white;
 }
 
-a {
-    color: #0288D1;
+#board header {
+    box-shadow: none;
+    border-bottom: 2px solid gray;
 }
 
-header #title a:visited {
-    color: #0288D1;
+a, header #title a:visited {
+    color: #42A5F5;
 }
 
 header, .list-head .item, tasklist, #list {

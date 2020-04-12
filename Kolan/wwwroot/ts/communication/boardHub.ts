@@ -1,6 +1,6 @@
 import * as signalR from "@microsoft/signalr";
 import { Board } from "../views/board";
-import { IBoard } from "../models/IBoard";
+import { ITask } from "../models/ITask";
 import { IHub } from "./IHub";
 import { RequestParameter } from "./requestParameter";
 import { ToastController } from "../controllers/toastController";
@@ -66,7 +66,7 @@ export class BoardHub implements IHub {
         return this.connection.invoke("requestReload", this.boardId);
     }
 
-    private onReceiveNewBoard(board: IBoard, groupId: string): void {
+    private onReceiveNewBoard(board: ITask, groupId: string): void {
         Board.tasklistControllers[groupId].addTask(board);
     }
 
@@ -77,7 +77,7 @@ export class BoardHub implements IHub {
         Board.tasklistControllers[tasklistId].moveTask(boardId, targetId);
     }
 
-    private onEditBoard(newBoardContent: IBoard): void {
+    private onEditBoard(newBoardContent: ITask): void {
         const board = document.querySelector(`#tasklists [data-id="${newBoardContent.id}"]`);
         const tasklistId = board.parentElement.dataset.id;
 

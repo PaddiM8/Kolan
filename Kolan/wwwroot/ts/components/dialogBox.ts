@@ -34,7 +34,7 @@ export class DialogBox extends LitElement {
          <section class="dialog">
             <h2>${html`${this.options.title}`}</h2>
             <div id="inputs">
-                ${this.fields.map(x => html`${this.getComponentHtml(x.inputType, x.key, x.value, x.title, x.placeholder)}`)}
+                ${this.fields.map(x => html`${this.getComponentHtml(x.inputType, x.key, x.value, x.title, x.placeholder, x.optional)}`)}
             </div>
             <button @click="${this.submitHandler}">${html`${this.options.primaryButton}`}</button>
             <button class="secondary" @click="${this.cancelHandler}">Cancel</button>
@@ -52,7 +52,7 @@ export class DialogBox extends LitElement {
          const dateElements = this.shadowRoot.querySelectorAll("input[type='date']");
          for (const element of dateElements) {
              const dateElement = element as HTMLInputElement;
-             dateElement.valueAsDate = new Date();
+             if (!dateElement.value) dateElement.valueAsDate = new Date();
              dateElement.min = dateElement.value;
          }
 
@@ -81,12 +81,24 @@ export class DialogBox extends LitElement {
     public setValues(values: object): void { // TODO: Type safety
         for (const name in values) {
             const element = this.shadowRoot.querySelector(`[name="${name}"]`);
+            const inputElement = element as HTMLInputElement;
             if (!values[name]) continue;
+            if (!element) continue;
 
-            if (element instanceof InputList) {
+            if ("type" in element && element["type"] == "date") {
+                inputElement.valueAsNumber = values[name];
+
+                // Make sure it's enabled if it has a value
+                const checkbox = inputElement.parentElement.querySelector(`.${name}Toggle`) as HTMLInputElement;
+                if (checkbox) {
+                    const hasValue = values[name] > 0;
+                    checkbox.checked = hasValue;
+                    inputElement.disabled = !hasValue;
+                }
+            } else if (element instanceof InputList) {
                 element.items = values[name];
             } else if (element.getAttribute("type") == "checkbox") {
-                (element as HTMLInputElement).checked = values[name];
+                inputElement.checked = values[name];
             } else {
                 element["value"] = values[name];
             }
@@ -135,13 +147,28 @@ export class DialogBox extends LitElement {
         let input = {};
         const inputs = <any>this.shadowRoot.getElementById("inputs").children;
         for (const element of inputs) {
+            // If it isn't an actual input element
+            if (!element.name) {
+                if (element.classList.contains("checkboxLabel")) {
+                    const checkbox = element.children[0];
+                    input[checkbox.name] = checkbox.checked;
+                }
+
+                continue;
+            }
+
+            // Ignore any value if the element's toggle (if any) is not checked.
+            const inputToggle = this.shadowRoot.querySelector(`.${element.name}Toggle`) as HTMLInputElement;
+            if (inputToggle && !inputToggle.checked) {
+                if (element.type == "date") input[element.name] = 0;
+                else                        input[element.name] = null;
+                continue;
+            }
+
             if (element.type == "date") {
-                input[element.name] = element.valueAsDate;
+                input[element.name] = element.valueAsNumber
             } else if (element.name) {
                 input[element.name] = element.value;
-            } else if (element.classList.contains("checkboxLabel")) {
-                const checkbox = element.children[0];
-                input[checkbox.name] = checkbox.checked;
             }
         }
 
@@ -196,20 +223,26 @@ export class DialogBox extends LitElement {
      * @param {string} value
      * @returns {TemplateResult}
      */
-    private getComponentHtml(inputType: InputType, name: string, value: string, title: string = null, placeholder: string = null): TemplateResult {
+    private getComponentHtml(inputType: InputType, name: string, value: string, title: string = null, placeholder: string = null, optional: boolean = false): TemplateResult {
         placeholder = placeholder == null ? value + "..." : placeholder; // Set placeholder to title if it's not specified
+
+        const label = optional
+            ? html`<label class="checkboxLabel">
+                       <input type="checkbox" class="${name}Toggle" onchange="this.parentElement.nextElementSibling.nextElementSibling.disabled = !this.checked" />${value}
+                   </label>`
+            : html`<p>${value}</p>`;
 
         switch (inputType) {
             case InputType.Text:
-                return html`<p>${value}:</p>
+                return html`${label}
                             <label for="${name}" class="error"></label>
-                            <input type="text" name="${name}" placeholder="${placeholder}" /><br />`;
+                            <input type="text" name="${name}" placeholder="${placeholder}" ?disabled=${optional} /><br />`;
             case InputType.TextArea:
                 this.enterToSubmit = false;
 
-                return html`<p>${value}:</p>
+                return html`${label}
                             <label for="${name}" class="error"></label>
-                            <textarea name="${name}" placeholder="${placeholder}"></textarea>`;
+                            <textarea name="${name}" placeholder="${placeholder}" ?disabled=${optional}></textarea>`;
             case InputType.InputList:
                 this.enterToSubmit = false;
 
@@ -224,9 +257,9 @@ export class DialogBox extends LitElement {
                             <label for="${name}" class="error"></label>
                             <input type="color" name="${name}" /><br />`;
             case InputType.Date:
-                return html`<p>Deadline:</p>
+                return html`${label}
                             <label for="${name}" class="error"></label>
-                            <input type="date" name="${name}" /><br />`;
+                            <input type="date" name="${name}" ?disabled=${optional} /><br />`;
             default:
                 return html``;
         }

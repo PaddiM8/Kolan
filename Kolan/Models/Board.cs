@@ -33,6 +33,6 @@ namespace Kolan.Models
         public string Assignee { get; set; }
 
         [JsonProperty("deadline")]
-        public DateTime Deadline { get; set; }
+        public long Deadline { get; set; }
     }
 }

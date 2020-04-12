@@ -25,27 +25,30 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-.icon-sign-out:before {
+.icon-clock:before {
   content: "\e900";
 }
-.icon-trash:before {
+.icon-sign-out:before {
   content: "\e901";
 }
-.icon-share-alt:before {
+.icon-trash:before {
   content: "\e902";
 }
-.icon-pen:before {
+.icon-share-alt:before {
   content: "\e903";
 }
-.icon-cog:before {
+.icon-pen:before {
   content: "\e904";
 }
-.icon-bars:before {
+.icon-cog:before {
   content: "\e905";
 }
-.icon-arrow-left:before {
+.icon-bars:before {
   content: "\e906";
 }
-.icon-times:before {
+.icon-arrow-left:before {
   content: "\e907";
+}
+.icon-times:before {
+  content: "\e908";
 }

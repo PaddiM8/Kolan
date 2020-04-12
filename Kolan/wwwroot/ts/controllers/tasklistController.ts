@@ -54,16 +54,10 @@ export class TasklistController {
     }
 
     public editTask(newTaskContent: ITask): void {
-        const item = document.querySelector(`#tasklists [data-id="${newTaskContent.id}"]`) as HTMLElement;
-        const name = item.querySelector(".name") as HTMLElement;
-        const description = item.querySelector(".description") as HTMLElement;
-        const assignee = item.querySelector(".assignee") as HTMLElement;
+       const item = document.querySelector(`#tasklists [data-id="${newTaskContent.id}"]`) as HTMLElement;
+       item.parentElement.insertBefore(this.createTaskItem(newTaskContent), item.nextElementSibling);
+       item.remove();
 
-        item.dataset.description = newTaskContent.description ? newTaskContent.description : "";
-        name.textContent = ContentFormatter.format(newTaskContent.name);
-        description.innerHTML = ContentFormatter.formatWithMarkdown(newTaskContent.description);
-        if (newTaskContent.tags) item.style.backgroundColor = this.generateColor(this.firstTag(newTaskContent.tags))
-        assignee.textContent = newTaskContent.assignee;
     }
 
     /**
@@ -75,13 +69,20 @@ export class TasklistController {
         item.movable = Board.permissionLevel == PermissionLevel.Edit;
         item.dataset.id = task.id;
         item.dataset.description = task.description ? task.description : "";
+        item.dataset.deadline = task.deadline.toString();
         task.name = ContentFormatter.format(task.name);
         task.description = ContentFormatter.formatWithMarkdown(task.description);
         task.assignee = ContentFormatter.format(task.assignee);
 
         item.insertAdjacentHTML("afterbegin", `
-         <h2 class="name"></h2>
-         <span class="description">${task.description}</span>
+        <span class="icon icon-clock top-left overdue-icon overlay-button"
+              role="button">
+              </span>
+
+         <div class="content">
+            <h2 class="name"></h2>
+            <span class="description">${task.description}</span>
+         </div>
          <div class="overlay">
             <span class="icon icon-pen top-right edit overlay-button"
                   role="button">
@@ -89,15 +90,22 @@ export class TasklistController {
             <span class="icon icon-trash bottom-right delete overlay-button"
                   role="button">
                   </span>
+            <span class="deadline">${task.deadline == 0 ? "" : ContentFormatter.formatDate(task.deadline)}</span>
          </div>
+
          <span class="assignee">${task.assignee}</span>
          `);
 
         item.querySelector(".name").textContent = task.name;
         item.dataset.tags = task.tags;
-
         if (task.tags) item.style.backgroundColor = this.generateColor(this.firstTag(task.tags));
 
+        // If overdue deadline
+        if (task.deadline != 0 && task.deadline - Date.now() < 0) {
+            item.classList.add("overdue");
+        }
+
+        // Events
         item.addEventListener("draggableClick", e => this.onClickEvent(e));
 
         if (Board.permissionLevel == PermissionLevel.Edit) {
@@ -173,6 +181,7 @@ export class TasklistController {
             name: item.querySelector(".name").innerHTML,
             description: item.dataset.description,
             tags: item.dataset.tags,
+            deadline: parseInt(item.dataset.deadline),
             assignee: item.querySelector(".assignee").innerHTML
         });
     }

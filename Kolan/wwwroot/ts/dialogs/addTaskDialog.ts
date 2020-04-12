@@ -29,6 +29,12 @@ export class AddTaskDialog extends DialogBox {
             inputType: InputType.Text
         },
         {
+            key: "deadline",
+            value: "Deadline",
+            inputType: InputType.Date,
+            optional: true
+        },
+        {
             key: "assignee",
             value: "Assigned to",
             placeholder: "Username...",

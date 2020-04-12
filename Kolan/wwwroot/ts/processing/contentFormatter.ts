@@ -36,4 +36,12 @@ export class ContentFormatter {
         if (!input) return "";
         return DOMPurify.sanitize(input);
     }
+
+    public static formatDate(date: number): string {
+        return new Date(date).toLocaleString(undefined, {
+            year: "numeric",
+            month: "numeric",
+            day: "numeric"
+        });
+    }
 }

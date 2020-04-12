@@ -17,6 +17,10 @@
         &:focus {
             border: 1px solid #0062ff;
         }
+
+        &[disabled] {
+            color: #9e9e9e;
+        }
     }
 
     textarea {

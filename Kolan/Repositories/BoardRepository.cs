@@ -6,7 +6,6 @@ using Neo4jClient;
 using Neo4jClient.Cypher;
 using Kolan.Models;
 using System.Runtime.CompilerServices;
-using Newtonsoft.Json;
 
 [assembly: InternalsVisibleTo("Kolan.Tests")]
 namespace Kolan.Repositories
@@ -40,6 +39,7 @@ namespace Kolan.Repositories
         /// Return the groups and boards from a parent board.
         /// </summary>
         /// <param name="id">Board id</param>
+        /// <param name="username">User requesting the board data</param>
         public async Task<dynamic> GetAsync(string id, string username)
         {
             var result = await Client.Cypher
@@ -70,6 +70,8 @@ namespace Kolan.Repositories
         /// <summary>
         /// Checks if a user has access to a board.
         /// </summary>
+        /// <param name="boardId">Id of the board</param>
+        /// <param name="username">Username of the user to check for permission for</param>
         public async Task<bool> UserHasAccess(string boardId, string username)
         {
             var result = await Client.Cypher
@@ -140,6 +142,10 @@ namespace Kolan.Repositories
             return id;
         }
 
+        /// <summary>
+        /// Edit a board
+        /// </summary>
+        /// <param name="newBoardContents">The new contents of the board</param>
         public async Task EditAsync(Board newBoardContents)
         {
             await Client.Cypher
@@ -151,6 +157,11 @@ namespace Kolan.Repositories
                 .ExecuteWithoutResultsAsync();
         }
 
+        /// <summary>
+        /// Change the publicity of a board
+        /// </summary>
+        /// <param name="boardId">Id of the board</param>
+        /// <param name="publicity">Whether or not it should be public</param>
         public async Task SetPublicityAsync(string boardId, bool publicity)
         {
             await Client.Cypher
@@ -162,6 +173,11 @@ namespace Kolan.Repositories
                 .ExecuteWithoutResultsAsync();
         }
 
+        /// <summary>
+        /// Change the order of groups in a board
+        /// </summary>
+        /// <param name="boardId">Parent board</param>
+        /// <param name="groupIds">List of the group ids in the correct order</param>
         public async Task SetGroupOrder(string boardId, string[] groupIds)
         {
             await Client.Cypher
@@ -176,6 +192,10 @@ namespace Kolan.Repositories
                 .ExecuteWithoutResultsAsync();
         }
 
+        /// <summary>
+        /// Whether or not a board exists
+        /// </summary>
+        /// <param name="id">Board id</param>
         public async Task<bool> ExistsAsync(string id)
         {
             var result = await Client.Cypher
@@ -188,6 +208,10 @@ namespace Kolan.Repositories
             return result.Single() > 0;
         }
 
+        /// <summary>
+        /// Delete any board. Root board, child board, non-empty board
+        /// </summary>
+        /// <param name="id">Board id</param>
         public async Task DeleteAsync(string id)
         {
             var collaborators = await Client.Cypher
@@ -199,7 +223,7 @@ namespace Kolan.Repositories
             // Remove protential collaborators before removing board
             foreach (string collaborator in collaborators)
             {
-                RemoveUserAsync(id, collaborator);
+                await RemoveUserAsync(id, collaborator);
             }
 
             await Client.Cypher
@@ -222,6 +246,7 @@ namespace Kolan.Repositories
         /// <summary>
         /// Add board groups
         /// </summary>
+        /// <param name="id">Board id</param>
         public async Task<IEnumerable<Group>> SetupAsync(string id)
         {
             var result = await Client.Cypher
@@ -358,7 +383,10 @@ namespace Kolan.Repositories
                 .ResultsAsync;
         }
 
-        // This is all temporary ok
+        /// <summary>
+        /// Add the default groups to a board
+        /// </summary>
+        /// <param name="id">Board id</param>
         private async Task<IEnumerable<Group>> AddDefaultGroups(string id)
         {
             await Client.Cypher

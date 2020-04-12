@@ -25,8 +25,7 @@ namespace Kolan.Controllers.Api
         /// <summary>
         /// Create a new user.
         /// </summary>
-        /// <param name="username">Chosen username</param>
-        /// <param name="password">Chosen password</param>
+        /// <param name="model">A RegisterViewModel</param>
         [HttpPost("Create")]
         [ValidateModel]
         public async Task<IActionResult> Create(RegisterViewModel model)
@@ -38,6 +37,11 @@ namespace Kolan.Controllers.Api
             return Ok();
         }
 
+        /// <summary>
+        /// Change a user's password
+        /// </summary>
+        /// <param name="username">Username of user</param>
+        /// <param name="model">A ChangePasswordViewModel</param>
         [HttpPost("ChangePassword")]
         [ValidateModel]
         public async Task<IActionResult> ChangePassword(string username, ChangePasswordViewModel model)

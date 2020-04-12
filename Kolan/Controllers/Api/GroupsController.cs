@@ -24,6 +24,11 @@ namespace Kolan.Controllers.Api
             _boardHubContext = boardHubContext;
         }
 
+        /// <summary>
+        /// Create a new group inside a board
+        /// </summary>
+        /// <param name="boardId">Parent board id</param>
+        /// <param name="group">Group object to add</param>
         [HttpPost]
         [AuthorizeForBoard("boardId")]
         public async Task<IActionResult> Create([FromForm]string boardId, Group group)
@@ -33,6 +38,11 @@ namespace Kolan.Controllers.Api
             return Ok(new { id = id });
         }
 
+        /// <summary>
+        /// Delete a group
+        /// </summary>
+        /// <param name="id">Id of group to delete</param>
+        /// <param name="boardId">Parent board id</param>
         [HttpDelete("{id}")]
         [AuthorizeForBoard("boardId")]
         public async Task<IActionResult> Delete(string id, [FromForm]string boardId)

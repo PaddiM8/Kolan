@@ -1,11 +1,8 @@
 
 using System.Linq;
 using Neo4jClient;
-using Kolan.Controllers.Api;
-using Kolan.Repositories;
 using System;
 using Neo4jClient.Transactions;
-using Kolan.ViewModels;
 
 namespace Kolan
 {
@@ -13,7 +10,7 @@ namespace Kolan
     {
         public static ITransactionalGraphClient Client;
 
-        public async void Init()
+        public void Init()
         {
             // Create graph client
             Client = new GraphClient(new Uri(Config.Values.DatabaseUrl),

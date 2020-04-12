@@ -6,7 +6,6 @@ using Kolan.Models;
 using Kolan.ViewModels;
 using Kolan.Repositories;
 using Kolan.Controllers.Api;
-using Kolan.Filters;
 
 namespace Kolan.Controllers
 {
@@ -46,7 +45,7 @@ namespace Kolan.Controllers
 
             if (!ModelState.IsValid) return View("Index", model);
 
-            new UserController(_uow).Create(model);
+            await new UserController(_uow).Create(model);
 
             return RedirectToAction("Index", "Login");
         }

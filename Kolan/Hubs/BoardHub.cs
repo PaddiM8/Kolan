@@ -21,6 +21,10 @@ namespace Kolan.Hubs
             _uow = uow;
         }
 
+        /// <summary>
+        /// Join a board
+        /// </summary>
+        /// <param name="boardId">Id of board to join</param>
         [Authorize("BoardHubRestricted")]
         public async Task<IActionResult> Join(string boardId)
         {
@@ -32,6 +36,12 @@ namespace Kolan.Hubs
             return new UnauthorizedResult();
         }
 
+        /// <summary>
+        /// Create a new board
+        /// </summary>
+        /// <param name="parentId">Parent board id</param>
+        /// <param name="board">Board object</param>
+        /// <param name="groupId">Id of the group to add it under</param>
         public async Task<IActionResult> AddBoard(string parentId, Board board, string groupId)
         {
             var validation = ModelValidator.Validate(board);
@@ -44,12 +54,23 @@ namespace Kolan.Hubs
             return new OkObjectResult(new { id = id });
         }
 
+        /// <summary>
+        /// Move a board
+        /// </summary>
+        /// <param name="parentId">Parent board id</param>
+        /// <param name="boardId">Id of board to move</param>
+        /// <param name="targetId">Id of board to move it to (underneath)</param>
         public async Task MoveBoard(string parentId, string boardId, string targetId)
         {
             await Clients.Group(parentId).MoveBoard(boardId, targetId);
             await _uow.Boards.MoveAsync(parentId, boardId, targetId, false);
         }
 
+        /// <summary>
+        /// Edit a board
+        /// </summary>
+        /// <param name="parentId">Parent board id</param>
+        /// <param name="newBoardContents">Board object with the new contents</param>
         public async Task<IActionResult> EditBoard(string parentId, Board newBoardContents)
         {
             var validation = ModelValidator.Validate(newBoardContents);
@@ -61,12 +82,24 @@ namespace Kolan.Hubs
             return new OkObjectResult("");
         }
 
+        /// <summary>
+        /// Delete a board
+        /// </summary>
+        /// <param name="parentId">Parent board id</param>
+        /// <param name="id">Board id</param>
         public async Task DeleteBoard(string parentId, string id)
         {
             await Clients.Group(parentId).DeleteBoard(id);
             await _uow.Boards.DeleteAsync(id);
         }
 
+        /// <summary>
+        /// Request all clients to reload
+        /// </summary>
+        /// <remarks>
+        /// This is done when they urgently need to get new board information, in order to avoid collisions.
+        /// </remarks>
+        /// <param name="id">Id of board</param>
         public async Task RequestReload(string id)
         {
             await Clients.Group(id).RequestReload();

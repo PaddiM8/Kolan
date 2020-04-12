@@ -8,18 +8,22 @@ import { ToastType } from "../enums/toastType";
 
 /**
  * Manages the websocket connection and acts on responses.
- * @name BoardHubConnection
- * @function
  */
 export class BoardHub implements IHub {
     private connection;
     private boardId;
     private stateToast;
 
+    /**
+    * Get the current state of the connection. Eg. connected, connecting, disconnected
+    */
     public get state() {
         return this.connection.state;
     }
 
+    /**
+    * Join a board hub
+    */
     public join(boardId: string) {
         this.boardId = boardId;
 
@@ -33,12 +37,14 @@ export class BoardHub implements IHub {
             this.connection.invoke("join", boardId).catch(err => console.log(err));
         });
 
+        // Execute a function when a SignalR call is received
         this.connection.on("receiveNewBoard", this.onReceiveNewBoard);
         this.connection.on("moveBoard", this.onMoveBoard);
         this.connection.on("editBoard", this.onEditBoard);
         this.connection.on("deleteBoard", this.onDeleteBoard);
         this.connection.on("requestReload", this.onRequestReload);
 
+        // Keep track of the current state
         this.connection.onclose(() => this.onDisconnected());
         this.connection.onreconnecting(() => this.onReconnecting());
         this.connection.onreconnected(() => this.onConnected());

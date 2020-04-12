@@ -110,11 +110,6 @@ export class InputList extends LitElement {
 
     /**
      * Create the HTML for a list item.
-     *
-     * @name createItem
-     * @function
-     * @param {string} value
-     * @returns {TemplateResult}
      */
     private createItem(value: string): TemplateResult {
         const li = document.createElement("li");
@@ -141,10 +136,6 @@ export class InputList extends LitElement {
 
     /**
      * Add a new item to the list and fire an event.
-     *
-     * @name addItem
-     * @function
-     * @returns {void}
      */
     private addItem(): void {
         const inputElement: HTMLInputElement = this.shadowRoot.getElementById("textInput") as HTMLInputElement;
@@ -167,11 +158,17 @@ export class InputList extends LitElement {
         }
     }
 
+    /**
+    * Remove the last added item
+    */
     public undoAdd(): void {
         const lastItem = this.items[this.items.length - 1];
         this.items = this.items.filter((item: string) => item != lastItem);
     }
 
+    /**
+    * Re-add the last removed item
+    */
     public undoRemove(): void {
         this.items.splice(this.lastRemoved.index, 0, this.lastRemoved.item);
     }
@@ -277,6 +274,9 @@ export class InputList extends LitElement {
         }
     }
 
+    /**
+    * Move an array item from one index to another and return the new array
+    */
     private moveArrayItem(arr, fromIndex, toIndex) {
         arr.splice(toIndex, 0, arr.splice(fromIndex, 1)[0]);
 

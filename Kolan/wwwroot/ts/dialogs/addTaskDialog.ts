@@ -83,6 +83,7 @@ export class AddTaskDialog extends DialogBox {
                 return;
             }
 
+            // Move the task to the top of the group if that option is checked.
             if (data["onTop"]) {
                 Board.boardHub.moveTask(x.value["id"], this.groupId);
             }

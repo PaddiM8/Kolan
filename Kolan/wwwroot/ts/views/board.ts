@@ -26,8 +26,6 @@ declare const viewData;
 
 /**
  * In charge of controlling the "Board" page.
- * @name Board
- * @function
  */
 export class Board extends View {
     public static content: IBoard;
@@ -99,6 +97,9 @@ export class Board extends View {
         });
     }
 
+    /**
+    * Reload the page in an appropriate manner. If a dialog is open, wait for it to be closed before reloading.
+    */
     public static reload(): void {
         for (const dialogName in Board.dialogs) {
             const dialog = Board.dialogs[dialogName];
@@ -115,8 +116,6 @@ export class Board extends View {
 
     /**
      * Add a group to the client side.
-     * @param id Group id
-     * @param name Group name
      */
     private addGroup(group: IGroup): void {
         const listhead = document.getElementById("list-head");
@@ -164,13 +163,6 @@ export class Board extends View {
 
     /**
      * Add a task (board) to the client side.
-     *
-     * @name addTask
-     * @function
-     * @param {string} tasklistId
-     * @param {ITask} task
-     * @param toTop=true
-     * @returns {void}
      */
     private addTask(tasklistId: string, task: ITask): void {
         const tasklist: HTMLElement = document.querySelector(`#tasklists tasklist[data-id='${tasklistId}']`);
@@ -199,10 +191,6 @@ export class Board extends View {
 
     /**
      * Prepare the dialogs for use, they are hidden by default. Simply update dialog.shown to show a dialog.
-     *
-     * @name loadDialogs
-     * @function
-     * @returns {void}
      */
     private loadDialogs(): void {
         const dialogs = {
@@ -219,6 +207,9 @@ export class Board extends View {
         Board.dialogs = dialogs;
     }
 
+    /**
+    * Set the page title (with links to ancestors as well)
+    */
     private setTitle(title: string, ancestors: object[]) {
         document.title = title + " - Kolan";
         let html = Board.permissionLevel == PermissionLevel.Edit
@@ -250,10 +241,6 @@ export class Board extends View {
 
     /**
      * Load the contents of the board from the backend.
-     *
-     * @name loadBoard
-     * @function
-     * @returns {void}
      */
     private loadBoard(): void {
         const boardNameElement = document.getElementById("boardName");

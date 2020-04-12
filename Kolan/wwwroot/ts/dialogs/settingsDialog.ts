@@ -46,6 +46,7 @@ export class SettingsDialog extends DialogBox {
     }
 
     submitHandler() {
+        // If eg. name or description has been changed, update this information.
         if (this.contentHasChanged) {
             const formData = this.getFormData();
             Board.content.name = formData["name"];
@@ -62,6 +63,7 @@ export class SettingsDialog extends DialogBox {
             });
         }
 
+        // Send a request to change the group order only if it has been changed.
         if (this.itemHasBeenMoved) {
             ApiRequester.send("Boards", `${viewData.id}/ChangeGroupOrder`, RequestType.Post, {
                 groupIds: JSON.stringify(this.list.items.map(x => x.id))
@@ -76,6 +78,8 @@ export class SettingsDialog extends DialogBox {
         const name = this.shadowRoot.querySelector("[name='name']") as HTMLInputElement;
         const description = this.shadowRoot.querySelector("[name='description']") as HTMLInputElement;
 
+        // Set the values
+        // TODO: Use the dialogbox.setValues() function for this...
         name.value = Board.content.name;
         description.value = Board.content.description;
         name.oninput = () => this.contentHasChanged = true;

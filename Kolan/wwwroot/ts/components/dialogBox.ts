@@ -9,10 +9,6 @@ import { IModelError } from "../models/IModelError"
 /**
  * Dialog element that takes an IDialogTemplate as input and returns an object with the values as an event.
  *
- * @name customElement
- * @function
- * @param 'dialog-box'
- * @returns {undefined}
  */
 @customElement('dialog-box')
 export class DialogBox extends LitElement {
@@ -72,20 +68,15 @@ export class DialogBox extends LitElement {
 
     /**
      * Set the values of the input fields in the dialog.
-     *
-     * @name setValues
-     * @function
-     * @param {object} values
-     * @returns {void}
      */
-    public setValues(values: object): void { // TODO: Type safety
+    public setValues(values: object): void {
         for (const name in values) {
             const element = this.shadowRoot.querySelector(`[name="${name}"]`);
             const inputElement = element as HTMLInputElement;
             if (!values[name]) continue;
             if (!element) continue;
 
-            if ("type" in element && element["type"] == "date") {
+            if ("type" in element && element["type"] == "date") { // input type="date"
                 inputElement.valueAsNumber = values[name];
 
                 // Make sure it's enabled if it has a value
@@ -95,9 +86,9 @@ export class DialogBox extends LitElement {
                     checkbox.checked = hasValue;
                     inputElement.disabled = !hasValue;
                 }
-            } else if (element instanceof InputList) {
+            } else if (element instanceof InputList) { // InputList
                 element.items = values[name];
-            } else if (element.getAttribute("type") == "checkbox") {
+            } else if (element.getAttribute("type") == "checkbox") { // input type="checkbox"
                 inputElement.checked = values[name];
             } else {
                 element["value"] = values[name];
@@ -107,10 +98,6 @@ export class DialogBox extends LitElement {
 
     /**
      * When the submit button in the dialog is clicked. Fires the event, hides and clears the dialog
-     *
-     * @name submitHandler
-     * @function
-     * @returns {void}
      */
     protected submitHandler(): void {
         let formData = this.getFormData();
@@ -125,27 +112,23 @@ export class DialogBox extends LitElement {
 
     /**
      * When the cancel button in the dialog is clicked. Hides and clears the dialog.
-     *
-     * @name cancelHandler
-     * @function
-     * @returns {void}
      */
     protected cancelHandler(): void {
         this.hide();
     }
 
+    /**
+    * Fires when a dialog is opened. This is likely overriden.
+    */
     protected onOpen(): void {}
 
     /**
      * Get the user input values.
-     *
-     * @name getFormData
-     * @function
-     * @returns {object}
      */
     protected getFormData(): object {
         let input = {};
         const inputs = <any>this.shadowRoot.getElementById("inputs").children;
+
         for (const element of inputs) {
             // If it isn't an actual input element
             if (!element.name) {
@@ -165,6 +148,7 @@ export class DialogBox extends LitElement {
                 continue;
             }
 
+            // Set the value
             if (element.type == "date") {
                 input[element.name] = element.valueAsNumber
             } else if (element.name) {
@@ -175,10 +159,16 @@ export class DialogBox extends LitElement {
         return input;
     }
 
+    /**
+    * Get an input element present in the dialog
+    */
     protected getInputElement(name: string): HTMLInputElement {
         return this.shadowRoot.querySelector(`input[name="${name}"]`);
     }
 
+    /**
+    * Parse an error string (probably sent by the server), and display the corresponding errors above each input element.
+    */
     protected showErrors(errorString: string): void {
         const errors = JSON.parse(errorString);
 
@@ -192,15 +182,13 @@ export class DialogBox extends LitElement {
 
     /**
      * Hide the dialog and clear the values.
-     *
-     * @name hide
-     * @function
-     * @returns {void}
      */
     public hide(): void {
         let dialogItems = <any>this.shadowRoot.getElementById("inputs").children;
+
         for (let element of dialogItems) {
             if (element.classList.contains("checkboxLabel")) {
+                // Uncheck any checkboxes
                 element.querySelector("input[type='checkbox']").checked = false;
             } else if (element.name) {
                 element.value = "";
@@ -215,13 +203,6 @@ export class DialogBox extends LitElement {
 
     /**
      * Create the HTML for a given input type.
-     *
-     * @name getComponentHtml
-     * @function
-     * @param {InputType} inputType
-     * @param {string} name
-     * @param {string} value
-     * @returns {TemplateResult}
      */
     private getComponentHtml(inputType: InputType, name: string, value: string, title: string = null, placeholder: string = null, optional: boolean = false): TemplateResult {
         placeholder = placeholder == null ? value + "..." : placeholder; // Set placeholder to title if it's not specified

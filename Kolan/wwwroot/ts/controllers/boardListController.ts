@@ -19,8 +19,6 @@ export class BoardListController {
 
     /**
      * Add a board to the top of the list.
-     * @param   name        {string} Board name.
-     * @param   description {string} Board description.
      */
     public addBoard(board: IBoard): void {
         const item = this.createBoard(board);
@@ -29,8 +27,6 @@ export class BoardListController {
 
     /**
      * Add a board to the bottom of the list.
-     * @param   name        {string} Board name.
-     * @param   description {string} Board description.
      */
     public addBoardToBottom(board: IBoard): void {
         const item = this.createBoard(board);
@@ -39,9 +35,6 @@ export class BoardListController {
 
     /**
      * Create a board item without placing it
-     * @param id Board id
-     * @param name Board name
-     * @param description Board description
      */
     private createBoard(board: IBoard): HTMLElement {
         const item = new DraggableItem();
@@ -69,8 +62,6 @@ export class BoardListController {
 
     /**
      * Fires when the board item was moved in the list.
-     * @param item   {HTMLElement} Item being moved
-     * @param toItem {HTMLElement} The item above it in the new location
      */
     private onInternalMove(item: HTMLElement, toItem: HTMLElement): void {
         var target: string;

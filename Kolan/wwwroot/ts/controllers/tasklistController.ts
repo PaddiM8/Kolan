@@ -32,13 +32,15 @@ export class TasklistController {
 
     /**
      * Add a task to bottom of the tasklist.
-     * @param   task        {ITask} Task.
      */
     public addTask(task: ITask): void {
         const item = this.createTaskItem(task);
         this.tasklist.appendChild(item);
     }
 
+    /**
+    * Automatically move a task to under another task.
+    */
     public moveTask(boardId: string, targetId: string): void {
         const item = document.querySelector(`#tasklists [data-id="${boardId}"]`);
         const target = document.querySelector(`#tasklists [data-id="${targetId}"]`);
@@ -53,6 +55,9 @@ export class TasklistController {
         }
     }
 
+    /**
+    * Edit the contents of a task. This actually just removes the task and adds it again, with the new content
+    */
     public editTask(newTaskContent: ITask): void {
        const item = document.querySelector(`#tasklists [data-id="${newTaskContent.id}"]`) as HTMLElement;
        item.parentElement.insertBefore(this.createTaskItem(newTaskContent), item.nextElementSibling);
@@ -62,7 +67,6 @@ export class TasklistController {
 
     /**
      * Create the HTML element of a task item.
-     * @param task ITask task
      */
     public createTaskItem(task: ITask): HTMLElement {
         const item = new DraggableItem();
@@ -197,6 +201,9 @@ export class TasklistController {
         });
     }
 
+    /**
+    * Extract the first tag out of a string of tags divided by comma.
+    */
     private firstTag(input: string): string {
         const commaIndex = input.indexOf(",");
 
@@ -208,6 +215,9 @@ export class TasklistController {
         }
     }
 
+    /**
+    * Generate a colour using a string, this colour will be the same if the same string if provided the next time.
+    */
     private generateColor(input: string): string {
         const rnd = seedrandom.alea(input + this.taskColorSeed);
         const h = Math.floor(rnd() * 360);
@@ -217,6 +227,9 @@ export class TasklistController {
         return `hsl(${h}, ${s}, ${l})`;
     }
 
+    /**
+    * Get the luminance of an rgb(x, x, x) colour.
+    */
     private getLuminance(rgbString: string) {
         const rgb: string[] = rgbString.substring(4, rgbString.length - 2).split(", ");
 

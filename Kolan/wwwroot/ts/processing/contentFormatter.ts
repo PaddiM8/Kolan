@@ -12,12 +12,6 @@ export class ContentFormatter {
 
     /**
      * Converts markdown to HTML while keeping it safe from XSS attacks.
-     *
-     * @name formatWithMarkdown
-     * @function
-     * @static
-     * @param {string} input
-     * @returns {string}
      */
     public static formatWithMarkdown(input: string): string {
         if (!input) return "";
@@ -26,17 +20,15 @@ export class ContentFormatter {
 
     /**
      * Makes the input safe for use, preventing XSS attacks.
-     *
-     * @name format
-     * @static
-     * @param {string} input
-     * @returns {string}
      */
     public static format(input: string): string {
         if (!input) return "";
         return DOMPurify.sanitize(input);
     }
 
+    /**
+    * Takes a date-number and creates a formatted date string showing the date.
+    */
     public static formatDate(date: number): string {
         return new Date(date).toLocaleString(undefined, {
             year: "numeric",

@@ -37,9 +37,8 @@ class Boards extends View {
             addDialog.shown = true);
     }
 
-    /** Adds a board item
-     * @param   name        {string} Board name.
-     * @param   description {string} Board description.
+    /**
+     * Adds a board item
      */
     private addBoardItem(board: IBoard): void {
         const boardListController = new BoardListController(document

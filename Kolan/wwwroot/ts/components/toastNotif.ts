@@ -90,6 +90,9 @@ export class ToastNotif extends LitElement {
         }, 2500);
     }
 
+    /**
+    * Hide the toast
+    */
     public hide(): void {
         this.shadowRoot.getElementById("content").classList.toggle("slide-down");
         setTimeout(() => {
@@ -97,6 +100,9 @@ export class ToastNotif extends LitElement {
         }, 300);
     }
 
+    /**
+    * Get the class name used for the icon corresponding to the toast type.
+    */
     private getIconName(): string {
         switch (this.type) {
             case ToastType.Info:    return "info";

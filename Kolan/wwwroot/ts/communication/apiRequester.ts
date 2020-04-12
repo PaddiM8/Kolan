@@ -2,23 +2,12 @@ import { RequestParameter } from "./requestParameter";
 import { RequestType } from "../enums/requestType";
 import { Promise } from "es6-promise";
 
-/** Do an API request
- * @param action - Api action (controller)
- * @param method - Api method (additional route, often empty)
- * @param requestType - HTTP request type, eg. GET, POST, PUT, etc.
- * @param requestParameters - A list of parameters to be pushed with the request.
+/**
+ * Do an API request
  */
 export class ApiRequester {
     /**
      * Performs an HTTP request to the backend server.
-     *
-     * @name send
-     * @function
-     * @param {string} action
-     * @param {string} method
-     * @param {string} requestType
-     * @param {RequestParameter[]} requestParameters=null
-     * @returns {undefined}
      */
     public static send(action: string, method: string, requestType: RequestType, requestObject: object = []): Promise<any> {
         return new Promise((resolve, reject) => {
@@ -45,11 +34,6 @@ export class ApiRequester {
 
     /**
      * Convert the RequestParameters to URLSearch params, which can be read by the server.
-     *
-     * @name createURLSearchParams
-     * @function
-     * @param {RequestParameter[]} requestParameters
-     * @returns {URLSearchParams}
      */
     private static createURLSearchParams(requestObject: object): URLSearchParams {
         let params = new URLSearchParams();

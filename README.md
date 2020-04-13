@@ -1,4 +1,4 @@
-# <img src="/Kolan/wwwroot/res/logo-text.png" width="300" height="auto">
+# <img src="/Kolan/wwwroot/res/logo-text-compressed.png" width="300" height="auto">
 
 Kolan is a self-hostable project management website, that is built around the concept of Kanban boards. You create tasks that you move to different columns as you progress. The default columns are "Backlog", "Ready", "In Progress" and "Done", but you can of course choose these yourself. Tasks contain a title, description, tag and assignee. The description can be written in markdown, and tags make sure all tasks with the same tag share the same colour. If you have bigger tasks with more steps, you can create another kanban board inside that task. This is what makes Kolan recursive. You can also share a board with other users, and work together on it in real-time, for example like on Google Docs.  
 

@@ -1,4 +1,5 @@
 import { DialogBox } from "../components/dialogBox";
+import { ConfirmDialog } from "./confirmDialog";
 import { LitElement, property, customElement } from "lit-element";
 import { InputType } from "../enums/inputType";
 import { BoardHub } from "../communication/boardHub";
@@ -28,6 +29,11 @@ export class SettingsDialog extends DialogBox {
             title: "Edit columns",
             value: "Choose a column name...",
             inputType: InputType.InputList
+        },
+        {
+            key: "deleteBoard",
+            value: "Delete board",
+            inputType: InputType.Button
         }
     ];
     @property({type: Object}) options = {
@@ -75,6 +81,12 @@ export class SettingsDialog extends DialogBox {
     }
 
     onOpen() {
+        // Change delete button to leave button if the board isn't owned by the user.
+        const deleteButton = this.shadowRoot.querySelector(".deleteBoard");
+        // TODO
+
+        deleteButton.addEventListener("click", () => this.deleteBoard());
+
         const name = this.shadowRoot.querySelector("[name='name']") as HTMLInputElement;
         const description = this.shadowRoot.querySelector("[name='description']") as HTMLInputElement;
 
@@ -95,6 +107,27 @@ export class SettingsDialog extends DialogBox {
 
         this.list.items = groupNames;
         this.list.draggableItems = true;
+    }
+
+    private deleteBoard(): void {
+        const confirmDialog = new ConfirmDialog("Are you sure you want to delete the board?", "Yes");
+        document.body.appendChild(confirmDialog);
+        confirmDialog.shown = true;
+
+        confirmDialog.addEventListener("submitDialog", () => {
+            // If it's not a root board
+            if (Board.parentId) {
+                ApiRequester.send("Boards", Board.parentId, RequestType.Delete, {
+                    boardId: viewData.id
+                }).then(() => location.href = `/Board/${Board.parentId}`);
+            } else {
+                ApiRequester.send("Boards", "", RequestType.Delete, {
+                    id: viewData.id
+                }).then(() => location.href = `/`);
+            }
+
+            confirmDialog.remove();
+        });
     }
 
     private onItemAdded(e): void {

@@ -32,8 +32,8 @@ export class DialogBox extends LitElement {
             <div id="inputs">
                 ${this.fields.map(x => html`${this.getComponentHtml(x.inputType, x.key, x.value, x.title, x.placeholder, x.optional)}`)}
             </div>
-            <button @click="${this.submitHandler}">${html`${this.options.primaryButton}`}</button>
-            <button class="secondary" @click="${this.cancelHandler}">Cancel</button>
+            <button class="submit" @click="${this.submitHandler}">${html`${this.options.primaryButton}`}</button>
+            <button class="cancel secondary" @click="${this.cancelHandler}">Cancel</button>
          </section>`;
 
          // Make the form submit when enter is pressed
@@ -241,6 +241,9 @@ export class DialogBox extends LitElement {
                 return html`${label}
                             <label for="${name}" class="error"></label>
                             <input type="date" name="${name}" ?disabled=${optional} /><br />`;
+            case InputType.Button:
+                return html`${label}
+                            <button class="${name}">${value}</button>`;
             default:
                 return html``;
         }

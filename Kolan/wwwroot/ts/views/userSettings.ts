@@ -4,6 +4,7 @@ import { ToastController } from "../controllers/toastController";
 import { ToastType } from "../enums/toastType";
 import { themes } from "../themes/themes";
 import { ThemeManager } from "../themes/themeManager";
+import { PasswordDialog } from "../dialogs/passwordDialog";
 
 window.addEventListener("load", () => new UserSettings());
 declare const tempData;

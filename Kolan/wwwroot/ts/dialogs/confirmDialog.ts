@@ -17,4 +17,11 @@ export class ConfirmDialog extends DialogBox {
         this.options.title = message;
         this.options.primaryButton = buttonText;
     }
+
+    onOpen(): void {
+        const dialogElement = this.shadowRoot.querySelector(".dialog") as HTMLElement;
+        const background = this.shadowRoot.querySelector(".dialogBackground") as HTMLElement;
+        dialogElement.style.zIndex = "1002";
+        background.style.zIndex = "1001";
+    }
 }

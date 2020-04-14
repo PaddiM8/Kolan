@@ -123,6 +123,19 @@ namespace Kolan.Controllers.Api
         }
 
         /// <summary>
+        /// Delete a root board
+        /// </summary>
+        /// <param name="id">Id of the board to delete</param>
+        [HttpDelete]
+        [AuthorizeForBoard]
+        public async Task<IActionResult> Delete(string id)
+        {
+            await _uow.Boards.DeleteAsync(id, User.Identity.Name);
+
+            return Ok();
+        }
+
+        /// <summary>
         /// Delete a child board
         /// </summary>
         /// <param name="id">Parent board id</param>

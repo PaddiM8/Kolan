@@ -209,22 +209,39 @@ namespace Kolan.Repositories
         }
 
         /// <summary>
-        /// Delete any board. Root board, child board, non-empty board
+        /// Delete a root board
+        /// </summary>
+        /// <param name="id">Board id</param>
+        /// <param name="username">User performing the action</param>
+        public async Task DeleteAsync(string id, string username)
+        {
+            await ClearCollaborators(id);
+
+            await Client.Cypher
+                .Match("(prev)-[:NEXT]->(board:Board)")
+                .Where("board.id = {id}")
+                .Call("apoc.lock.nodes([prev])")
+                .Match("(prev)-[prevRel:NEXT]->(board)-[nextRel:NEXT]->(next)")
+                .WithParam("id", id)
+                .Match("(user:User)-[childRel:CHILD_BOARD]->(board)")
+                .Where((User user) => user.Username == username)
+                .Create("(prev)-[:NEXT]->(next)")
+                .Delete("prevRel, nextRel, childRel")
+                .With("board")
+                .Match("path=(board)-[:CHILD_GROUP|CHILD_BOARD|NEXT]-(n1)-[:CHILD_GROUP|CHILD_BOARD|NEXT*0..]->(n2)")
+                .With("relationships(path) as rels, n1, n2, board")
+                .Unwind("rels", "rel")
+                .Delete("rel, n1, n2, board")
+                .ExecuteWithoutResultsAsync();
+        }
+
+        /// <summary>
+        /// Delete a child board
         /// </summary>
         /// <param name="id">Board id</param>
         public async Task DeleteAsync(string id)
         {
-            var collaborators = await Client.Cypher
-                .Match("(user:User)-[:CHILD_BOARD]->(board)")
-                .Where((Board board) => board.Id == id)
-                .Return<string>("user.username")
-                .ResultsAsync;
-
-            // Remove protential collaborators before removing board
-            foreach (string collaborator in collaborators)
-            {
-                await RemoveUserAsync(id, collaborator);
-            }
+            await ClearCollaborators(id);
 
             await Client.Cypher
                 .Match("(prev)-[:NEXT]->(board:Board)")
@@ -412,6 +429,20 @@ namespace Kolan.Repositories
                 .OrderBy("groupRel.order")
                 .Return((group) => group.As<Group>())
                 .ResultsAsync;
+        }
+
+
+        private async Task ClearCollaborators(string id)
+        {
+            var collaborators = await Client.Cypher
+                .Match("(user:User)-[:CHILD_BOARD]->(board)")
+                .Where((Board board) => board.Id == id)
+                .Return<string>("user.username")
+                .ResultsAsync;
+
+            // Remove protential collaborators before removing board
+            foreach (string collaborator in collaborators)
+                await RemoveUserAsync(id, collaborator);
         }
     }
 }

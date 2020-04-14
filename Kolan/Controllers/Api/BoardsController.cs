@@ -48,7 +48,7 @@ namespace Kolan.Controllers.Api
         {
             dynamic result = await _uow.Boards.GetAsync(id, User.Identity.Name);
             if (result == null) return NotFound();
-            if ((PermissionLevel)result.UserAccess == PermissionLevel.None) return Unauthorized(); // No AuthorizeForBoard attribute here since this GetAsync() already retrieves this (for other reason). Also, later on users should be able to make boards visible to the public
+            if (result.UserAccess == PermissionLevel.None) return Unauthorized(); // No AuthorizeForBoard attribute here since this GetAsync() already retrieves this (for other reason). Also, later on users should be able to make boards visible to the public
 
             return Ok(result);
         }
@@ -127,7 +127,7 @@ namespace Kolan.Controllers.Api
         /// </summary>
         /// <param name="id">Id of the board to delete</param>
         [HttpDelete]
-        [AuthorizeForBoard]
+        [AuthorizeForBoard(PermissionLevel = PermissionLevel.All)]
         public async Task<IActionResult> Delete(string id)
         {
             await _uow.Boards.DeleteAsync(id, User.Identity.Name);
@@ -231,10 +231,18 @@ namespace Kolan.Controllers.Api
         /// <param name="id">Id of the board</param>
         /// <param name="username">Username of the user to remove</param>
         [HttpDelete("{id}/Users")]
-        [AuthorizeForBoard]
         public async Task<IActionResult> RemoveUser(string id, [FromForm]string username)
         {
-            await _uow.Boards.RemoveUserAsync(id, username);
+            // Only do it if the current user is board owner or they are trying to remove themselves from the board.
+            if (await _uow.Boards.GetUserPermissionLevel(id, User.Identity.Name) == PermissionLevel.All ||
+                username == User.Identity.Name)
+            {
+                await _uow.Boards.RemoveUserAsync(id, username);
+            }
+            else
+            {
+                return Unauthorized();
+            }
 
             return Ok();
         }

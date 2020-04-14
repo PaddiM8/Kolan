@@ -70,7 +70,7 @@ export class TasklistController {
      */
     public createTaskItem(task: ITask): HTMLElement {
         const item = new DraggableItem();
-        item.movable = Board.permissionLevel == PermissionLevel.Edit;
+        item.movable = Board.permissionLevel >= PermissionLevel.Edit;
         item.dataset.id = task.id;
         item.dataset.description = task.description ? task.description : "";
         item.dataset.deadline = task.deadline.toString();
@@ -112,7 +112,7 @@ export class TasklistController {
         // Events
         item.addEventListener("draggableClick", e => this.onClickEvent(e));
 
-        if (Board.permissionLevel == PermissionLevel.Edit) {
+        if (Board.permissionLevel >= PermissionLevel.Edit) {
             item.addEventListener("mouseover", () => this.onHoverEvent(item));
             item.addEventListener("mouseleave", () => this.onMouseLeaveEvent(item));
         }
@@ -123,11 +123,20 @@ export class TasklistController {
         item.addEventListener("taskExternalMove", e =>
             this.onExternalMove(e.target as HTMLElement, e["detail"]["toItem"], e["detail"]["toTasklist"]));
 
-        item.querySelector(".edit").addEventListener("click", () =>
-            this.onEditClick(item));
+        // Add event listeners to overlay buttons if the user has permission to use them, otherwise remove them
+        if (Board.permissionLevel >= PermissionLevel.Edit) {
+            item.querySelector(".edit").addEventListener("click", () =>
+                this.onEditClick(item));
 
-        item.querySelector(".delete").addEventListener("click", () =>
-            this.onDeleteClick(item));
+            item.querySelector(".delete").addEventListener("click", () =>
+                this.onDeleteClick(item));
+        } else {
+            const overlayButtons = item.querySelectorAll(".overlay-button");
+            for (const overlayButton of overlayButtons)
+                overlayButton.remove();
+        }
+
+
 
         return item;
     }

@@ -1,5 +1,6 @@
 export enum PermissionLevel {
     None,
     View,
-    Edit
+    Edit,
+    All
 }

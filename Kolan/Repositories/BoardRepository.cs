@@ -6,6 +6,7 @@ using Neo4jClient;
 using Neo4jClient.Cypher;
 using Kolan.Models;
 using System.Runtime.CompilerServices;
+using Kolan.Enums;
 
 [assembly: InternalsVisibleTo("Kolan.Tests")]
 namespace Kolan.Repositories
@@ -49,18 +50,19 @@ namespace Kolan.Repositories
                 .OptionalMatch("(group)-[:NEXT*]->(childBoard:Board)-[:NEXT*]->(:End)")
                 .With("board, group, groupRel, {group: group, boards: collect(childBoard)} AS groups")
                 .OrderBy("groupRel.order")
-                .OptionalMatch("path=(board)<-[:CHILD_BOARD*0..]-()<-[:CHILD_BOARD|SHARED_BOARD]-(user:User)")
+                .OptionalMatch("path=(board)<-[:CHILD_BOARD*0..]-(rootBoard)<-[:CHILD_BOARD]-(user:User)")
                 .Where((User user) => user.Username == username)
-                .With("board, group, groups, path")
-                .Return((board, group, groups, path) => new
+                .With("user, board, group, groups, path")
+                .OptionalMatch("sharedPath=(rootBoard)<-[:SHARED_BOARD]-()<-[:NEXT]-()<-[:CHILD_GROUP]-(user)")
+                .Return((board, group, groups, path, sharedPath) => new
                 {
                     Board = board.As<Board>(),
                     Groups = Return.As<IEnumerable<Groups>>("CASE WHEN group IS NULL THEN NULL ELSE collect(groups) END"),
                     Ancestors = Return.As<IEnumerable<Board>>("tail([b in nodes(path) WHERE (b:Board) | b])"),
-                    UserAccess = Return.As<int>(@"CASE WHEN path IS NULL
-                                                  THEN CASE WHEN board.public = false THEN 0 ELSE 1 END
-                                                  ELSE 2
-                                                  END")
+                    UserAccess = Return.As<PermissionLevel>(@"CASE WHEN path IS NULL
+                                                              THEN CASE WHEN board.public = false THEN 0 ELSE 1 END
+                                                              ELSE CASE WHEN sharedPath IS NOT NULL THEN 2 ELSE 3 END
+                                                              END")
                 })
                 .ResultsAsync;
 
@@ -72,16 +74,23 @@ namespace Kolan.Repositories
         /// </summary>
         /// <param name="boardId">Id of the board</param>
         /// <param name="username">Username of the user to check for permission for</param>
-        public async Task<bool> UserHasAccess(string boardId, string username)
+        public async Task<PermissionLevel> GetUserPermissionLevel(string boardId, string username)
         {
+
             var result = await Client.Cypher
-                .Match("path=(board:Board)<-[:CHILD_BOARD*0..]-()<-[:CHILD_BOARD|SHARED_BOARD]-(user:User)")
+                .Match("path=(board)<-[:CHILD_BOARD*0..]-(rootBoard)<-[:CHILD_BOARD]-(user:User)")
                 .Where((User user) => user.Username == username)
                 .AndWhere((Board board) => board.Id == boardId)
-                .Return((path) => Return.As<int>("CASE WHEN path IS NULL THEN 0 ELSE 1 END"))
+                .With("path, user, board, rootBoard")
+                .OptionalMatch("sharedPath=(rootBoard)<-[:SHARED_BOARD]-()<-[:NEXT]-()<-[:CHILD_GROUP]-(user)")
+                .Return((path, board, sharedPath) =>
+                        Return.As<PermissionLevel>(@"CASE WHEN path IS NULL
+                                                     THEN CASE WHEN board.public = false THEN 0 ELSE 1 END
+                                                     ELSE CASE WHEN sharedPath IS NOT NULL THEN 2 ELSE 3 END
+                                                     END"))
                 .ResultsAsync;
 
-            return result.SingleOrDefault() == 1;
+            return result.SingleOrDefault();
         }
 
         /// <summary>
@@ -347,8 +356,7 @@ namespace Kolan.Repositories
         public async Task<bool> AddUserAsync(string boardId, string username)
         {
             // Don't add user if it already has access to the board
-            bool userHasAccess = await UserHasAccess(boardId, username);
-            if (userHasAccess) return false;
+            if (await GetUserPermissionLevel(boardId, username) >= PermissionLevel.Edit) return false;
 
             var result = await Client.Cypher
                 .Match("(user:User)")

@@ -1,12 +1,10 @@
-using System;
-using System.Collections.Generic;
-
 namespace Kolan.Enums
 {
-    enum PermissionLevel
+    public enum PermissionLevel
     {
         None,
         View,
-        Edit
+        Edit,
+        All
     }
 }

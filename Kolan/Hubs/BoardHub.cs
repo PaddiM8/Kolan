@@ -4,11 +4,7 @@ using Kolan.Models;
 using Kolan.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using System.ComponentModel.DataAnnotations;
-using System.Collections.Generic;
-using System;
-using Newtonsoft.Json;
-
+using Kolan.Enums;
 namespace Kolan.Hubs
 {
     [Authorize]
@@ -25,10 +21,9 @@ namespace Kolan.Hubs
         /// Join a board
         /// </summary>
         /// <param name="boardId">Id of board to join</param>
-        [Authorize("BoardHubRestricted")]
         public async Task<IActionResult> Join(string boardId)
         {
-            if (await _uow.Boards.UserHasAccess(boardId, Context.User.Identity.Name))
+            if (await _uow.Boards.GetUserPermissionLevel(boardId, Context.User.Identity.Name) >= PermissionLevel.Edit)
             {
                 return new OkObjectResult(Groups.AddToGroupAsync(Context.ConnectionId, boardId));
             }

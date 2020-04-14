@@ -8,6 +8,7 @@ import { ApiRequester } from "../communication/apiRequester";
 import { RequestType } from "../enums/requestType";
 import { ToastType } from "../enums/toastType";
 import { ToastController } from "../controllers/toastController";
+import { PermissionLevel } from "../enums/permissionLevel";
 
 declare const viewData;
 
@@ -83,9 +84,15 @@ export class SettingsDialog extends DialogBox {
     onOpen() {
         // Change delete button to leave button if the board isn't owned by the user.
         const deleteButton = this.shadowRoot.querySelector(".deleteBoard");
-        // TODO
+        console.log(Board.permissionLevel);
+        if (Board.permissionLevel != PermissionLevel.All) {
+            deleteButton.previousElementSibling.innerHTML = "Leave board";
+            deleteButton.innerHTML = "Leave";
+            deleteButton.addEventListener("click", () => this.leaveBoard());
+        } else {
+            deleteButton.addEventListener("click", () => this.deleteBoard());
+        }
 
-        deleteButton.addEventListener("click", () => this.deleteBoard());
 
         const name = this.shadowRoot.querySelector("[name='name']") as HTMLInputElement;
         const description = this.shadowRoot.querySelector("[name='description']") as HTMLInputElement;
@@ -127,6 +134,14 @@ export class SettingsDialog extends DialogBox {
             }
 
             confirmDialog.remove();
+        });
+    }
+
+    private leaveBoard(): void {
+        ApiRequester.send("Boards", `${viewData.id}/Users`, RequestType.Delete, {
+            username: viewData.username
+        }).then(() => {
+            location.href = "/";
         });
     }
 

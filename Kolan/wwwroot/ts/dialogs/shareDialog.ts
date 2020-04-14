@@ -7,6 +7,7 @@ import { ApiRequester } from "../communication/apiRequester";
 import { ToastController } from "../controllers/toastController";
 import { ToastType } from "../enums/toastType";
 import { Board } from "../views/board";
+import { PermissionLevel } from "../enums/permissionLevel";
 
 declare const viewData;
 
@@ -38,6 +39,7 @@ export class ShareDialog extends DialogBox {
     }
 
     protected onOpen(): void {
+        this.list.removableItems = Board.permissionLevel == PermissionLevel.All;
         this.list.items = Board.collaborators.map(x => ({ name: x }));
     }
 
@@ -55,12 +57,10 @@ export class ShareDialog extends DialogBox {
     private onUserAdded(e): void {
         ApiRequester.send("Boards", `${viewData.id}/Users`, RequestType.Post, {
             username: e.detail["value"]
-        })
-        .then(() => {
+        }).then(() => {
             Board.collaborators.push(e.detail["value"])
             ToastController.new("Collaborator added", ToastType.Info);
-        })
-        .catch(() => {
+        }).catch(() => {
             ToastController.new("Failed to add collaborator", ToastType.Error);
             e.detail["object"].undoAdd();
         })
@@ -69,9 +69,11 @@ export class ShareDialog extends DialogBox {
     private onUserRemoved(e): void {
         ApiRequester.send("Boards", `${viewData.id}/Users`, RequestType.Delete, {
             username: e.detail["item"].name
-        })
-        .then(() => {
+        }).then(() => {
             ToastController.new("Collaborator removed", ToastType.Info);
+        }).catch(() => {
+            ToastController.new("Failed to remove collaborator", ToastType.Error);
+            e.detail["object"].undoRemove();
         });
     }
 }

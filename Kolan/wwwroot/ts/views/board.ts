@@ -125,7 +125,7 @@ export class Board extends View {
         item.dataset.name = group.name;
         item.textContent = group.name;
 
-        if (Board.permissionLevel == PermissionLevel.Edit)
+        if (Board.permissionLevel >= PermissionLevel.Edit)
             item.insertAdjacentHTML("beforeend", "<span class='plus'>+</span>")
 
         listhead.appendChild(item);
@@ -212,7 +212,7 @@ export class Board extends View {
     */
     private setTitle(title: string, ancestors: object[]) {
         document.title = title + " - Kolan";
-        let html = Board.permissionLevel == PermissionLevel.Edit
+        let html = Board.permissionLevel >= PermissionLevel.Edit
             ? `<a href="/">Boards</a> / `
             : `<a href="/">Kolan</a> / `;
 
@@ -279,11 +279,13 @@ export class Board extends View {
             }
 
             Board.content = boardContent.board;
-            if (boardContent.ancestors.length > 0) Board.parentId = boardContent.ancestors[0]["id"];
 
-            if (Board.permissionLevel == PermissionLevel.Edit) {
+            // Save the parent board id in a variable for easy access, if the board has a parent
+            if (boardContent.ancestors && boardContent.ancestors.length > 0)
+                Board.parentId = boardContent.ancestors[0]["id"];
+
+            if (Board.permissionLevel >= PermissionLevel.Edit) {
                 // Connect to SignalR
-                if (Board.permissionLevel == PermissionLevel.Edit)
                     Board.boardHub.join(Board.viewData.id);
             } else {
                 // Remove header icons

@@ -4,32 +4,38 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Primitives;
 using Microsoft.AspNetCore.Mvc;
+using Kolan.Enums;
+using System;
 
 namespace Kolan.Filters
 {
     class AuthorizeForBoardAttribute : AuthorizeAttribute, IAsyncAuthorizationFilter
     {
+        public PermissionLevel PermissionLevel { get; set; } = PermissionLevel.Edit;
+        public string IdParameter { get; set; }
+
         private static readonly UnitOfWork _uow = new UnitOfWork(Database.Client); // Temporary
-        private readonly string _idParameterName;
 
         public AuthorizeForBoardAttribute(string idParameterName = "id")
         {
-            _idParameterName = idParameterName;
+            IdParameter = idParameterName;
         }
 
         public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
         {
-            string boardId = (string)context.HttpContext.Request.RouteValues[_idParameterName];
+            string boardId = (string)context.HttpContext.Request.RouteValues[IdParameter];
             if (boardId == null)
             {
                 StringValues formStringValues;
-                context.HttpContext.Request.Form.TryGetValue(_idParameterName, out formStringValues);
+                context.HttpContext.Request.Form.TryGetValue(IdParameter, out formStringValues);
                 boardId = formStringValues[0];
             }
 
             string username = context.HttpContext.User.Identity.Name;
 
-            if (await _uow.Boards.UserHasAccess(boardId, username) == false)
+            Console.WriteLine("Expects: " + this.PermissionLevel);
+            Console.WriteLine("Got: " + await _uow.Boards.GetUserPermissionLevel(boardId, username));
+            if (await _uow.Boards.GetUserPermissionLevel(boardId, username) < this.PermissionLevel)
             {
                 context.Result = new UnauthorizedResult();
             }

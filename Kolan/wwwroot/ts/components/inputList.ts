@@ -6,6 +6,7 @@ import { ThemeManager } from "../themes/themeManager";
 export class InputList extends LitElement {
     @property({ type: Array }) items = [];
     @property({ type: Boolean }) draggableItems;
+    @property({ type: Boolean }) removableItems = true;
     private inputPlaceholder: string;
     private grabbedItem: HTMLElement;
     private listElement: HTMLElement;
@@ -115,21 +116,24 @@ export class InputList extends LitElement {
         const li = document.createElement("li");
         li.dataset.value = value;
 
-        const dragger = document.createElement("span") as FaIcon;
-        dragger.className = "icon icon-bars dragger";
-        dragger.addEventListener("mousedown", e => this.onItemMouseDown(e));
+        if (this.draggableItems) {
+            const dragger = document.createElement("span") as FaIcon;
+            dragger.className = "icon icon-bars dragger";
+            dragger.addEventListener("mousedown", e => this.onItemMouseDown(e));
+            li.appendChild(dragger);
+        }
 
         const span = document.createElement("span");
         span.className = "itemValue";
         span.textContent = value;
-
-        const deleteButton = document.createElement("span") as FaIcon;
-        deleteButton.className = "icon icon-times delete";
-        deleteButton.addEventListener("click", (e) => this.onRemoveClick(e));
-
-        if (this.draggableItems) li.appendChild(dragger);
         li.appendChild(span);
-        li.appendChild(deleteButton);
+
+        if (this.removableItems) {
+            const deleteButton = document.createElement("span") as FaIcon;
+            deleteButton.className = "icon icon-times delete";
+            deleteButton.addEventListener("click", (e) => this.onRemoveClick(e));
+            li.appendChild(deleteButton);
+        }
 
         return html`${li}`;
     }

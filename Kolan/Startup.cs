@@ -96,14 +96,6 @@ namespace Kolan
             services.AddMvc(options => options.Filters.Add(new AuthorizeFilter()));
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
-            services.AddAuthorization(options =>
-            {
-                options.AddPolicy("BoardHubRestricted", policy =>
-                {
-                    policy.Requirements.Add(new BoardHubRestrictedRequirement());
-                });
-            });
-
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Kolan API", Version = "v1" });

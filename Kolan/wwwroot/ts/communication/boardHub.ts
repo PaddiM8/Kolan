@@ -18,7 +18,7 @@ export class BoardHub implements IHub {
     * Get the current state of the connection. Eg. connected, connecting, disconnected
     */
     public get state() {
-        return this.connection.state;
+        return this.connection ? this.connection.state : "";
     }
 
     /**

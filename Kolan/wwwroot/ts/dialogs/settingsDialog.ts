@@ -84,11 +84,15 @@ export class SettingsDialog extends DialogBox {
     onOpen() {
         // Change delete button to leave button if the board isn't owned by the user.
         const deleteButton = this.shadowRoot.querySelector(".deleteBoard");
-        console.log(Board.permissionLevel);
         if (Board.permissionLevel != PermissionLevel.All) {
-            deleteButton.previousElementSibling.innerHTML = "Leave board";
-            deleteButton.innerHTML = "Leave";
-            deleteButton.addEventListener("click", () => this.leaveBoard());
+            if (Board.parentId) {
+                deleteButton.previousElementSibling.remove();
+                deleteButton.remove();
+            } else {
+                deleteButton.previousElementSibling.innerHTML = "Leave board";
+                deleteButton.innerHTML = "Leave";
+                deleteButton.addEventListener("click", () => this.leaveBoard());
+            }
         } else {
             deleteButton.addEventListener("click", () => this.deleteBoard());
         }

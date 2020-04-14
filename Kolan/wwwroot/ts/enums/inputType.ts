@@ -3,6 +3,7 @@
  */
 export enum InputType {
     Text,
+    Password,
     TextArea,
     InputList,
     Checkbox,

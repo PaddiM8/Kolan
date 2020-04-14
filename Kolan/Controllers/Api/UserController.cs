@@ -12,12 +12,12 @@ namespace Kolan.Controllers.Api
     /// Managing users
     /// </summary>
     [Produces("application/json")]
-    [Route("api/Login")]
-    public class UserController : Controller
+    [Route("api/Users")]
+    public class UsersController : Controller
     {
         private readonly UnitOfWork _uow;
 
-        public UserController(UnitOfWork uow)
+        public UsersController(UnitOfWork uow)
         {
             _uow = uow;
         }
@@ -46,14 +46,32 @@ namespace Kolan.Controllers.Api
         [ValidateModel]
         public async Task<IActionResult> ChangePassword(string username, ChangePasswordViewModel model)
         {
-            if (await _uow.Users.ValidatePassword(username, model.CurrentPassword) == false)
+            if (await _uow.Users.ValidatePasswordAsync(username, model.CurrentPassword) == false)
             {
                 return BadRequest("Invalid password.");
             }
 
-            await _uow.Users.ChangePassword(username, model.NewPassword);
+            await _uow.Users.ChangePasswordAsync(username, model.NewPassword);
 
             return Ok();
+        }
+
+        /// <summary>
+        /// Delete a user
+        /// </summary>
+        /// <param name="username">Username of user to delete</param>
+        /// <param name="password">Password of user to delete, the user should confirm this manually.</param>
+        [HttpDelete("{username}")]
+        public async Task<IActionResult> Delete(string username, string password)
+        {
+            if (await _uow.Users.ValidatePasswordAsync(username, password))
+            {
+                await _uow.Users.DeleteAsync(username);
+
+                return Ok();
+            }
+
+            return Unauthorized("Invalid password");
         }
     }
 }

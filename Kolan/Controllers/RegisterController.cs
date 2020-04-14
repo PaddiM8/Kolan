@@ -45,7 +45,7 @@ namespace Kolan.Controllers
 
             if (!ModelState.IsValid) return View("Index", model);
 
-            await new UserController(_uow).Create(model);
+            await new UsersController(_uow).Create(model);
 
             return RedirectToAction("Index", "Login");
         }

@@ -25,7 +25,7 @@ namespace Kolan.Repositories
                 .ExecuteWithoutResultsAsync();
         }
 
-        public async Task<bool> ValidatePassword(string username, string password)
+        public async Task<bool> ValidatePasswordAsync(string username, string password)
         {
             var result = await Client.Cypher
                 .Match("(user:User)")
@@ -38,13 +38,24 @@ namespace Kolan.Repositories
             return PBKDF2.Validate(password, result.SingleOrDefault());
         }
 
-        public async Task ChangePassword(string username, string newPassword)
+        public async Task ChangePasswordAsync(string username, string newPassword)
         {
             await Client.Cypher
                 .Match("(user:User)")
                 .Where((User user) => user.Username == username)
                 .Set("user.password = {password}")
                 .WithParam("password", PBKDF2.Hash(newPassword))
+                .ExecuteWithoutResultsAsync();
+        }
+
+        public async Task DeleteAsync(string username)
+        {
+            await Client.Cypher
+                .Match("path=(user:User)-[:CHILD_GROUP|CHILD_BOARD|NEXT]->(n1)-[:CHILD_GROUP|CHILD_BOARD|NEXT*0..]->(n2)")
+                .Where((User user) => user.Username == username)
+                .With("relationships(path) as rels, n1, n2, user")
+                .Unwind("rels", "rel")
+                .Delete("rel, n1, n2, user")
                 .ExecuteWithoutResultsAsync();
         }
     }

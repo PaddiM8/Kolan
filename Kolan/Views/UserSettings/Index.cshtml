@@ -35,10 +35,17 @@
 
             <h3>Appearance</h3>
             <label>Theme: </label><drop-down id="themeSelect"></drop-down>
+
+            <h3>Remove Account</h3>
+            <button id="removeUserButton">Remove</button>
         </main>
         <script>
             const tempData = {
                 message: '@TempData["message"]'
+            };
+
+            const viewData = {
+                username: '@ViewData["username"]'
             }
         </script>
     </body>

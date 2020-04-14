@@ -38,7 +38,7 @@ namespace Kolan.Controllers
         public async Task<IActionResult> Login(LoginViewModel model)
         {
             // Validate password
-            if (await _uow.Users.ValidatePassword(model.Username, model.Password) == false)
+            if (await _uow.Users.ValidatePasswordAsync(model.Username, model.Password) == false)
             {
                 ModelState.AddModelError("Password", "Incorrect password.");
                 return View("Index", model);

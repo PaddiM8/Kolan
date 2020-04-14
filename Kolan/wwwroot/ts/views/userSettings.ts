@@ -5,9 +5,12 @@ import { ToastType } from "../enums/toastType";
 import { themes } from "../themes/themes";
 import { ThemeManager } from "../themes/themeManager";
 import { PasswordDialog } from "../dialogs/passwordDialog";
+import { ApiRequester } from "../communication/apiRequester";
+import { RequestType } from "../enums/requestType";
 
 window.addEventListener("load", () => new UserSettings());
 declare const tempData;
+declare const viewData;
 
 class UserSettings extends View {
     constructor() {
@@ -26,6 +29,20 @@ class UserSettings extends View {
             const dropdown = e.target as DropDown;
             ThemeManager.setTheme(dropdown.value);
             location.reload();
+        });
+
+        // Remove user
+        const removeUserButton = document.getElementById("removeUserButton");
+        removeUserButton.addEventListener("click", () => {
+            const dialog = new PasswordDialog("Confirm password to delete (this will remove ALL your boards)", "Delete");
+            document.body.appendChild(dialog);
+            dialog.shown = true;
+
+            dialog.addEventListener("submitDialog", (e: CustomEvent) => {
+                ApiRequester.send("Users", viewData.username, RequestType.Delete, {
+                    password: e.detail.output["password"]
+                }).then(() => location.href = "/Logout");
+            });
         });
     }
 }

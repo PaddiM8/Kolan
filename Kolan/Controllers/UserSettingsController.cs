@@ -6,6 +6,7 @@ using Kolan.Repositories;
 using Kolan.Controllers.Api;
 using System.Threading.Tasks;
 using System;
+
 namespace Kolan.Controllers
 {
     public class UserSettingsController : Controller
@@ -35,7 +36,7 @@ namespace Kolan.Controllers
             if (!ModelState.IsValid) return View("Index", model);
 
             // Change the password
-            var userController = new UserController(_uow);
+            var userController = new UsersController(_uow);
             IActionResult result = await userController.ChangePassword(User.Identity.Name, model);
 
             // Check for failure

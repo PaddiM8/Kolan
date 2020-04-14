@@ -100,11 +100,11 @@ export class DialogBox extends LitElement {
      * When the submit button in the dialog is clicked. Fires the event, hides and clears the dialog
      */
     protected submitHandler(): void {
-        let formData = this.getFormData();
-
         // Fire event
         this.dispatchEvent(new CustomEvent("submitDialog", {
-            detail: { output: formData["inputValues"] }
+            detail: {
+                output: this.getFormData()
+            }
         }));
 
         this.hide();
@@ -218,6 +218,10 @@ export class DialogBox extends LitElement {
                 return html`${label}
                             <label for="${name}" class="error"></label>
                             <input type="text" name="${name}" placeholder="${placeholder}" ?disabled=${optional} /><br />`;
+            case InputType.Password:
+                return html`${label}
+                            <label for="${name}" class="error"></label>
+                            <input type="password" name="${name}" placeholder="${placeholder}" ?disabled=${optional} /><br />`;
             case InputType.TextArea:
                 this.enterToSubmit = false;
 

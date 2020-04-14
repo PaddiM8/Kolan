@@ -24,8 +24,8 @@ namespace Kolan.Tests
         public async Task Setup()
         {
             new Database().Setup();
-            await new UserController(_uow).Create(_username1, "pass1");
-            await new UserController(_uow).Create(_username2, "pass2");
+            await new UsersController(_uow).Create(_username1, "pass1");
+            await new UsersController(_uow).Create(_username2, "pass2");
         }
 
         [TearDown]

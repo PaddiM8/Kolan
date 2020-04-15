@@ -119,6 +119,8 @@ namespace Kolan.Repositories
                 .Set("user.boardCount = user.boardCount + 1")
                 .ExecuteWithoutResultsAsync();
 
+            await SetupAsync(id);
+
             return id;
         }
 

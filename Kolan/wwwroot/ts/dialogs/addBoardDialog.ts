@@ -27,14 +27,15 @@ export class AddBoardDialog extends DialogBox {
     submitHandler(): void {
         const board = this.getFormData();
         ApiRequester.send("Boards", "", RequestType.Post, board).then((response) => {
+            const output = JSON.parse(response);
             this.dispatchEvent(new CustomEvent("submitDialog", {
                 detail: {
                     input: board,
-                    output: JSON.parse(response)
+                    output: output
                 }
             }));
 
-            this.hide();
+            location.href = `/Board/${output["id"]}`;
         }).catch(err => {
             this.showErrors(err.response);
         });

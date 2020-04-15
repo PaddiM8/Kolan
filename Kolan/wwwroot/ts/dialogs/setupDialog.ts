@@ -29,4 +29,8 @@ export class SetupDialog extends DialogBox {
 
         this.hide();
     }
+
+    cancelHandler(): void {
+        history.back();
+    }
 }

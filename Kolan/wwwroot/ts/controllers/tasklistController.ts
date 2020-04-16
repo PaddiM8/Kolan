@@ -74,9 +74,7 @@ export class TasklistController {
         item.dataset.id = task.id;
         item.dataset.description = task.description ? task.description : "";
         item.dataset.deadline = task.deadline.toString();
-        task.name = ContentFormatter.format(task.name);
-        task.description = ContentFormatter.formatWithMarkdown(task.description);
-        task.assignee = ContentFormatter.format(task.assignee);
+        task.description = ContentFormatter.markdown(task.description);
 
         item.insertAdjacentHTML("afterbegin", `
         <span class="icon icon-clock top-left overdue-icon overlay-button"
@@ -94,7 +92,7 @@ export class TasklistController {
             <span class="icon icon-trash bottom-right delete overlay-button"
                   role="button">
                   </span>
-            <span class="deadline">${task.deadline == 0 ? "" : ContentFormatter.formatDate(task.deadline)}</span>
+            <span class="deadline">${task.deadline == 0 ? "" : ContentFormatter.date(task.deadline)}</span>
          </div>
 
          <span class="assignee">${task.assignee}</span>

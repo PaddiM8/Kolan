@@ -5,6 +5,7 @@ import { IHub } from "./IHub";
 import { RequestParameter } from "./requestParameter";
 import { ToastController } from "../controllers/toastController";
 import { ToastType } from "../enums/toastType";
+import { ContentFormatter } from "../processing/contentFormatter";
 
 /**
  * Manages the websocket connection and acts on responses.
@@ -50,12 +51,21 @@ export class BoardHub implements IHub {
         this.connection.onreconnected(() => this.onConnected());
     }
 
-    public addTask(task: object, boardId: string) {
-        return this.connection.invoke("addBoard", this.boardId, task, boardId);
+    public addTask(task: ITask, underTask: string) {
+        return this.connection.invoke(
+            "addBoard",
+            this.boardId,
+            ContentFormatter.object<ITask>(task, ContentFormatter.preBackend),
+            underTask
+        );
     }
 
-    public editTask(task: object) {
-        return this.connection.invoke("editBoard", this.boardId, task);
+    public editTask(task: ITask) {
+        return this.connection.invoke(
+            "editBoard",
+            this.boardId,
+            ContentFormatter.object<ITask>(task, ContentFormatter.preBackend, ["id"])
+        );
     }
 
     public moveTask(taskId: string, targetId: string): void {
@@ -73,7 +83,10 @@ export class BoardHub implements IHub {
     }
 
     private onReceiveNewBoard(board: ITask, groupId: string): void {
-        Board.tasklistControllers[groupId].addTask(board);
+
+        Board.tasklistControllers[groupId].addTask(
+            ContentFormatter.object<ITask>(board, ContentFormatter.postBackend, ["id"])
+        );
     }
 
     private onMoveBoard(boardId: string, targetId: string): void {
@@ -87,7 +100,9 @@ export class BoardHub implements IHub {
         const board = document.querySelector(`#tasklists [data-id="${newBoardContent.id}"]`);
         const tasklistId = board.parentElement.dataset.id;
 
-        Board.tasklistControllers[tasklistId].editTask(newBoardContent);
+        Board.tasklistControllers[tasklistId].editTask(
+            ContentFormatter.object<ITask>(newBoardContent, ContentFormatter.postBackend, ["id"])
+        );
     }
 
     private onDeleteBoard(boardId: string): void {

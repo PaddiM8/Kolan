@@ -5,6 +5,7 @@ import { BoardHub } from "../communication/boardHub";
 import { ITask } from "../models/ITask";
 import { Board } from "../views/board";
 import { IHub } from "../communication/IHub";
+import { ContentFormatter } from "../processing/contentFormatter";
 
 declare const viewData;
 
@@ -76,7 +77,10 @@ export class AddTaskDialog extends DialogBox {
     }
 
     submitHandler(): void {
-        const data = this.getFormData();
+        let data = this.getFormData();
+        const onTop: boolean = data["onTop"];
+        delete data["onTop"];
+
         Board.boardHub.addTask(data as ITask, this.groupId).then(x => {
             if (x.statusCode != 200) {
                 this.showErrors(x.value);
@@ -84,7 +88,7 @@ export class AddTaskDialog extends DialogBox {
             }
 
             // Move the task to the top of the group if that option is checked.
-            if (data["onTop"]) {
+            if (onTop) {
                 Board.boardHub.moveTask(x.value["id"], this.groupId);
             }
 

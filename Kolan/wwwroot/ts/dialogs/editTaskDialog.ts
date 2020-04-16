@@ -3,6 +3,7 @@ import { LitElement, property, customElement } from "lit-element";
 import { InputType } from "../enums/inputType";
 import { BoardHub } from "../communication/boardHub";
 import { Board } from "../views/board";
+import { ITask } from "../models/ITask";
 
 declare const viewData;
 
@@ -72,7 +73,7 @@ export class EditTaskDialog extends DialogBox {
         let task = this.getFormData();
         task["id"] = this.boardId;
 
-        Board.boardHub.editTask(task).then(x => {
+        Board.boardHub.editTask(task as ITask).then(x => {
             if (x.statusCode != 200) {
                 this.showErrors(x.value);
             } else {

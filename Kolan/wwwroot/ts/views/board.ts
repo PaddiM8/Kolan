@@ -13,6 +13,7 @@ import { ToastNotif } from "../components/toastNotif";
 import { ToastController } from "../controllers/toastController";
 import { IBoard } from "../models/IBoard";
 import { PermissionLevel } from "../enums/permissionLevel";
+import { ContentFormatter } from "../processing/contentFormatter";
 
 // Dialogs
 import { AddTaskDialog } from "../dialogs/addTaskDialog";
@@ -274,8 +275,12 @@ export class Board extends View {
             for (const groupObject of boardContent.groups) {
                 this.addGroup(groupObject.group);
 
-                for (const board of groupObject.boards)
-                    this.addTask(groupObject.group.id, board);
+                for (const board of groupObject.boards) {
+                    this.addTask(
+                        groupObject.group.id,
+                        ContentFormatter.object<ITask>(board, ContentFormatter.postBackend, ["id"])
+                    );
+                }
             }
 
             Board.content = boardContent.board;

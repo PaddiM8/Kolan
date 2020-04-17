@@ -3,7 +3,6 @@ import { DialogBox } from "../components/dialogBox"
 import { InputList } from "../components/inputList"
 import { TasklistController } from "../controllers/tasklistController";
 import { ApiRequester } from "../communication/apiRequester";
-import { RequestParameter } from "../communication/requestParameter"
 import { BoardHub } from "../communication/boardHub";
 import { ITask } from "../models/ITask";
 import { IGroup } from "../models/IGroup";
@@ -37,12 +36,14 @@ export class Board extends View {
     public static tasklistControllers = {};
     public static viewData;
     public static pageReloadInProgress = false;
-    public static boardHub: BoardHub = new BoardHub();
+    public static boardHub: BoardHub;
     private currentTasklistId: string;
     private previousTasklist: HTMLElement;
 
     constructor() {
         super();
+
+        Board.boardHub = new BoardHub();
 
         Board.viewData = viewData;
 
@@ -245,7 +246,6 @@ export class Board extends View {
      */
     private loadBoard(): void {
         const boardNameElement = document.getElementById("boardName");
-
         // Get board content
         ApiRequester.send("Boards", Board.viewData.id, RequestType.Get).then(result => {
             const boardContent = JSON.parse(result as string);
@@ -275,12 +275,17 @@ export class Board extends View {
             for (const groupObject of boardContent.groups) {
                 this.addGroup(groupObject.group);
 
+                let formattedTaskPromises: Promise<ITask>[] = [];
                 for (const board of groupObject.boards) {
-                    this.addTask(
-                        groupObject.group.id,
-                        ContentFormatter.object<ITask>(board, ContentFormatter.postBackend, ["id"])
-                    );
+                    formattedTaskPromises.push(ContentFormatter.board(board, ContentFormatter.postBackend));
                 }
+
+                Promise.all(formattedTaskPromises).then(formattedTasks => {
+                    formattedTasks.forEach(formattedTask => this.addTask(
+                            groupObject.group.id,
+                            formattedTask
+                        ));
+                });
             }
 
             Board.content = boardContent.board;

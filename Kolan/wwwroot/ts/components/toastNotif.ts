@@ -30,7 +30,6 @@ export class ToastNotif extends LitElement {
                 z-index: 999999;
             }
 
-
             :host > div {
                 width: 100%;
                 height: 100%;

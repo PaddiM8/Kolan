@@ -1,10 +1,10 @@
-declare const viewData;
-
 import { ApiRequester } from "../communication/apiRequester";
 import { RequestParameter } from "../communication/requestParameter";
 import { IBoard } from "../models/IBoard";
 import { RequestType } from "../enums/requestType";
 import { DraggableItem } from "../components/draggableItem";
+
+declare const viewData;
 
 /**
  * Controller to add/remove/edit/etc. items in a board list.

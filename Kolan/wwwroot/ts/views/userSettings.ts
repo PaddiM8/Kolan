@@ -9,8 +9,8 @@ import { ApiRequester } from "../communication/apiRequester";
 import { RequestType } from "../enums/requestType";
 
 window.addEventListener("load", () => new UserSettings());
-declare const tempData;
 declare const viewData;
+declare const tempData;
 
 class UserSettings extends View {
     constructor() {

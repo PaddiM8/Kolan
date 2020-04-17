@@ -41,6 +41,7 @@
     "@microsoft/signalr": "^3.1.0",
     "@types/node": "^12.12.14",
     "byte-base64": "^1.0.0",
+    "dexie": "^2.0.4",
     "dompurify": "^2.0.7",
     "lit-element": "^2.2.1",
     "markdown-it": "^10.0.0",

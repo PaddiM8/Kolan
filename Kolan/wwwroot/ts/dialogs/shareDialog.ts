@@ -9,7 +9,6 @@ import { ToastType } from "../enums/toastType";
 import { Board } from "../views/board";
 import { PermissionLevel } from "../enums/permissionLevel";
 
-declare const viewData;
 
 @customElement("share-dialog")
 export class ShareDialog extends DialogBox {
@@ -45,7 +44,7 @@ export class ShareDialog extends DialogBox {
 
     submitHandler(): void {
         const isPublic = this.getFormData()["public"];
-        ApiRequester.send("Boards", `${viewData.id}/ChangePublicity`, RequestType.Post, {
+        ApiRequester.send("Boards", `${Board.id}/ChangePublicity`, RequestType.Post, {
             publicity: isPublic
         });
 
@@ -55,7 +54,7 @@ export class ShareDialog extends DialogBox {
     }
 
     private onUserAdded(e): void {
-        ApiRequester.send("Boards", `${viewData.id}/Users`, RequestType.Post, {
+        ApiRequester.send("Boards", `${Board.id}/Users`, RequestType.Post, {
             username: e.detail["value"]
         }).then(() => {
             Board.collaborators.push(e.detail["value"])
@@ -67,7 +66,7 @@ export class ShareDialog extends DialogBox {
     }
 
     private onUserRemoved(e): void {
-        ApiRequester.send("Boards", `${viewData.id}/Users`, RequestType.Delete, {
+        ApiRequester.send("Boards", `${Board.id}/Users`, RequestType.Delete, {
             username: e.detail["item"].name
         }).then(() => {
             ToastController.new("Collaborator removed", ToastType.Info);

@@ -28,8 +28,9 @@ declare const viewData;
  * In charge of controlling the "Board" page.
  */
 export class Board extends View {
+    public static id: string = viewData.id;
     public static content: IBoard;
-    public static parentId: string;
+    public static ancestors: { id: string, name: string }[];
     public static collaborators: string[];
     public static permissionLevel: PermissionLevel;
     public static dialogs;
@@ -173,7 +174,7 @@ export class Board extends View {
     }
 
     private onUserAdded(username: string, inputList: InputList): void {
-        ApiRequester.send("Boards", `${Board.viewData.id}/Users`, RequestType.Post, {
+        ApiRequester.send("Boards", `${Board.id}/Users`, RequestType.Post, {
             username: username
         })
         .then(() => {
@@ -186,7 +187,7 @@ export class Board extends View {
     }
 
     private onUserRemoved(username: string): void {
-        ApiRequester.send("Boards", `${Board.viewData.id}/Users`, RequestType.Delete, {
+        ApiRequester.send("Boards", `${Board.id}/Users`, RequestType.Delete, {
             username: username
         });
     }
@@ -247,7 +248,7 @@ export class Board extends View {
     private loadBoard(): void {
         const boardNameElement = document.getElementById("boardName");
         // Get board content
-        ApiRequester.send("Boards", Board.viewData.id, RequestType.Get).then(result => {
+        ApiRequester.send("Boards", Board.id, RequestType.Get).then(result => {
             const boardContent = JSON.parse(result as string);
 
             // If the request returns nothing, the board hasn't been set up yet. Display the setup dialog.
@@ -264,6 +265,9 @@ export class Board extends View {
             // Get permission level
             Board.permissionLevel = boardContent.userAccess as PermissionLevel;
 
+            // Save the ancestors
+            Board.ancestors = boardContent.ancestors;
+
             // Set title on the client side, both on the board page and in the document title.
             this.setTitle(boardContent.board.name, boardContent.ancestors);
 
@@ -277,6 +281,8 @@ export class Board extends View {
 
                 let formattedTaskPromises: Promise<ITask>[] = [];
                 for (const board of groupObject.boards) {
+                    // Format the boards (eg. decrypt if needed), and then save the promises returned in an array
+                    // They will then be unwrapped at the same time, and added to the board *in order*
                     formattedTaskPromises.push(ContentFormatter.board(board, ContentFormatter.postBackend));
                 }
 
@@ -291,12 +297,12 @@ export class Board extends View {
             Board.content = boardContent.board;
 
             // Save the parent board id in a variable for easy access, if the board has a parent
-            if (boardContent.ancestors && boardContent.ancestors.length > 0)
-                Board.parentId = boardContent.ancestors[0]["id"];
+            //if (boardContent.ancestors && boardContent.ancestors.length > 0)
+            //    Board.parentId = boardContent.ancestors[0]["id"];
 
             if (Board.permissionLevel >= PermissionLevel.Edit) {
                 // Connect to SignalR
-                    Board.boardHub.join(Board.viewData.id);
+                    Board.boardHub.join(Board.id);
             } else {
                 // Remove header icons
                 const headerIcons = document.querySelector("header .right");
@@ -304,7 +310,7 @@ export class Board extends View {
             }
 
             // Get collaborators
-            ApiRequester.send("Boards", `${viewData.id}/Users`, RequestType.Get)
+            ApiRequester.send("Boards", `${Board.id}/Users`, RequestType.Get)
             .then(response => {
                 Board.collaborators = JSON.parse(response as string);
             });

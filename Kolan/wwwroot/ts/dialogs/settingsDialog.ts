@@ -60,8 +60,8 @@ export class SettingsDialog extends DialogBox {
             Board.content.description = formData["description"];
 
             // Board.parentId is empty if there is no parent. The backend will understand this.
-            ApiRequester.send("Boards", `${viewData.id}`, RequestType.Put, {
-                parentId: Board.parentId,
+            ApiRequester.send("Boards", `${Board.id}`, RequestType.Put, {
+                parentId: Board.ancestors[-1].id,
                 newBoardContent: JSON.stringify(Board.content)
             }).then(x => {
                 location.reload();
@@ -72,7 +72,7 @@ export class SettingsDialog extends DialogBox {
 
         // Send a request to change the group order only if it has been changed.
         if (this.itemHasBeenMoved) {
-            ApiRequester.send("Boards", `${viewData.id}/ChangeGroupOrder`, RequestType.Post, {
+            ApiRequester.send("Boards", `${Board.id}/ChangeGroupOrder`, RequestType.Post, {
                 groupIds: JSON.stringify(this.list.items.map(x => x.id))
             })
             .then(() => Board.boardHub.requestReload().then(() => location.reload())); // It won't automatically reload since the dialog is open
@@ -85,7 +85,7 @@ export class SettingsDialog extends DialogBox {
         // Change delete button to leave button if the board isn't owned by the user.
         const deleteButton = this.shadowRoot.querySelector(".deleteBoard");
         if (Board.permissionLevel != PermissionLevel.All) {
-            if (Board.parentId) {
+            if (Board.ancestors[-1].id) {
                 deleteButton.previousElementSibling.remove();
                 deleteButton.remove();
             } else {
@@ -96,7 +96,6 @@ export class SettingsDialog extends DialogBox {
         } else {
             deleteButton.addEventListener("click", () => this.deleteBoard());
         }
-
 
         const name = this.shadowRoot.querySelector("[name='name']") as HTMLInputElement;
         const description = this.shadowRoot.querySelector("[name='description']") as HTMLInputElement;
@@ -127,13 +126,14 @@ export class SettingsDialog extends DialogBox {
 
         confirmDialog.addEventListener("submitDialog", () => {
             // If it's not a root board
-            if (Board.parentId) {
-                ApiRequester.send("Boards", Board.parentId, RequestType.Delete, {
-                    boardId: viewData.id
-                }).then(() => location.href = `/Board/${Board.parentId}`);
+            const parentId = Board.ancestors.length > 0 ? Board.ancestors[-1].id : null;
+            if (Board.ancestors.length > 0) {
+                ApiRequester.send("Boards", parentId, RequestType.Delete, {
+                    boardId: Board.id
+                }).then(() => location.href = `/Board/${parentId}`);
             } else {
                 ApiRequester.send("Boards", "", RequestType.Delete, {
-                    id: viewData.id
+                    id: Board.id
                 }).then(() => location.href = `/`);
             }
 
@@ -142,7 +142,7 @@ export class SettingsDialog extends DialogBox {
     }
 
     private leaveBoard(): void {
-        ApiRequester.send("Boards", `${viewData.id}/Users`, RequestType.Delete, {
+        ApiRequester.send("Boards", `${Board.id}/Users`, RequestType.Delete, {
             username: viewData.username
         }).then(() => {
             location.href = "/";
@@ -151,7 +151,7 @@ export class SettingsDialog extends DialogBox {
 
     private onItemAdded(e): void {
         ApiRequester.send("Groups", "", RequestType.Post, {
-            boardId: viewData.id,
+            boardId: Board.id,
             name: e.detail["value"]
         })
         .then((req) => {
@@ -169,7 +169,7 @@ export class SettingsDialog extends DialogBox {
         }
 
         ApiRequester.send("Groups", `${groupId}`, RequestType.Delete, {
-            boardId: viewData.id
+            boardId: Board.id
         })
         .catch((err) => console.log(err));
     }

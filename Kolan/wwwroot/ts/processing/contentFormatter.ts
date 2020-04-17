@@ -1,6 +1,9 @@
 import { IBoard } from "../models/IBoard";
 import { ITask } from "../models/ITask";
+import { Board } from "../views/board";
+import { PasswordDialog } from "../dialogs/passwordDialog";
 import { Crypto } from "./crypto";
+import Dexie from "dexie";
 
 const MarkdownIt = require("markdown-it")
 const md = new MarkdownIt({ // Doing it the normal way does not work apparently!
@@ -12,17 +15,7 @@ const md = new MarkdownIt({ // Doing it the normal way does not work apparently!
  */
 export class ContentFormatter {
     private static markdownRenderer = md;
-    /*private indexedDB: IDBDatabase;
-
-    constructor() {
-        const request = window.indexedDB.open("crypto", 1);
-
-        request.onupgradeneeded = (e: any) => {
-            console.log("hi");
-            this.indexedDB = e.target.result;
-            e.target.result.createObjectStore("boardCryptoKeys", { keyPath: "boardId" });
-        };
-    }*/
+    private static db: Dexie;
 
     /**
      * Converts markdown to HTML
@@ -78,7 +71,7 @@ export class ContentFormatter {
      * Formats the string fields of an object using the given function
      */
     public static board(board: ITask, func: Function): Promise<ITask> {
-        return this.getCryptoKey(board.id).then(cryptoKey => {
+        return this.getCryptoKey().then(cryptoKey => {
             let newValuePromises = [];
             let keys = [];
             for (const key in board) {
@@ -86,8 +79,9 @@ export class ContentFormatter {
 
                 const value = board[key];
                 if (typeof value == "string") {
+                    // func returns a promise, save each promise in an array so they can be unwrapped at the same time.
                     newValuePromises.push(func(value, cryptoKey));
-                    keys.push(key);
+                    keys.push(key); // Also save the key of the property that was formatted, to keep track of which promise belongs to which key
                 }
             }
 
@@ -96,32 +90,51 @@ export class ContentFormatter {
 
                 return board;
             })
-        }).catch(err => { console.log(err); return undefined; });
+        });
     }
 
-    private static getCryptoKey(id: string): Promise<CryptoKey> {
-        return Crypto.createKey("password", "salt") as Promise<CryptoKey>;
-        /*const key = localStorage.getItem("key_" + id);
-        if (!key) return Crypto.createKey("password", "salt") as Promise<CryptoKey>;
-
-        return new Promise((resolve, reject) => {
-            resolve(JSON.parse(key));
-        });*/
-        /*const objectStore = this.indexedDB.transaction("cryptoKeys", "readwrite")
-            .objectStore("cryptoKeys");
-        const keyObj = objectStore.get(id);
-
-        if (!keyObj) {
-            const key = Crypto.createKey("password", "x");
-            objectStore.add({
-                id: id,
-                cryptoKey: key
-            })
-
-            return key;
+    /**
+    * Gets a board's cryptokey using the root board's id
+    * If the key is not saved in the browser, the user will be prompted to enter the board password.
+    */
+    private static getCryptoKey(): Promise<any> {
+        // Open database if it isn't already open.
+        if (!ContentFormatter.db) {
+            ContentFormatter.db = new Dexie("crypto");
+            ContentFormatter.db.version(1).stores({
+                cryptokeys: "&id"
+            });
         }
 
-        return keyObj.result.cryptoKey;*/
+        const db = ContentFormatter.db;
+        const id = Board.ancestors.length > 0 ? Board.ancestors[0].id : Board.id;
+
+        // Return the cryptokey if it exists in IndexDB, otherwise create one and add it to the db.
+        return db.table("cryptokeys").get(id).then(result => {
+            return result.key;
+        }).catch(() => {
+            // Prompt user for password
+            const passwordDialog = new PasswordDialog("Enter board password", "Done");
+            passwordDialog.shown = true;
+            document.body.appendChild(passwordDialog);
+
+            // Creating a promise here will make it wait for the submitDialog event to fire.
+            return new Promise((resolve, reject) => {
+                passwordDialog.addEventListener("submitDialog", (e: CustomEvent) => {
+                    // Create cryptokey using the password provided by the user
+                    Crypto.createKey(e.detail.output["password"], id).then(key => {
+                        db.table("cryptokeys").put({
+                            id: id,
+                            key: key
+                        });
+
+                        passwordDialog.remove();
+
+                        resolve(key);
+                    });
+                });
+            });
+        });
     }
 
     private static toBase64(input: ArrayBuffer): string {

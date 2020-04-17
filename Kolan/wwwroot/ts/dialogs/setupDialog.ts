@@ -4,8 +4,7 @@ import { InputType } from "../enums/inputType";
 import { BoardHub } from "../communication/boardHub";
 import { ApiRequester } from "../communication/apiRequester";
 import { RequestType } from "../enums/requestType";
-
-declare const viewData;
+import { Board } from "../views/board";
 
 @customElement("setup-dialog")
 export class SetupDialog extends DialogBox {
@@ -16,7 +15,7 @@ export class SetupDialog extends DialogBox {
     }
 
     submitHandler(): void {
-        const result = ApiRequester.send("Boards", `${viewData.id}/Setup`, RequestType.Post)
+        const result = ApiRequester.send("Boards", `${Board.id}/Setup`, RequestType.Post)
         .then((response) => {
             this.dispatchEvent(new CustomEvent("submitDialog", {
                 detail: {
@@ -25,7 +24,6 @@ export class SetupDialog extends DialogBox {
             }));
         })
         .catch((err) => console.log(err));
-
 
         this.hide();
     }

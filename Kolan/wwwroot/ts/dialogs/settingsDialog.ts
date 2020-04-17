@@ -122,7 +122,7 @@ export class SettingsDialog extends DialogBox {
     private deleteBoard(): void {
         const confirmDialog = new ConfirmDialog("Are you sure you want to delete the board?", "Yes");
         document.body.appendChild(confirmDialog);
-        confirmDialog.shown = true;
+        //confirmDialog.shown = true;
 
         confirmDialog.addEventListener("submitDialog", () => {
             // If it's not a root board
@@ -137,7 +137,7 @@ export class SettingsDialog extends DialogBox {
                 }).then(() => location.href = `/`);
             }
 
-            confirmDialog.remove();
+            //confirmDialog.remove();
         });
     }
 

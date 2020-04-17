@@ -115,7 +115,6 @@ export class ContentFormatter {
         }).catch(() => {
             // Prompt user for password
             const passwordDialog = new PasswordDialog("Enter board password", "Done");
-            passwordDialog.shown = true;
             document.body.appendChild(passwordDialog);
 
             // Creating a promise here will make it wait for the submitDialog event to fire.
@@ -127,8 +126,6 @@ export class ContentFormatter {
                             id: id,
                             key: key
                         });
-
-                        passwordDialog.remove();
 
                         resolve(key);
                     });

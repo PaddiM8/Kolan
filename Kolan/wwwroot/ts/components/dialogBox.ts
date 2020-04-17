@@ -1,10 +1,11 @@
 import { LitElement, html, css, property, customElement, TemplateResult } from "lit-element";
 import { ApiRequester } from "../communication/apiRequester";
 import { RequestParameter } from "../communication/requestParameter";
-import { InputType } from "../enums/inputType"
-import { InputList } from "./inputList"
-import { ThemeManager } from "../themes/themeManager"
-import { IModelError } from "../models/IModelError"
+import { InputType } from "../enums/inputType";
+import { DialogType } from "../enums/dialogType";
+import { InputList } from "./inputList";
+import { ThemeManager } from "../themes/themeManager";
+import { IModelError } from "../models/IModelError";
 
 /**
  * Dialog element that takes an IDialogTemplate as input and returns an object with the values as an event.
@@ -23,11 +24,13 @@ export class DialogBox extends LitElement {
     }
 
     render() {
+        const dialogTypeClass = this.options.dialogType == DialogType.Disposable ? "disposable": "";
+
         const componentHtml = html`
          <link rel="stylesheet" type="text/css" href="../css/components/dialog.css">
          <link rel="stylesheet" type="text/css" href="../css/themes/${ThemeManager.getTheme()}.css">
-         <div class="dialogBackground"></div>
-         <section class="dialog">
+         <div class="dialogBackground ${dialogTypeClass}"></div>
+         <section class="dialog ${dialogTypeClass}">
             <h2>${html`${this.options.title}`}</h2>
             <div id="inputs">
                 ${this.fields.map(x => html`${this.getComponentHtml(x.inputType, x.key, x.value, x.title, x.placeholder, x.optional)}`)}
@@ -56,6 +59,9 @@ export class DialogBox extends LitElement {
     }
 
     updated() {
+        // Always show disposable dialogs
+        if (this.options.dialogType == DialogType.Disposable) this.shown = true;
+
         this.style.display = this.shown ? "block" : "none";
 
         // Fire event
@@ -199,6 +205,8 @@ export class DialogBox extends LitElement {
 
         this.dispatchEvent(new CustomEvent("hideDialog"));
         this.shown = false;
+
+        if (this.options.dialogType == DialogType.Disposable) this.remove();
     }
 
     /**

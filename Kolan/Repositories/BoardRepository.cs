@@ -147,6 +147,8 @@ namespace Kolan.Repositories
                 .Create("(previous)-[:NEXT]->(board:Board {newBoard})-[:NEXT]->(next)")
                 .WithParam("newBoard", entity)
                 .Create("(parent)-[:CHILD_BOARD]->(board)")
+                .Set("board.encrypted = parent.encrypted")
+                .Set("board.encryptionKey = parent.encryptionKey")
                 .Delete("oldRel")
                 .ExecuteWithoutResultsAsync();
 

@@ -33,8 +33,6 @@ namespace Kolan.Filters
 
             string username = context.HttpContext.User.Identity.Name;
 
-            Console.WriteLine("Expects: " + this.PermissionLevel);
-            Console.WriteLine("Got: " + await _uow.Boards.GetUserPermissionLevel(boardId, username));
             if (await _uow.Boards.GetUserPermissionLevel(boardId, username) < this.PermissionLevel)
             {
                 context.Result = new UnauthorizedResult();

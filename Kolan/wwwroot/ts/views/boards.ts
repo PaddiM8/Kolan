@@ -6,6 +6,7 @@ import { ApiRequester } from "../communication/apiRequester";
 import { IBoard } from "../models/IBoard";
 import { RequestType } from "../enums/requestType";
 import { AddBoardDialog } from "../dialogs/addBoardDialog";
+import { ContentFormatter } from "../processing/contentFormatter";
 
 window.addEventListener("load", () => new Boards());
 
@@ -19,15 +20,6 @@ class Boards extends View {
         // Prepare dialog
         let addDialog = new AddBoardDialog();
         document.body.appendChild(addDialog);
-        addDialog.addEventListener("submitDialog", (e: CustomEvent) => {
-            const board: IBoard = {
-                id: e.detail.output.id,
-                name: e.detail.input.name,
-                description: e.detail.input.description
-            };
-
-            this.addBoardItem(board);
-        });
 
         // Load boards
         this.loadBoards();
@@ -55,8 +47,10 @@ class Boards extends View {
 
         ApiRequester.send("Boards", "", RequestType.Get).then(result => {
             const boards = JSON.parse(result as string);
-            for (const item of boards) {
-                boardListController.addBoardToBottom(item);
+            for (let board of boards) {
+                ContentFormatter.boardPostBackend(board, board.id).then(formattedBoard => {
+                    boardListController.addBoardToBottom(formattedBoard);
+                });
             }
         }).catch((err) => console.log(err));
     }

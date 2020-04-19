@@ -1,9 +1,8 @@
 import { IBoard } from "../models/IBoard";
 import { ITask } from "../models/ITask";
-import { Board } from "../views/board";
 import { PasswordDialog } from "../dialogs/passwordDialog";
 import { Crypto } from "./crypto";
-import Dexie from "dexie";
+import { KeyStorer } from "./keyStorer";
 
 const MarkdownIt = require("markdown-it")
 const md = new MarkdownIt({ // Doing it the normal way does not work apparently!
@@ -15,7 +14,7 @@ const md = new MarkdownIt({ // Doing it the normal way does not work apparently!
  */
 export class ContentFormatter {
     private static markdownRenderer = md;
-    private static db: Dexie;
+    private static keyStorer = new KeyStorer();
 
     /**
      * Converts markdown to HTML
@@ -70,71 +69,72 @@ export class ContentFormatter {
     /**
      * Formats the string fields of an object using the given function
      */
-    public static board(board: ITask, func: Function): Promise<ITask> {
-        return this.getCryptoKey().then(cryptoKey => {
-            let newValuePromises = [];
-            let keys = [];
-            for (const key in board) {
-                if (key == "id") continue;
+    /*public static board(board: IBoard | ITask, func: Function, rootId: string = null): Promise<IBoard | ITask> {
+        if (board.encrypted) {
+            return Crypto.unwrapKey(board.encryptionKey).then(cryptoKey => {
+                return this.boardFields(board, func, cryptoKey);
+            });
+        }
 
-                const value = board[key];
-                if (typeof value == "string") {
-                    // func returns a promise, save each promise in an array so they can be unwrapped at the same time.
-                    newValuePromises.push(func(value, cryptoKey));
-                    keys.push(key); // Also save the key of the property that was formatted, to keep track of which promise belongs to which key
-                }
+        // If no cryptokey is provided, it will not attempt to encrypt/decrypt it.
+        return this.boardFields(board, func, null);
+    }*/
+
+    public static boardPreBackend(board: IBoard | ITask, rootId: string = null): Promise<IBoard | ITask> {
+        if (board.encrypted) {
+            return Crypto.unwrapKey(board.encryptionKey).then(cryptoKey => {
+                return this.boardFields(board, this.preBackend, cryptoKey);
+            });
+        }
+
+        return this.boardFields(board, this.preBackend, null);
+    }
+
+    public static boardPostBackend(board: IBoard | ITask, rootId: string = null): Promise<IBoard | ITask> {
+        if (board.encrypted) {
+            return Crypto.unwrapKey(board.encryptionKey).then(cryptoKey => {
+                return this.boardFields(board, this.postBackend, cryptoKey);
+            });
+        }
+
+        return this.boardFields(board, this.postBackend, null);
+    }
+
+    private static boardFields(inputBoard: IBoard | ITask, func: Function, cryptoKey?: CryptoKey): Promise<IBoard | ITask> {
+        let board = Object.assign({}, inputBoard); // Clone the object before editing it
+        let newValuePromises = [];
+        let keys = [];
+
+        for (const key in board) {
+            if (key == "id" || key == "encryptionKey") continue;
+            if (key == "onTop") delete board[key];
+
+            const value = board[key];
+            if (typeof value == "string") {
+                // func returns a promise, save each promise in an array so they can be unwrapped at the same time.
+                newValuePromises.push(func(value, cryptoKey));
+                keys.push(key); // Also save the key of the property that was formatted, to keep track of which promise belongs to which key
             }
+        }
 
-            return Promise.all(newValuePromises).then(newValues => {
-                for (let i = 0; i < newValues.length; i++) board[keys[i]] = newValues[i];
+        return Promise.all(newValuePromises).then(newValues => {
+            for (let i = 0; i < newValues.length; i++) board[keys[i]] = newValues[i];
 
-                return board;
-            })
-        });
+            return board;
+        })
     }
 
     /**
     * Gets a board's cryptokey using the root board's id
     * If the key is not saved in the browser, the user will be prompted to enter the board password.
     */
-    private static getCryptoKey(): Promise<any> {
-        // Open database if it isn't already open.
-        if (!ContentFormatter.db) {
-            ContentFormatter.db = new Dexie("crypto");
-            ContentFormatter.db.version(1).stores({
-                cryptokeys: "&id"
-            });
+    /*private static getCryptoKey(board: IBoard | ITask, id: string): Promise<CryptoKey> {
+        // If the board has an encryption key already, import it so that it can be used
+        if (board.encryptionKey) {
+            return Crypto.importKey(board.encryptionKey);
         }
 
-        const db = ContentFormatter.db;
-        const id = Board.ancestors.length > 0 ? Board.ancestors[0].id : Board.id;
-
-        // Return the cryptokey if it exists in IndexDB, otherwise create one and add it to the db.
-        return db.table("cryptokeys").get(id).then(result => {
-            return result.key;
-        }).catch(() => {
-            // Prompt user for password
-            const passwordDialog = new PasswordDialog("Enter board password", "Done");
-            document.body.appendChild(passwordDialog);
-
-            // Creating a promise here will make it wait for the submitDialog event to fire.
-            return new Promise((resolve, reject) => {
-                passwordDialog.addEventListener("submitDialog", (e: CustomEvent) => {
-                    // Create cryptokey using the password provided by the user
-                    Crypto.createKey(e.detail.output["password"], id).then(key => {
-                        db.table("cryptokeys").put({
-                            id: id,
-                            key: key
-                        });
-
-                        resolve(key);
-                    });
-                });
-            });
-        });
-    }
-
-    private static toBase64(input: ArrayBuffer): string {
-        return btoa(new Uint8Array(input).reduce((data, byte) => data + String.fromCharCode(byte), ''));
-    }
+        // Otherwise generate a new random encryption key that will be used for encrypting everything inside the board
+        return Crypto.createRandomKey(id);
+    }*/
 }

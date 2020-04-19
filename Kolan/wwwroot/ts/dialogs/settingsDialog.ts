@@ -9,6 +9,7 @@ import { RequestType } from "../enums/requestType";
 import { ToastType } from "../enums/toastType";
 import { ToastController } from "../controllers/toastController";
 import { PermissionLevel } from "../enums/permissionLevel";
+import { ContentFormatter } from "../processing/contentFormatter";
 
 declare const viewData;
 
@@ -59,14 +60,17 @@ export class SettingsDialog extends DialogBox {
             Board.content.name = formData["name"];
             Board.content.description = formData["description"];
 
-            // Board.parentId is empty if there is no parent. The backend will understand this.
-            ApiRequester.send("Boards", `${Board.id}`, RequestType.Put, {
-                parentId: Board.ancestors[-1].id,
-                newBoardContent: JSON.stringify(Board.content)
-            }).then(x => {
-                location.reload();
-            }).catch(err => {
-                this.showErrors(JSON.parse(err.response));
+            ContentFormatter.boardPreBackend(Board.content, Board.getRootId()).then(processedBoard => {
+                // parentId is empty if there is no parent. The backend will understand this.
+                const parentId = Board.ancestors.length > 0 ? Board.ancestors[Board.ancestors.length - 1] : Board.id;
+                ApiRequester.send("Boards", Board.id, RequestType.Put, {
+                    parentId: parentId,
+                    newBoardContent: JSON.stringify(processedBoard)
+                }).then(x => {
+                    location.reload();
+                }).catch(err => {
+                    this.showErrors(JSON.parse(err.response));
+                });
             });
         }
 
@@ -122,7 +126,6 @@ export class SettingsDialog extends DialogBox {
     private deleteBoard(): void {
         const confirmDialog = new ConfirmDialog("Are you sure you want to delete the board?", "Yes");
         document.body.appendChild(confirmDialog);
-        //confirmDialog.shown = true;
 
         confirmDialog.addEventListener("submitDialog", () => {
             // If it's not a root board
@@ -136,8 +139,6 @@ export class SettingsDialog extends DialogBox {
                     id: Board.id
                 }).then(() => location.href = `/`);
             }
-
-            //confirmDialog.remove();
         });
     }
 

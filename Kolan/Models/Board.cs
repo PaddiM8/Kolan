@@ -20,6 +20,12 @@ namespace Kolan.Models
         [StringLength(2000, ErrorMessage = "Description may not be more than 2000 characters long.")]
         public string Description { get; set; }
 
+        [JsonProperty("encrypted")]
+        public bool Encrypted { get; set; }
+
+        [JsonProperty("encryptionKey")]
+        public string EncryptionKey { get; set; }
+
         [JsonProperty("shared")]
         public bool Shared { get; set; } = false;
 

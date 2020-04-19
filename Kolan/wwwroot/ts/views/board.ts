@@ -1,4 +1,4 @@
-import { View } from "../views/view"
+import { View } from "./view"
 import { DialogBox } from "../components/dialogBox"
 import { InputList } from "../components/inputList"
 import { TasklistController } from "../controllers/tasklistController";
@@ -13,6 +13,7 @@ import { ToastController } from "../controllers/toastController";
 import { IBoard } from "../models/IBoard";
 import { PermissionLevel } from "../enums/permissionLevel";
 import { ContentFormatter } from "../processing/contentFormatter";
+import { Crypto } from "../processing/crypto";
 
 // Dialogs
 import { AddTaskDialog } from "../dialogs/addTaskDialog";
@@ -118,6 +119,15 @@ export class Board extends View {
     }
 
     /**
+    * Get the id of the root board
+    */
+    public static getRootId(): string {
+        // If the board has ancestors, the the root board id will be the first ancestor's id.
+        // If the board doesn't have ancestors, the board is the root board, and this board's id is the root id.
+        return Board.ancestors.length > 0 ? Board.ancestors[Board.ancestors.length - 1].id : Board.id;
+    }
+
+    /**
      * Add a group to the client side.
      */
     private addGroup(group: IGroup): void {
@@ -213,14 +223,16 @@ export class Board extends View {
     /**
     * Set the page title (with links to ancestors as well)
     */
-    private setTitle(title: string, ancestors: object[]) {
-        document.title = title + " - Kolan";
+    private setTitle(board: IBoard, ancestors: object[]) {
+        document.title = board.name + " - Kolan";
         let html = Board.permissionLevel >= PermissionLevel.Edit
             ? `<a href="/">Boards</a> / `
             : `<a href="/">Kolan</a> / `;
 
         // Ancestors
-        if (ancestors)
+        if (ancestors) {
+            let ids = [];
+            let namePromises = [];
             for (let i = 0; i < ancestors.length; i++) {
                 // If there are a lot of ancestors, hide the middle ones
                 if (ancestors.length >= 5 && i == 1)
@@ -231,13 +243,35 @@ export class Board extends View {
                 }
 
                 const ancestor = ancestors[ancestors.length - i - 1]; // Do backwards for correct order
-                const name = ancestor["name"];
-                const id = ancestor["id"];
-                html += `<a href="./${id}">${name}</a> / `;
+                ids.push(ancestor["id"]);
+
+                if (board.encrypted) {
+                    // Needs to be decrypted
+                    const promise = Crypto.unwrapKey(board.encryptionKey).then(cryptoKey => {
+                        return ContentFormatter.postBackend(ancestor["name"], cryptoKey);
+                    });
+
+                    namePromises.push(promise);
+                } else {
+                    namePromises.push(ContentFormatter.postBackend(ancestor["name"], null));
+                }
             }
 
+            Promise.all(namePromises).then(names => {
+                // Print all the ancestor names in order.
+                for (let i = 0; i < names.length; i++)
+                    html += `<a href="./${ids[i]}">${names[i]}</a> / `;
+
+                // Current board
+                html += `<span>${board.name}</span>`;
+                document.getElementById("title").insertAdjacentHTML("afterbegin", html);
+            });
+
+            return;
+        }
+
         // Current board
-        html += `<span>${title}</span>`;
+        html += `<span>${board.name}</span>`;
 
         document.getElementById("title").insertAdjacentHTML("afterbegin", html);
     }
@@ -249,7 +283,7 @@ export class Board extends View {
         const boardNameElement = document.getElementById("boardName");
         // Get board content
         ApiRequester.send("Boards", Board.id, RequestType.Get).then(result => {
-            const boardContent = JSON.parse(result as string);
+            let boardContent = JSON.parse(result as string);
 
             // If the request returns nothing, the board hasn't been set up yet. Display the setup dialog.
             if (!boardContent.groups) {
@@ -262,60 +296,61 @@ export class Board extends View {
                 return;
             }
 
-            // Get permission level
-            Board.permissionLevel = boardContent.userAccess as PermissionLevel;
-
             // Save the ancestors
             Board.ancestors = boardContent.ancestors;
 
-            // Set title on the client side, both on the board page and in the document title.
-            this.setTitle(boardContent.board.name, boardContent.ancestors);
+            // Get permission level
+            Board.permissionLevel = boardContent.userAccess as PermissionLevel;
 
-            const tasklists = document.getElementById("tasklists");
-            const listHead = document.getElementById("list-head");
-            tasklists.style.gridTemplateColumns = `repeat(${boardContent.groups.length}, 1fr)`;
-            listHead.style.gridTemplateColumns = tasklists.style.gridTemplateColumns;
+            // Process board data post-backend (eg. decrypt)
+            ContentFormatter.boardPostBackend(boardContent.board, Board.getRootId()).then(processedBoard => {
+                boardContent.board = processedBoard;
 
-            for (const groupObject of boardContent.groups) {
-                this.addGroup(groupObject.group);
+                // Set title on the client side, both on the board page and in the document title.
+                this.setTitle(boardContent.board, boardContent.ancestors);
 
-                let formattedTaskPromises: Promise<ITask>[] = [];
-                for (const board of groupObject.boards) {
-                    // Format the boards (eg. decrypt if needed), and then save the promises returned in an array
-                    // They will then be unwrapped at the same time, and added to the board *in order*
-                    formattedTaskPromises.push(ContentFormatter.board(board, ContentFormatter.postBackend));
+                const tasklists = document.getElementById("tasklists");
+                const listHead = document.getElementById("list-head");
+                tasklists.style.gridTemplateColumns = `repeat(${boardContent.groups.length}, 1fr)`;
+                listHead.style.gridTemplateColumns = tasklists.style.gridTemplateColumns;
+
+                for (const groupObject of boardContent.groups) {
+                    this.addGroup(groupObject.group);
+
+                    let formattedTaskPromises: Promise<IBoard | ITask>[] = [];
+                    for (const board of groupObject.boards) {
+                        // Format the boards (eg. decrypt if needed), and then save the promises returned in an array
+                        // They will then be unwrapped at the same time, and added to the board *in order*
+                        formattedTaskPromises.push(ContentFormatter.boardPostBackend(board, Board.getRootId()));
+                    }
+
+                    Promise.all(formattedTaskPromises).then(formattedTasks => {
+                        formattedTasks.forEach(formattedTask => this.addTask(
+                                groupObject.group.id,
+                                formattedTask as ITask
+                            ));
+                    });
                 }
 
-                Promise.all(formattedTaskPromises).then(formattedTasks => {
-                    formattedTasks.forEach(formattedTask => this.addTask(
-                            groupObject.group.id,
-                            formattedTask
-                        ));
+                Board.content = boardContent.board;
+
+                if (Board.permissionLevel >= PermissionLevel.Edit) {
+                    // Connect to SignalR
+                        Board.boardHub.join(Board.id);
+                } else {
+                    // Remove header icons
+                    const headerIcons = document.querySelector("header .right");
+                    headerIcons.parentNode.removeChild(headerIcons);
+                }
+
+                // Get collaborators
+                ApiRequester.send("Boards", `${Board.id}/Users`, RequestType.Get)
+                .then(response => {
+                    Board.collaborators = JSON.parse(response as string);
                 });
-            }
 
-            Board.content = boardContent.board;
-
-            // Save the parent board id in a variable for easy access, if the board has a parent
-            //if (boardContent.ancestors && boardContent.ancestors.length > 0)
-            //    Board.parentId = boardContent.ancestors[0]["id"];
-
-            if (Board.permissionLevel >= PermissionLevel.Edit) {
-                // Connect to SignalR
-                    Board.boardHub.join(Board.id);
-            } else {
-                // Remove header icons
-                const headerIcons = document.querySelector("header .right");
-                headerIcons.parentNode.removeChild(headerIcons);
-            }
-
-            // Get collaborators
-            ApiRequester.send("Boards", `${Board.id}/Users`, RequestType.Get)
-            .then(response => {
-                Board.collaborators = JSON.parse(response as string);
+                ToastController.new("Loaded board", ToastType.Info);
             });
-
-            ToastController.new("Loaded board", ToastType.Info);
         }).catch((req) => {
             if (req.status == 404) this.setTitle("404 - Board does not exist", []);
             else if (req.status == 401) this.setTitle("401 - Unauthorized. Are you logged in?", []);

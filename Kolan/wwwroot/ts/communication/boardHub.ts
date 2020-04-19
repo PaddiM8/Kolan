@@ -52,7 +52,10 @@ export class BoardHub implements IHub {
     }
 
     public addTask(task: ITask, underTask: string) {
-        return ContentFormatter.board(task, ContentFormatter.preBackend).then(formattedTask => {
+        task.encrypted = Board.content.encrypted;
+        task.encryptionKey = Board.content.encryptionKey;
+
+        return ContentFormatter.boardPreBackend(task, Board.getRootId()).then(formattedTask => {
             return this.connection.invoke(
                 "addBoard",
                 this.boardId,
@@ -63,7 +66,7 @@ export class BoardHub implements IHub {
     }
 
     public editTask(task: ITask) {
-        return ContentFormatter.board(task, ContentFormatter.preBackend).then(formattedTask => {
+        return ContentFormatter.boardPreBackend(task, Board.getRootId()).then(formattedTask => {
             return this.connection.invoke(
                 "editBoard",
                 this.boardId,
@@ -87,7 +90,7 @@ export class BoardHub implements IHub {
     }
 
     private onReceiveNewBoard(board: ITask, groupId: string): void {
-        ContentFormatter.board(board, ContentFormatter.postBackend).then(formattedBoard => {
+        ContentFormatter.boardPostBackend(board, Board.getRootId()).then(formattedBoard => {
             Board.tasklistControllers[groupId].addTask(formattedBoard);
         });
     }
@@ -103,7 +106,7 @@ export class BoardHub implements IHub {
         const board = document.querySelector(`#tasklists [data-id="${newBoardContent.id}"]`);
         const tasklistId = board.parentElement.dataset.id;
 
-        ContentFormatter.board(newBoardContent, ContentFormatter.postBackend).then(formattedBoard => {
+        ContentFormatter.boardPostBackend(newBoardContent, Board.getRootId()).then(formattedBoard => {
             Board.tasklistControllers[tasklistId].editTask(formattedBoard);
         });
     }

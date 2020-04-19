@@ -18,6 +18,7 @@ export class DialogBox extends LitElement {
     @property({type: String}) options;
     protected list: InputList;
     private enterToSubmit = true;
+    private submittedAlready = false;
 
     constructor() {
         super();
@@ -35,7 +36,7 @@ export class DialogBox extends LitElement {
             <div id="inputs">
                 ${this.fields.map(x => html`${this.getComponentHtml(x.inputType, x.key, x.value, x.title, x.placeholder, x.optional)}`)}
             </div>
-            <button class="submit" @click="${this.submitHandler}">${html`${this.options.primaryButton}`}</button>
+            <button class="submit" @click="${this.submit}">${html`${this.options.primaryButton}`}</button>
             <button class="cancel secondary" @click="${this.cancelHandler}">Cancel</button>
          </section>`;
 
@@ -62,13 +63,15 @@ export class DialogBox extends LitElement {
         // Always show disposable dialogs
         if (this.options.dialogType == DialogType.Disposable) this.shown = true;
 
-        this.style.display = this.shown ? "block" : "none";
-
         // Fire event
         if (this.shown) {
+            this.submittedAlready = false;
+            this.style.display = "block";
             this.dispatchEvent(new CustomEvent("openDialog"));
             this.onOpen();
             window.scrollTo(0, 0);
+        } else {
+            this.style.display = "none";
         }
     }
 
@@ -100,6 +103,17 @@ export class DialogBox extends LitElement {
                 element["value"] = values[name];
             }
         }
+    }
+
+    /**
+    * Submit the dialog
+    */
+    private submit(): void {
+        // Make sure it can only be submitted once
+        if (this.submittedAlready) return;
+        this.submittedAlready = true;
+
+        this.submitHandler();
     }
 
     /**

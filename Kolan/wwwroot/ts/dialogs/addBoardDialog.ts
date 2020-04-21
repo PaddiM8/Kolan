@@ -8,6 +8,7 @@ import { ContentFormatter } from "../processing/contentFormatter";
 import { ITask } from "../models/ITask";
 import { IBoard } from "../models/IBoard";
 import { Crypto } from "../processing/crypto";
+import { Defaults } from "../defaults";
 
 @customElement("add-board-dialog")
 export class AddBoardDialog extends DialogBox {
@@ -55,8 +56,19 @@ export class AddBoardDialog extends DialogBox {
                             ApiRequester.send("Boards", id, RequestType.Put, {
                                 parentId: null,
                                 newBoardContent: JSON.stringify(encryptedBoard)
-                            }).then(response => {
-                                location.href = `/Board/${id}`;
+                            }).then(() => {
+                                // Prepare for group name encryption
+                                let groupNamePromises = [];
+                                for (const groupName in Defaults.groupNames)
+                                    groupNamePromises.push(ContentFormatter.preBackend(groupName, cryptoKey));
+
+                                // Unwrap the group name promises, and get the encrypted list of group names.
+                                Promise.all(groupNamePromises).then(groupNames => {
+                                    // Setup board
+                                    ApiRequester.send("Boards", `${id}/Setup`, RequestType.Post, {
+                                        groups: JSON.stringify(groupNames)
+                                    }).then(() => location.href = `/Board/${id}`);
+                                })
                             }).catch(err => this.showErrors(JSON.parse(err.response)));
                         });
                     });
@@ -66,7 +78,11 @@ export class AddBoardDialog extends DialogBox {
             // Send http request
             ApiRequester.send("Boards", "", RequestType.Post, board as IBoard).then(response => {
                 const output = JSON.parse(response);
-                location.href = `/Board/${output["id"]}`;
+
+                // Setup board
+                ApiRequester.send("Boards", `${output["id"]}/Setup`, RequestType.Post, {
+                    groups: JSON.stringify(Defaults.groupNames)
+                }).then(() => location.href = `/Board/${output["id"]}`);
             }).catch(err => {
                 this.showErrors(err.response);
             });

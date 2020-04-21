@@ -7,6 +7,7 @@ using Neo4jClient.Cypher;
 using Kolan.Models;
 using System.Runtime.CompilerServices;
 using Kolan.Enums;
+using Newtonsoft.Json;
 
 [assembly: InternalsVisibleTo("Kolan.Tests")]
 namespace Kolan.Repositories
@@ -118,8 +119,6 @@ namespace Kolan.Repositories
                 .With("user")
                 .Set("user.boardCount = user.boardCount + 1")
                 .ExecuteWithoutResultsAsync();
-
-            await SetupAsync(id);
 
             return id;
         }
@@ -277,50 +276,47 @@ namespace Kolan.Repositories
         /// Add board groups
         /// </summary>
         /// <param name="id">Board id</param>
-        public async Task<IEnumerable<Group>> SetupAsync(string id)
+        /// <param name="groupNames">List of names of groups to initialise the board with</param>
+        public async Task<string[]> SetupAsync(string id, string[] groupNames)
         {
-            var result = await Client.Cypher
-                    .Match("(board:Board)")
+            // Inherit parents groups
+            if (groupNames.Length == 0)
+            {
+                groupNames = (await Client.Cypher
+                    .Match("(parent:Board)-[:CHILD_BOARD]->(board:Board)")
                     .Where((Board board) => board.Id == id)
-                    .OptionalMatch("(board)-[:CHILD_GROUP]->(group:Group)")
-                    .OptionalMatch("(parent:Board)-[:CHILD_BOARD]->(board)")
-                    .OptionalMatch("(parent)-[rel:CHILD_GROUP]->(parentGroup:Group)")
-                    .Set("board.public = CASE WHEN parent IS NULL THEN false ELSE parent.public END")
-                    .With("group, parent, parentGroup, rel")
+                    .Match("(parent)-[rel:CHILD_GROUP]->(group:Group)")
+                    .Return<string>("group.name")
                     .OrderBy("rel.order")
-                    .Return((group, parent, parentGroup, rel) => new 
-                     {
-                        GroupCount = Return.As<int>("count(group)"),
-                        HasParent = Return.As<int>("CASE WHEN parent IS NULL THEN 0 ELSE 1 END"),
-                        ParentGroups = parentGroup.CollectAs<Group>()
-                     })
-                    .ResultsAsync;
-
-            var resultObject = result.Single();
-            if (resultObject.GroupCount != 0) throw new InvalidOperationException();
-
-            // Inherit parent's groups if the board has a parent, otherwise add the default groups.
-            if (resultObject.HasParent == 1)
-            {
-                List<Group> groups = resultObject.ParentGroups.ToList();
-                groups.ForEach(x => x.Id = _generator.NewId(id + x.Name));
-
-                await Client.Cypher
-                    .Match("(board:Board)")
-                    .Where((Board board) => board.Id == id)
-                    .With("board, {groups} AS groups")
-                    .WithParam("groups", groups)
-                    .Unwind("range(0, size(groups) - 1)", "index")
-                    .Create("(board)-[rel:CHILD_GROUP { order: index }]->(group:Group)-[:NEXT]->(:End)")
-                    .Set("group = groups[rel.order]")
-                    .ExecuteWithoutResultsAsync();
-
-                return groups;
+                    .ResultsAsync)
+                    .ToArray();
             }
-            else
+
+            // Create group objects with randomly generated ids
+            var groups = new List<Group>(groupNames.Length);
+            for (int i = 0; i < groupNames.Length; i++)
             {
-                return await AddDefaultGroups(id);
+                groups.Add(new Group
+                {
+                    Id = _generator.NewId(id + i.ToString()),
+                    Name = groupNames[i]
+                });
             }
+
+            // Add list of groups
+            await Client.Cypher
+                .Match("(board:Board)")
+                .Where((Board board) => board.Id == id)
+                .OptionalMatch("(parent:Board)-[:CHILD_BOARD]->(board)")
+                .Set("board.public = CASE WHEN parent IS NULL THEN false ELSE parent.public END")
+                .With("board, {groups} as groups")
+                .WithParam("groups", groups)
+                .Unwind("range(0, size(groups) - 1)", "index")
+                .Create("(board)-[:CHILD_GROUP { order: index }]->(g:Group)-[:NEXT]->(:End)")
+                .Set("g = groups[index]")
+                .ExecuteWithoutResultsAsync();
+
+            return groupNames;
         }
 
         /// <summary>
@@ -411,38 +407,6 @@ namespace Kolan.Repositories
                 .Return<string>("user.username")
                 .ResultsAsync;
         }
-
-        /// <summary>
-        /// Add the default groups to a board
-        /// </summary>
-        /// <param name="id">Board id</param>
-        private async Task<IEnumerable<Group>> AddDefaultGroups(string id)
-        {
-            await Client.Cypher
-                .Match("(board:Board)")
-                .Where((Board board) => board.Id == id)
-                .Create("(board)-[:CHILD_GROUP { order: 0 }]->(g1:Group { name: 'Backlog' })-[:NEXT]->(:End)")
-                .Set("g1.id = '" + _generator.NewId(id + "1") + "'")
-
-                .Create("(board)-[:CHILD_GROUP { order: 1 }]->(g2:Group { name: 'Ready' })-[:NEXT]->(:End)")
-                .Set("g2.id = '" + _generator.NewId(id + "2") + "'")
-
-                .Create("(board)-[:CHILD_GROUP { order: 2 }]->(g3:Group { name: 'In Progress' })-[:NEXT]->(:End)")
-                .Set("g3.id = '" + _generator.NewId(id + "3") + "'")
-
-                .Create("(board)-[:CHILD_GROUP { order: 3 }]->(g4:Group { name: 'Done' })-[:NEXT]->(:End)")
-                .Set("g4.id = '" + _generator.NewId(id + "4") + "'")
-                .ExecuteWithoutResultsAsync();
-
-            return await Client.Cypher
-                .Match("(board:Board)-[groupRel:CHILD_GROUP]->(group:Group)")
-                .Where((Board board) => board.Id == id)
-                .With("group, groupRel")
-                .OrderBy("groupRel.order")
-                .Return((group) => group.As<Group>())
-                .ResultsAsync;
-        }
-
 
         private async Task ClearCollaborators(string id)
         {

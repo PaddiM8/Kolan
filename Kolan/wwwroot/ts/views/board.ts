@@ -290,7 +290,7 @@ export class Board extends View {
                 const setupDialog = new SetupDialog();
                 document.body.appendChild(setupDialog);
                 setupDialog.shown = true;
-                setupDialog.addEventListener("submitDialog", (e: CustomEvent) => {
+                setupDialog.addEventListener("submitDialog", () => {
                     this.loadBoard();
                 });
                 return;

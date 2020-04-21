@@ -5,6 +5,7 @@ import { BoardHub } from "../communication/boardHub";
 import { ApiRequester } from "../communication/apiRequester";
 import { RequestType } from "../enums/requestType";
 import { Board } from "../views/board";
+import { Defaults } from "../defaults";
 
 @customElement("setup-dialog")
 export class SetupDialog extends DialogBox {
@@ -15,8 +16,9 @@ export class SetupDialog extends DialogBox {
     }
 
     submitHandler(): void {
-        const result = ApiRequester.send("Boards", `${Board.id}/Setup`, RequestType.Post)
-        .then((response) => {
+        const result = ApiRequester.send("Boards", `${Board.id}/Setup`, RequestType.Post, {
+            groups: "[]" // Let the backend automatically provide the groups
+        }).then((response) => {
             this.dispatchEvent(new CustomEvent("submitDialog", {
                 detail: {
                     output: JSON.parse(response)

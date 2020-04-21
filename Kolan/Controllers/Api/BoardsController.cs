@@ -54,12 +54,19 @@ namespace Kolan.Controllers.Api
         /// <summary>
         /// Initialise a board to make it ready for use. This needs to be done before you can edit it.
         /// </summary>
+        /// <remarks>
+        /// If the provided list of group names is empty, the board will inherits its parents group names.
+        /// </remarks>
+        /// <param name="id">Id of board to set up</param>
+        /// <param name="groups">List of group names to add during setup</param>
         /// <returns>The groups added by default</returns>
         [AuthorizeForBoard]
         [HttpPost("{id}/Setup")]
-        public async Task<object> Setup(string id)
+        public async Task<string[]> Setup(string id, [FromForm]string groups)
         {
-            return await _uow.Boards.SetupAsync(id);
+            string[] groupNames = JsonConvert.DeserializeObject<string[]>(groups);
+
+            return await _uow.Boards.SetupAsync(id, groupNames);
         }
 
         /// <summary>

@@ -1,4 +1,4 @@
-import { View } from "../views/view";
+import { View } from "./view";
 import { DropDown } from "../components/dropDown";
 import { ToastController } from "../controllers/toastController";
 import { ToastType } from "../enums/toastType";
@@ -8,11 +8,11 @@ import { PasswordDialog } from "../dialogs/passwordDialog";
 import { ApiRequester } from "../communication/apiRequester";
 import { RequestType } from "../enums/requestType";
 
-window.addEventListener("load", () => new UserSettings());
+window.addEventListener("load", () => new UserSettingsView());
 declare const viewData;
 declare const tempData;
 
-class UserSettings extends View {
+class UserSettingsView extends View {
     constructor() {
         super();
 
@@ -39,10 +39,16 @@ class UserSettings extends View {
             dialog.shown = true;
 
             dialog.addEventListener("submitDialog", (e: CustomEvent) => {
-                ApiRequester.send("Users", viewData.username, RequestType.Delete, {
-                    password: e.detail.output["password"]
-                }).then(() => location.href = "/Logout");
+                this.removeUser(e.detail.output["password"]);
             });
         });
+    }
+
+    private async removeUser(password: string): Promise<void> {
+        await ApiRequester.send("Users", viewData.username, RequestType.Delete, {
+            password: password
+        });
+
+        location.href = "/Logout";
     }
 }

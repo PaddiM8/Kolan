@@ -1,9 +1,8 @@
 import { DialogBox } from "../components/dialogBox";
-import { LitElement, property, customElement } from "lit-element";
+import { property, customElement } from "lit-element";
 import { InputType } from "../enums/inputType";
-import { BoardHub } from "../communication/boardHub";
-import { Board } from "../views/board";
-import { ITask } from "../models/ITask";
+import { BoardView } from "../views/boardView";
+import { Task } from "../models/task";
 
 declare const viewData;
 
@@ -49,14 +48,14 @@ export class EditTaskDialog extends DialogBox {
         super();
     }
 
-    onOpen() {
+    async onOpen(): Promise<void> {
         const tagsElement = this.getInputElement("tags");
 
         // Populate data list with available users
         const userDataList = document.createElement("datalist");
         userDataList.id = "userDataList";
 
-        const users = [ viewData.username, ...Board.collaborators ];
+        const users = [ viewData.username, ...BoardView.collaborators ];
         for (const collaborator of users) {
             const option = document.createElement("option");
             option.value = collaborator;
@@ -69,16 +68,15 @@ export class EditTaskDialog extends DialogBox {
         assigneeElement.setAttribute("list", "userDataList");
     }
 
-    submitHandler(): void {
+    async submitHandler(): Promise<void> {
         let task = this.getFormData();
         task["id"] = this.boardId;
 
-        Board.boardHub.editTask(task as ITask).then(x => {
-            if (x.statusCode != 200) {
-                this.showErrors(x.value);
-            } else {
-                this.hide();
-            }
-        });
+        const response = await BoardView.boardHub.editTask(task as Task);
+        if (response.statusCode != 200) {
+            this.showErrors(response.value);
+        } else {
+            this.hide();
+        }
     }
 }

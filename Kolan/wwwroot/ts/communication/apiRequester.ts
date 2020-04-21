@@ -1,6 +1,5 @@
 import { RequestParameter } from "./requestParameter";
 import { RequestType } from "../enums/requestType";
-import { Promise } from "es6-promise";
 
 /**
  * Do an API request

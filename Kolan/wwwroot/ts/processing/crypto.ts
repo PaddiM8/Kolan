@@ -46,24 +46,17 @@ export class Crypto {
         ) as Promise<CryptoKey>;
     }
 
-    public static setWrappingKey(password: string, salt: string): Promise<any> {
-        return Crypto.createWrappingKey(password, salt).then(cryptoKey => {
-            return Crypto.keyStorer.clear().then(() => {
-                return Crypto.keyStorer.set("wrappingKey", cryptoKey);
-            });
-        });
+    public static async setWrappingKey(password: string, salt: string): Promise<any> {
+        const cryptoKey = await Crypto.createWrappingKey(password, salt);
+        await Crypto.keyStorer.clear();
+
+        return Crypto.keyStorer.set("wrappingKey", cryptoKey);
     }
 
     public static wrapKey(keyToWrap: CryptoKey): Promise<string> {
-        return Crypto.keyStorer.get("wrappingKey").then(wrappingKey => {
-            return crypto.subtle.wrapKey(
-                "raw",
-                keyToWrap,
-                wrappingKey,
-                "AES-KW"
-            ).then(wrappedKey => {
-                return base64.bytesToBase64(new Uint8Array(wrappedKey));
-            });
+        return Crypto.keyStorer.get("wrappingKey").then(async wrappingKey => {
+            const wrappedKey = await crypto.subtle.wrapKey("raw", keyToWrap, wrappingKey, "AES-KW");
+            return base64.bytesToBase64(new Uint8Array(wrappedKey));
         }) as Promise<string>;
     }
 

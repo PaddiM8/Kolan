@@ -1,11 +1,8 @@
 import { DialogBox } from "../components/dialogBox";
-import { LitElement, property, customElement } from "lit-element";
+import { property, customElement } from "lit-element";
 import { InputType } from "../enums/inputType";
-import { BoardHub } from "../communication/boardHub";
-import { ITask } from "../models/ITask";
-import { Board } from "../views/board";
-import { IHub } from "../communication/IHub";
-import { ContentFormatter } from "../processing/contentFormatter";
+import { Task } from "../models/task";
+import { BoardView } from "../views/boardView";
 
 declare const viewData;
 
@@ -56,14 +53,14 @@ export class AddTaskDialog extends DialogBox {
         super();
     }
 
-    onOpen() {
+    async onOpen(): Promise<void> {
         const tagsElement = this.getInputElement("tags");
 
         // Populate data list with available users
         const userDataList = document.createElement("datalist");
         userDataList.id = "userDataList";
 
-        const users = [ viewData.username, ...Board.collaborators ];
+        const users = [ viewData.username, ...BoardView.collaborators ];
         for (const collaborator of users) {
             const option = document.createElement("option");
             option.value = collaborator;
@@ -76,23 +73,22 @@ export class AddTaskDialog extends DialogBox {
         assigneeElement.setAttribute("list", "userDataList");
     }
 
-    submitHandler(): void {
+    async submitHandler(): Promise<void> {
         let data = this.getFormData();
         const onTop: boolean = data["onTop"];
         delete data["onTop"];
 
-        Board.boardHub.addTask(data as ITask, this.groupId).then(x => {
-            if (x.statusCode != 200) {
-                this.showErrors(x.value);
-                return;
-            }
+        const response = await BoardView.boardHub.addTask(data as Task, this.groupId);
+        if (response.statusCode != 200) {
+            this.showErrors(response.value);
+            return;
+        }
 
-            // Move the task to the top of the group if that option is checked.
-            if (onTop) {
-                Board.boardHub.moveTask(x.value["id"], this.groupId);
-            }
+        // Move the task to the top of the group if that option is checked.
+        if (onTop) {
+            BoardView.boardHub.moveTask(response.value["id"], this.groupId);
+        }
 
-            this.hide();
-        });
+        this.hide();
     }
 }

@@ -5,7 +5,7 @@ import { InputType } from "../enums/inputType";
 import { DialogType } from "../enums/dialogType";
 import { InputList } from "./inputList";
 import { ThemeManager } from "../themes/themeManager";
-import { IModelError } from "../models/IModelError";
+import { ModelError } from "../models/modelError";
 
 /**
  * Dialog element that takes an IDialogTemplate as input and returns an object with the values as an event.
@@ -68,7 +68,7 @@ export class DialogBox extends LitElement {
             this.submittedAlready = false;
             this.style.display = "block";
             this.dispatchEvent(new CustomEvent("openDialog"));
-            this.onOpen();
+            this.onOpen().then();
             window.scrollTo(0, 0);
         } else {
             this.style.display = "none";
@@ -119,7 +119,7 @@ export class DialogBox extends LitElement {
     /**
      * When the submit button in the dialog is clicked. Fires the event, hides and clears the dialog
      */
-    protected submitHandler(): void {
+    protected async submitHandler(): Promise<void> {
         // Fire event
         this.dispatchEvent(new CustomEvent("submitDialog", {
             detail: {
@@ -140,7 +140,7 @@ export class DialogBox extends LitElement {
     /**
     * Fires when a dialog is opened. This is likely overriden.
     */
-    protected onOpen(): void {}
+    protected async onOpen(): Promise<void> {}
 
     /**
      * Get the user input values.

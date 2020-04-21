@@ -47,6 +47,7 @@ namespace Kolan.Controllers.Api
             dynamic result = await _uow.Boards.GetAsync(id, User.Identity.Name);
             if (result == null) return NotFound();
             if (result.UserAccess == PermissionLevel.None) return Unauthorized(); // No AuthorizeForBoard attribute here since this GetAsync() already retrieves this (for other reason). Also, later on users should be able to make boards visible to the public
+            Console.WriteLine(JsonConvert.SerializeObject(result));
 
             return Ok(result);
         }

@@ -1,10 +1,9 @@
 import { View } from "./view";
-import { KeyStorer } from "../processing/keyStorer";
 import { Crypto } from "../processing/crypto";
 
-window.addEventListener("load", () => new Login());
+window.addEventListener("load", () => new LoginView());
 
-class Login extends View {
+class LoginView extends View {
     constructor() {
         super();
 

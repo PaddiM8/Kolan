@@ -1,12 +1,11 @@
 import { DialogBox } from "../components/dialogBox";
-import { LitElement, property, customElement } from "lit-element";
+import { property, customElement } from "lit-element";
 import { InputType } from "../enums/inputType";
-import { BoardHub } from "../communication/boardHub";
 import { RequestType } from "../enums/requestType";
 import { ApiRequester } from "../communication/apiRequester";
 import { ToastController } from "../controllers/toastController";
 import { ToastType } from "../enums/toastType";
-import { Board } from "../views/board";
+import { BoardView } from "../views/boardView";
 import { PermissionLevel } from "../enums/permissionLevel";
 
 
@@ -37,42 +36,46 @@ export class ShareDialog extends DialogBox {
         this.addEventListener("itemRemoved", (e: CustomEvent) => this.onUserRemoved(e));
     }
 
-    protected onOpen(): void {
-        this.list.removableItems = Board.permissionLevel == PermissionLevel.All;
-        this.list.items = Board.collaborators.map(x => ({ name: x }));
+    async onOpen(): Promise<void> {
+        this.list.removableItems = BoardView.permissionLevel == PermissionLevel.All;
+        this.list.items = BoardView.collaborators.map(x => ({ name: x }));
     }
 
-    submitHandler(): void {
+    async submitHandler(): Promise<void> {
         const isPublic = this.getFormData()["public"];
-        ApiRequester.send("Boards", `${Board.id}/ChangePublicity`, RequestType.Post, {
+        await ApiRequester.send("Boards", `${BoardView.id}/ChangePublicity`, RequestType.Post, {
             publicity: isPublic
         });
 
-        Board.content.public = isPublic;
+        BoardView.content.public = isPublic;
 
         this.hide();
     }
 
-    private onUserAdded(e): void {
-        ApiRequester.send("Boards", `${Board.id}/Users`, RequestType.Post, {
-            username: e.detail["value"]
-        }).then(() => {
-            Board.collaborators.push(e.detail["value"])
+    private async onUserAdded(e: CustomEvent): Promise<void> {
+        try {
+            await ApiRequester.send("Boards", `${BoardView.id}/Users`, RequestType.Post, {
+                username: e.detail["value"]
+            });
+
+            BoardView.collaborators.push(e.detail["value"])
             ToastController.new("Collaborator added", ToastType.Info);
-        }).catch(() => {
+        } catch {
             ToastController.new("Failed to add collaborator", ToastType.Error);
             e.detail["object"].undoAdd();
-        })
+        }
     }
 
-    private onUserRemoved(e): void {
-        ApiRequester.send("Boards", `${Board.id}/Users`, RequestType.Delete, {
-            username: e.detail["item"].name
-        }).then(() => {
+    private async onUserRemoved(e): Promise<void> {
+        try {
+            await ApiRequester.send("Boards", `${BoardView.id}/Users`, RequestType.Delete, {
+                username: e.detail["item"].name
+            });
+
             ToastController.new("Collaborator removed", ToastType.Info);
-        }).catch(() => {
+        } catch {
             ToastController.new("Failed to remove collaborator", ToastType.Error);
             e.detail["object"].undoRemove();
-        });
+        }
     }
 }

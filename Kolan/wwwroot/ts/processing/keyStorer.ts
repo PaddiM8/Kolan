@@ -16,10 +16,10 @@ export class KeyStorer {
         });
     }
 
-    public get(type: string): Promise<CryptoKey> {
-        return this.db.table("cryptoKeys").get(type).then(result => {
-            return result.key;
-        });
+    public async get(type: string): Promise<CryptoKey> {
+        const result = await this.db.table("cryptoKeys").get(type);
+
+        return result.key;
     }
 
     public clear(): Promise<any> {

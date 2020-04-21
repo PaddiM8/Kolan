@@ -2,9 +2,9 @@ const seedrandom = require("seedrandom");
 import { DraggableItem } from "../components/draggableItem";
 import { RequestParameter } from "../communication/requestParameter";
 import { ApiRequester } from "../communication/apiRequester";
-import { ITask } from "../models/ITask";
-import { IBoard } from "../models/IBoard";
-import { Board } from "../views/board";
+import { Task } from "../models/task";
+import { Board } from "../models/board";
+import { BoardView } from "../views/boardView";
 import { ContentFormatter } from "../processing/contentFormatter";
 import { BoardHub } from "../communication/boardHub";
 import { ConfirmDialog } from "../dialogs/confirmDialog";
@@ -27,13 +27,13 @@ export class TasklistController {
         this.taskColorSeed = taskColorSeed;
 
         this.backgroundLuminance = this.getLuminance(window.getComputedStyle(document.body, null)
-                                                   .getPropertyValue("background-color"));
+            .getPropertyValue("background-color"));
     }
 
     /**
      * Add a task to bottom of the tasklist.
      */
-    public addTask(task: ITask): void {
+    public addTask(task: Task): void {
         const item = this.createTaskItem(task);
         this.tasklist.appendChild(item);
     }
@@ -58,7 +58,7 @@ export class TasklistController {
     /**
     * Edit the contents of a task. This actually just removes the task and adds it again, with the new content
     */
-    public editTask(newTaskContent: ITask): void {
+    public editTask(newTaskContent: Task): void {
        const item = document.querySelector(`#tasklists [data-id="${newTaskContent.id}"]`) as HTMLElement;
        item.parentElement.insertBefore(this.createTaskItem(newTaskContent), item.nextElementSibling);
        item.remove();
@@ -68,9 +68,9 @@ export class TasklistController {
     /**
      * Create the HTML element of a task item.
      */
-    public createTaskItem(task: ITask): HTMLElement {
+    public createTaskItem(task: Task): HTMLElement {
         const item = new DraggableItem();
-        item.movable = Board.permissionLevel >= PermissionLevel.Edit;
+        item.movable = BoardView.permissionLevel >= PermissionLevel.Edit;
         item.dataset.id = task.id;
         item.dataset.description = task.description ? task.description : "";
         item.dataset.deadline = task.deadline.toString();
@@ -110,7 +110,7 @@ export class TasklistController {
         // Events
         item.addEventListener("draggableClick", e => this.onClickEvent(e));
 
-        if (Board.permissionLevel >= PermissionLevel.Edit) {
+        if (BoardView.permissionLevel >= PermissionLevel.Edit) {
             item.addEventListener("mouseover", () => this.onHoverEvent(item));
             item.addEventListener("mouseleave", () => this.onMouseLeaveEvent(item));
         }
@@ -122,7 +122,7 @@ export class TasklistController {
             this.onExternalMove(e.target as HTMLElement, e["detail"]["toItem"], e["detail"]["toTasklist"]));
 
         // Add event listeners to overlay buttons if the user has permission to use them, otherwise remove them
-        if (Board.permissionLevel >= PermissionLevel.Edit) {
+        if (BoardView.permissionLevel >= PermissionLevel.Edit) {
             item.querySelector(".edit").addEventListener("click", () =>
                 this.onEditClick(item));
 
@@ -163,7 +163,7 @@ export class TasklistController {
     }
 
     private sendMoveRequest(boardId: string, targetId: string): void {
-       Board.boardHub.moveTask(boardId, targetId);
+       BoardView.boardHub.moveTask(boardId, targetId);
     }
 
     /**
@@ -185,9 +185,9 @@ export class TasklistController {
     }
 
     private onEditClick(item: DraggableItem): void {
-        Board.dialogs.editTask.shown = true;
-        Board.dialogs.editTask.boardId = item.dataset.id;
-        Board.dialogs.editTask.setValues({
+        BoardView.dialogs.editTask.shown = true;
+        BoardView.dialogs.editTask.boardId = item.dataset.id;
+        BoardView.dialogs.editTask.setValues({
             name: item.querySelector(".name").innerHTML,
             description: item.dataset.description,
             tags: item.dataset.tags,
@@ -201,7 +201,7 @@ export class TasklistController {
         document.body.appendChild(confirmDialog);
         confirmDialog.shown = true;
         confirmDialog.addEventListener("submitDialog", () => {
-            Board.boardHub.deleteTask(item.dataset.id);
+            BoardView.boardHub.deleteTask(item.dataset.id);
             item.parentNode.removeChild(item);
             document.body.removeChild(confirmDialog);
         });

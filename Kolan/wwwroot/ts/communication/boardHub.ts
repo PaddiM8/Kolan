@@ -1,11 +1,9 @@
 import * as signalR from "@microsoft/signalr";
-import { Board } from "../views/board";
-import { ITask } from "../models/ITask";
+import { BoardView } from "../views/boardView";
+import { Task } from "../models/task";
 import { IHub } from "./IHub";
-import { RequestParameter } from "./requestParameter";
 import { ToastController } from "../controllers/toastController";
 import { ToastType } from "../enums/toastType";
-import { ContentFormatter } from "../processing/contentFormatter";
 
 /**
  * Manages the websocket connection and acts on responses.
@@ -51,28 +49,18 @@ export class BoardHub implements IHub {
         this.connection.onreconnected(() => this.onConnected());
     }
 
-    public addTask(task: ITask, underTask: string) {
-        task.encrypted = Board.content.encrypted;
-        task.encryptionKey = Board.content.encryptionKey;
+    public async addTask(task: Task, underTask: string) {
+        task.encrypted = BoardView.content.encrypted;
+        task.encryptionKey = BoardView.content.encryptionKey;
 
-        return ContentFormatter.boardPreBackend(task, Board.getRootId()).then(formattedTask => {
-            return this.connection.invoke(
-                "addBoard",
-                this.boardId,
-                formattedTask,
-                underTask
-            );
-        });
+        const formattedTask = await new Task(task).processPreBackend();
+        return this.connection.invoke("addBoard", this.boardId, formattedTask, underTask);
     }
 
-    public editTask(task: ITask) {
-        return ContentFormatter.boardPreBackend(task, Board.getRootId()).then(formattedTask => {
-            return this.connection.invoke(
-                "editBoard",
-                this.boardId,
-                formattedTask
-            );
-        });
+    public async editTask(task: Task) {
+        const formattedTask = await new Task(task).processPreBackend();
+
+        return this.connection.invoke("editBoard", this.boardId, formattedTask);
     }
 
     public moveTask(taskId: string, targetId: string): void {
@@ -89,26 +77,24 @@ export class BoardHub implements IHub {
         return this.connection.invoke("requestReload", this.boardId);
     }
 
-    private onReceiveNewBoard(board: ITask, groupId: string): void {
-        ContentFormatter.boardPostBackend(board, Board.getRootId()).then(formattedBoard => {
-            Board.tasklistControllers[groupId].addTask(formattedBoard);
-        });
+    private async onReceiveNewBoard(task: Task, groupId: string): Promise<void> {
+        const processedTask = await new Task(task).processPostBackend();
+        BoardView.tasklistControllers[groupId].addTask(processedTask);
     }
 
     private onMoveBoard(boardId: string, targetId: string): void {
         const board = document.querySelector(`#tasklists [data-id="${boardId}"]`);
         const tasklistId = board.parentElement.dataset.id;
 
-        Board.tasklistControllers[tasklistId].moveTask(boardId, targetId);
+        BoardView.tasklistControllers[tasklistId].moveTask(boardId, targetId);
     }
 
-    private onEditBoard(newBoardContent: ITask): void {
-        const board = document.querySelector(`#tasklists [data-id="${newBoardContent.id}"]`);
+    private async onEditBoard(newTaskContent: Task): Promise<void> {
+        const board = document.querySelector(`#tasklists [data-id="${newTaskContent.id}"]`);
         const tasklistId = board.parentElement.dataset.id;
 
-        ContentFormatter.boardPostBackend(newBoardContent, Board.getRootId()).then(formattedBoard => {
-            Board.tasklistControllers[tasklistId].editTask(formattedBoard);
-        });
+        const processedTask = await new Task(newTaskContent).processPostBackend();
+        BoardView.tasklistControllers[tasklistId].editTask(processedTask);
     }
 
     private onDeleteBoard(boardId: string): void {
@@ -117,7 +103,7 @@ export class BoardHub implements IHub {
     }
 
     private onRequestReload(id: string): void {
-        Board.reload();
+        BoardView.reload();
     }
 
     private onDisconnected(): void {
@@ -141,7 +127,7 @@ export class BoardHub implements IHub {
     }
 
     private onReconnecting(): void {
-        if (Board.pageReloadInProgress) return;
+        if (BoardView.pageReloadInProgress) return;
         if (this.stateToast) this.stateToast.hide();
 
         const uiBlocker = document.getElementById("uiBlocker");

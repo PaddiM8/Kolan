@@ -1,4 +1,4 @@
-export interface IModelError {
+export class ModelError {
     memberNames: string[];
     errorMessage: string;
 }

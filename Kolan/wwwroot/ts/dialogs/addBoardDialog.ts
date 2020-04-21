@@ -5,8 +5,8 @@ import { BoardHub } from "../communication/boardHub";
 import { RequestType } from "../enums/requestType";
 import { ApiRequester } from "../communication/apiRequester";
 import { ContentFormatter } from "../processing/contentFormatter";
-import { ITask } from "../models/ITask";
-import { IBoard } from "../models/IBoard";
+import { Task } from "../models/task";
+import { Board } from "../models/board";
 import { Crypto } from "../processing/crypto";
 import { Defaults } from "../defaults";
 
@@ -34,58 +34,59 @@ export class AddBoardDialog extends DialogBox {
         primaryButton: "Add"
     }
 
-    submitHandler(): void {
-        let board = this.getFormData() as IBoard;
+    async submitHandler(): Promise<void> {
+        let board = new Board( this.getFormData());
 
         if (board.encrypted) {
-            const emptyBoard = { id: null, name: "-", description: null, encrypted: false };
+            const emptyBoard = new Board();
+            emptyBoard.name = "-"; // Some name is mandatory
 
             // Create an empty board for now, and get its id. It will be updated it with encrypted data afterwards.
-            ApiRequester.send("Boards", "", RequestType.Post, emptyBoard).then(response => {
-                const id = JSON.parse(response)["id"];
+            const response = await ApiRequester.send("Boards", "", RequestType.Post, emptyBoard);
+            const id = JSON.parse(response)["id"];
 
-                // Create the board's encryption key
-                Crypto.createRandomKey(id).then(cryptoKey => {
-                    Crypto.wrapKey(cryptoKey).then(portableKey => {
-                        board.encryptionKey = portableKey;
+            // Create the board's encryption key
+            const cryptoKey = await Crypto.createRandomKey(id);
+            const portableKey = await Crypto.wrapKey(cryptoKey);
+            board.encryptionKey = portableKey;
 
-                        // Update board with encrypted data, now that we have the id.
-                        ContentFormatter.boardPreBackend(board, id).then(encryptedBoard => {
-                            encryptedBoard.id = id;
+            // Update board with encrypted data, now that we have the id.
+            const encryptedBoard = await board.processPreBackend();
+            encryptedBoard.id = id;
 
-                            ApiRequester.send("Boards", id, RequestType.Put, {
-                                parentId: null,
-                                newBoardContent: JSON.stringify(encryptedBoard)
-                            }).then(() => {
-                                // Prepare for group name encryption
-                                let groupNamePromises = [];
-                                for (const groupName in Defaults.groupNames)
-                                    groupNamePromises.push(ContentFormatter.preBackend(groupName, cryptoKey));
-
-                                // Unwrap the group name promises, and get the encrypted list of group names.
-                                Promise.all(groupNamePromises).then(groupNames => {
-                                    // Setup board
-                                    ApiRequester.send("Boards", `${id}/Setup`, RequestType.Post, {
-                                        groups: JSON.stringify(groupNames)
-                                    }).then(() => location.href = `/Board/${id}`);
-                                })
-                            }).catch(err => this.showErrors(JSON.parse(err.response)));
-                        });
-                    });
+            try {
+                await ApiRequester.send("Boards", id, RequestType.Put, {
+                    parentId: null,
+                    newBoardContent: JSON.stringify(encryptedBoard)
                 });
-            });
+
+                let groupNames = [];
+                for (const groupName of Defaults.groupNames)
+                    groupNames.push(await ContentFormatter.preBackend(groupName, cryptoKey));
+    
+                await ApiRequester.send("Boards", `${id}/Setup`, RequestType.Post, {
+                    groups: JSON.stringify(groupNames)
+                });
+
+                location.href = `/Board/${id}`;
+            } catch (err) {
+                this.showErrors(JSON.parse(err.response))
+            }
         } else {
             // Send http request
-            ApiRequester.send("Boards", "", RequestType.Post, board as IBoard).then(response => {
+            try {
+                const response = await ApiRequester.send("Boards", "", RequestType.Post, board as Board);
                 const output = JSON.parse(response);
-
+    
                 // Setup board
-                ApiRequester.send("Boards", `${output["id"]}/Setup`, RequestType.Post, {
+                await ApiRequester.send("Boards", `${output["id"]}/Setup`, RequestType.Post, {
                     groups: JSON.stringify(Defaults.groupNames)
-                }).then(() => location.href = `/Board/${output["id"]}`);
-            }).catch(err => {
+                });
+    
+                location.href = `/Board/${output["id"]}`
+            } catch(err) {
                 this.showErrors(err.response);
-            });
+            };
         }
     }
 }

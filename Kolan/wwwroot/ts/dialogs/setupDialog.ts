@@ -1,11 +1,8 @@
 import { DialogBox } from "../components/dialogBox";
-import { LitElement, property, customElement } from "lit-element";
-import { InputType } from "../enums/inputType";
-import { BoardHub } from "../communication/boardHub";
+import { property, customElement } from "lit-element";
 import { ApiRequester } from "../communication/apiRequester";
 import { RequestType } from "../enums/requestType";
-import { Board } from "../views/board";
-import { Defaults } from "../defaults";
+import { BoardView } from "../views/boardView";
 
 @customElement("setup-dialog")
 export class SetupDialog extends DialogBox {
@@ -15,17 +12,16 @@ export class SetupDialog extends DialogBox {
         primaryButton: "Continue"
     }
 
-    submitHandler(): void {
-        const result = ApiRequester.send("Boards", `${Board.id}/Setup`, RequestType.Post, {
+    async submitHandler(): Promise<void> {
+        const response = await ApiRequester.send("Boards", `${BoardView.id}/Setup`, RequestType.Post, {
             groups: "[]" // Let the backend automatically provide the groups
-        }).then((response) => {
-            this.dispatchEvent(new CustomEvent("submitDialog", {
-                detail: {
-                    output: JSON.parse(response)
-                }
-            }));
-        })
-        .catch((err) => console.log(err));
+        });
+
+        this.dispatchEvent(new CustomEvent("submitDialog", {
+            detail: {
+                output: JSON.parse(response)
+            }
+        }));
 
         this.hide();
     }

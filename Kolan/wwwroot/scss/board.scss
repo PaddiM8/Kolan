@@ -99,15 +99,33 @@ tasklist {
     overflow: hidden;
 }
 
+.list-head .item {
+    display: flex;
+}
+
+.list-head .item span {
+    margin: auto;
+}
+
 .plus {
-    display: inline-block;
-    float: right;
+    align-self: flex-end;
+    margin: auto 0;
+
     font-family: sans-serif;
     font-size: 30px;
     font-weight: 100;
     color: black;
-    text-align: right;
+
+    background-color: transparent;
+    border: 0;
+    box-shadow: none;
+
     cursor: pointer;
+    transition: .2s ease transform;
+
+    &:hover {
+        transform: rotate(90deg);
+    }
 }
 
 placeholder {

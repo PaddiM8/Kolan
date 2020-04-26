@@ -11,17 +11,17 @@
     </head>
     <body id="boards">
         <div class="top left">
-            <span id="logoutButton" class="icon icon-sign-out logout" alt="logout" role="button"></span>
+            <button id="logoutButton" class="icon icon-sign-out logout" alt="logout" tabindex="1"></button>
             <label>Logout</label>
         </div>
         <div class="top right">
             <label>@ViewData["username"] - Settings</label>
-            <a href="/UserSettings" class="iconLink"><span class="icon icon-cog gear" alt="settings" role="button"></span></a>
+            <a href="/UserSettings" class="iconLink" tabindex="3"><span class="icon icon-cog gear" alt="settings" role="button"></span></a>
         </div>
         <main>
             <header>
                 <h1>Boards</h1>
-                <span id="addBoard" class="plus">+</span>
+                <button id="addBoard" class="plus" tabindex="2">+</button>
                 <hr />
             </header>
             <section class="board-list">

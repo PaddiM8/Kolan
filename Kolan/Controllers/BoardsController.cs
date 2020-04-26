@@ -17,7 +17,7 @@ namespace Kolan.Controllers
             _uow = uow;
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
             ViewData["username"] = User.Identity.Name;
 

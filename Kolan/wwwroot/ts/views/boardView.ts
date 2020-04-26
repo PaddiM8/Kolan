@@ -133,10 +133,14 @@ export class BoardView extends View {
         item.className = "item";
         item.dataset.id = group.id;
         item.dataset.name = group.name;
-        item.textContent = group.name;
+
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = group.name;
+
+        item.appendChild(nameSpan);
 
         if (BoardView.permissionLevel >= PermissionLevel.Edit)
-            item.insertAdjacentHTML("beforeend", "<span class='plus'>+</span>")
+            item.insertAdjacentHTML("beforeend", "<button class='plus'>+</button>")
 
         listhead.appendChild(item);
 

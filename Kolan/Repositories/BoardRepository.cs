@@ -205,7 +205,7 @@ namespace Kolan.Repositories
                 .Match("(board:Board)")
                 .Where("board.id = {id}")
                 .WithParam("id", boardId)
-                .Set("CASE WHEN board.encrypted = false THEN board.public = {publicity} END")
+                .Set("board.public = CASE WHEN board.encrypted = false THEN {publicity} ELSE false END")
                 .WithParam("publicity", publicity)
                 .ExecuteWithoutResultsAsync();
         }

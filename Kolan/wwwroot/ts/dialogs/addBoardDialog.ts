@@ -66,7 +66,7 @@ export class AddBoardDialog extends DialogBox {
             location.href = `/Board/${id}`;
         } catch (err) {
             // Show model errors.
-            this.showErrors(JSON.parse(err.response))
+            this.showErrors(err.response);
         }
     }
 }

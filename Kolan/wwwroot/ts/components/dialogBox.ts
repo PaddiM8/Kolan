@@ -196,7 +196,7 @@ export class DialogBox extends LitElement {
             const label = this.shadowRoot.querySelector(`label[for="${name}"]`) as HTMLLabelElement;
             label.innerHTML = errors[name].join("\n");
 
-            label.style.display = errors[name] ? "inline" : "none";
+            label.style.display = errors[name] ? "inline-block" : "none";
         }
     }
 

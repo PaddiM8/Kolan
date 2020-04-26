@@ -39,10 +39,6 @@ export class Crypto {
         await Crypto.keyStorer.set("privateKey", unwrappedPrivate);
     }
 
-    public static getPrivateKey(): Promise<CryptoKey> {
-        return Crypto.keyStorer.get("privateKey") as Promise<CryptoKey>;
-    }
-
     public static async wrapPrivateKey(keyToWrap: CryptoKey): Promise<string> {
         return Crypto.encrypt(
             await Crypto.exportRSAKey(keyToWrap),
@@ -178,6 +174,13 @@ export class Crypto {
         );
 
         return base64.bytesToBase64(new Uint8Array(wrappedKey));
+    }
+
+    /**
+     * Remove all the stored keys locally, this should be done when for example logging out.
+     */
+    public static async clearKeys(): Promise<void> {
+        await Crypto.keyStorer.clear();
     }
 
     /**

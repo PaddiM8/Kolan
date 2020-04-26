@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Kolan.Repositories;
 using Kolan.ViewModels;
 using Kolan.Filters;
@@ -28,9 +29,17 @@ namespace Kolan.Controllers.Api
         /// <param name="model">A RegisterViewModel</param>
         [HttpPost("Create")]
         [ValidateModel]
+        [AllowAnonymous]
         public async Task<IActionResult> Create(RegisterViewModel model)
         {
             if (!Config.Values.AllowRegistrations) return Unauthorized();
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            if (await _uow.Users.Exists(model.Username)) 
+            {
+                ModelState.AddModelError("username", "Username is already in use.");
+                return BadRequest(ModelState);
+            }
 
             string passwordHash = PBKDF2.Hash(model.Password);
             await _uow.Users.AddAsync(new User

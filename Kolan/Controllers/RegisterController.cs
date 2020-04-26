@@ -32,22 +32,12 @@ namespace Kolan.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
-        [HttpPost("Register")]
+        /*[HttpPost("Register")]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            if (!Config.Values.AllowRegistrations) return Unauthorized();
-
-            // Make sure the password fields have the same value
-            if (model.Password != model.RepeatPassword)
-            {
-                ModelState.AddModelError("RepeatPassword", "Passwords don't match.");
-            }
-
-            if (!ModelState.IsValid) return View("Index", model);
-
             await new UsersController(_uow).Create(model);
 
             return RedirectToAction("Index", "Login");
-        }
+        }*/
     }
 }

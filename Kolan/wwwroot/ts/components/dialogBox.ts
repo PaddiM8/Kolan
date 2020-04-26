@@ -5,7 +5,6 @@ import { InputType } from "../enums/inputType";
 import { DialogType } from "../enums/dialogType";
 import { InputList } from "./inputList";
 import { ThemeManager } from "../themes/themeManager";
-import { ModelError } from "../models/modelError";
 
 /**
  * Dialog element that takes an IDialogTemplate as input and returns an object with the values as an event.

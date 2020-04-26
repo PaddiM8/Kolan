@@ -26,6 +26,16 @@ namespace Kolan.Repositories
                 .ExecuteWithoutResultsAsync();
         }
 
+        public async Task<bool> Exists(string username)
+        {
+            return (await Client.Cypher
+                .Match("(user:User)")
+                .Where((User user) => user.Username == username)
+                .Return<int>("count(user)")
+                .ResultsAsync)
+                .SingleOrDefault() == 1;
+        }
+
         public async Task<string> GetPublicKey(string username)
         {
             return (await Client.Cypher

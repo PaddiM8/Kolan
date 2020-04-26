@@ -28,6 +28,11 @@ class BoardsView extends View {
         // Events
         document.getElementById("addBoard").addEventListener("click", () =>
             addDialog.shown = true);
+
+        document.getElementById("logoutButton").addEventListener("click", () => {
+            // Remove the stored keys and logout
+            Crypto.clearKeys().then(() => location.href = "/Logout");
+        });
     }
 
     /**

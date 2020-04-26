@@ -14,19 +14,16 @@
             <h1>Register</h1>
          </header>
          <section>
-            @model RegisterViewModel
-            <form asp-action="Register" method="post">
-               <label class="error">@Html.ValidationMessageFor(m => m.Email)</label>
-               <input asp-for="Email" class="input" placeholder="Email..." /><br />
-               <label class="error">@Html.ValidationMessageFor(m => m.Username)</label>
-               <input asp-for="Username" class="input" placeholder="Username..." /><br />
-               <label class="error">@Html.ValidationMessageFor(m => m.Password)</label>
-               <input asp-for="Password" class="input" placeholder="Password..." /><br />
-               <label class="error">@Html.ValidationMessageFor(m => m.RepeatPassword)</label>
-               <input asp-for="RepeatPassword" class="input" placeholder="Repeat Password..." /><br />
+            <form>
+               <label class="error" for="emailInput"></label>
+               <input type="email" id="emailInput" class="input" placeholder="Email..." /><br />
+               <label class="error" for="usernameInput"></label>
+               <input type="text" id="usernameInput" class="input" placeholder="Username..." /><br />
+               <label class="error" for="passwordInput"></label>
+               <input type="password" id="passwordInput" class="input" placeholder="Password..." /><br />
+               <label class="error" for="repeatPasswordInput"></label>
+               <input type="password" id="repeatPasswordInput" class="input" placeholder="Repeat Password..." /><br />
 
-               <input asp-for="PublicKey" hidden aria-hidden />
-               <input asp-for="PrivateKey" hidden aria-hidden />
                <input type="submit" value="Register" />
             </form>
          </section>

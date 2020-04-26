@@ -218,8 +218,11 @@ export class BoardView extends View {
                 }
 
                 const ancestor = ancestors[ancestors.length - i - 1]; // Do backwards for correct order
-                const cryptoKey = encryptionKey ? await Crypto.unwrapKey(encryptionKey) : null;
-                const name = await ContentFormatter.postBackend(ancestor["name"], cryptoKey);
+                /*const cryptoKey = encryptionKey
+                    ? await Crypto.unwrapEncryptionKey(encryptionKey, BoardView.permissionLevel != PermissionLevel.All)
+                    : null;*/
+
+                const name = await ContentFormatter.postBackend(ancestor["name"], BoardView.content.cryptoKey);
                 html += `<a href="./${ancestor["id"]}">${name}</a> / `;
             }
         }
@@ -258,6 +261,9 @@ export class BoardView extends View {
 
             // Process board data post-backend (eg. decrypt)
             await boardContent.board.processPostBackend();
+
+            BoardView.content = boardContent.board;
+
             // Set title on the client side, both on the board page and in the document title.
             await this.setTitle(boardContent.board.name, boardContent.ancestors, boardContent.board.encryptionKey);
 
@@ -273,16 +279,14 @@ export class BoardView extends View {
                 //let formattedTaskPromises: Promise<Board | Task>[] = [];
                 for (const task of groupObject.boards) {
                     // Format the boards (eg. decrypt if needed), and then save the promises returned in an array
-                    const processedTask = await (new Task(task)).processPostBackend();
+                    const processedTask = await (new Task(task, BoardView.content.cryptoKey)).processPostBackend();
                     this.addTask(groupObject.group.id, processedTask);
                 }
             }
 
-            BoardView.content = boardContent.board;
-
             if (BoardView.permissionLevel >= PermissionLevel.Edit) {
                 // Connect to SignalR
-                    BoardView.boardHub.join(BoardView.id);
+                BoardView.boardHub.join(BoardView.id);
             } else {
                 // Remove header icons
                 const headerIcons = document.querySelector("header .right");
@@ -291,9 +295,9 @@ export class BoardView extends View {
 
             // Get collaborators
             ApiRequester.send("Boards", `${BoardView.id}/Users`, RequestType.Get)
-            .then(response => {
-                BoardView.collaborators = JSON.parse(response as string);
-            });
+                .then(response => {
+                    BoardView.collaborators = JSON.parse(response as string);
+                });
 
             ToastController.new("Loaded board", ToastType.Info);
         } catch (req) {

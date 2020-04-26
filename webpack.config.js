@@ -8,7 +8,8 @@ module.exports = {
         board: './Kolan/wwwroot/js/views/boardView.js',
         userSettings: './Kolan/wwwroot/js/views/userSettingsView.js',
         components: './Kolan/wwwroot/js/components/components.js',
-        login: './Kolan/wwwroot/js/views/loginView.js'
+        login: './Kolan/wwwroot/js/views/loginView.js',
+        register: './Kolan/wwwroot/js/views/registerView.js'
     },
     output: {
         filename: '[name].js',

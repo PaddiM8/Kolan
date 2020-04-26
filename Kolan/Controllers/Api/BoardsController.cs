@@ -47,7 +47,6 @@ namespace Kolan.Controllers.Api
             dynamic result = await _uow.Boards.GetAsync(id, User.Identity.Name);
             if (result == null) return NotFound();
             if (result.UserAccess == PermissionLevel.None) return Unauthorized(); // No AuthorizeForBoard attribute here since this GetAsync() already retrieves this (for other reason). Also, later on users should be able to make boards visible to the public
-            Console.WriteLine(JsonConvert.SerializeObject(result));
 
             return Ok(result);
         }
@@ -222,11 +221,12 @@ namespace Kolan.Controllers.Api
         /// </summary>
         /// <param name="id">Id of the board</param>
         /// <param name="username">Username of the user to add</param>
+        /// <param name="encryptionKey">(This should be encrypted) Encryption key used to encrypt/decrypt the board.</param>
         [HttpPost("{id}/Users")]
         [AuthorizeForBoard]
-        public async Task<IActionResult> AddUser(string id, [FromForm]string username)
+        public async Task<IActionResult> AddUser(string id, [FromForm]string username, [FromForm]string encryptionKey = null)
         {
-            bool userAdded = await _uow.Boards.AddUserAsync(id, username);
+            bool userAdded = await _uow.Boards.AddUserAsync(id, username, encryptionKey);
 
             return userAdded ? (IActionResult)Ok() : (IActionResult)BadRequest();
         }

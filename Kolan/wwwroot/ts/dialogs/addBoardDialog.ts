@@ -35,58 +35,38 @@ export class AddBoardDialog extends DialogBox {
     }
 
     async submitHandler(): Promise<void> {
-        let board = new Board( this.getFormData());
+        let board = new Board(this.getFormData());
 
-        if (board.encrypted) {
-            const emptyBoard = new Board();
-            emptyBoard.name = "-"; // Some name is mandatory
+        // If encryption is enabled, create the board's encryption key and then wrap it to create an encrypted portable version of it.
+        // It is then put on the board and sent to the backend (encrypted, of course).
+        const cryptoKey = board.encrypted ? await Crypto.createEncryptionKey() : null;
+        const portableKey = board.encrypted ? await Crypto.wrapAnyKey(cryptoKey) : null;
+        board.encryptionKey = portableKey;
 
-            // Create an empty board for now, and get its id. It will be updated it with encrypted data afterwards.
-            const response = await ApiRequester.send("Boards", "", RequestType.Post, emptyBoard);
+        // Process board data before sending it off to the backend.
+        // This includes eg. encryption, if that is enabled on the board.
+        const processedBoard = await board.processPreBackend();
+
+        try {
+            // Send the board to the backend, and retrieve the id created for it.
+            const response = await ApiRequester.send("Boards", "", RequestType.Post, processedBoard);
             const id = JSON.parse(response)["id"];
 
-            // Create the board's encryption key
-            const cryptoKey = await Crypto.createRandomKey(id);
-            const portableKey = await Crypto.wrapKey(cryptoKey);
-            board.encryptionKey = portableKey;
+            // Create a list of the default group names (and process them)
+            let groupNames = [];
+            for (const groupName of Defaults.groupNames)
+                groupNames.push(await ContentFormatter.preBackend(groupName, cryptoKey));
 
-            // Update board with encrypted data, now that we have the id.
-            const encryptedBoard = await board.processPreBackend();
-            encryptedBoard.id = id;
+            // Set up the board using the group names.
+            await ApiRequester.send("Boards", `${id}/Setup`, RequestType.Post, {
+                groups: JSON.stringify(groupNames)
+            });
 
-            try {
-                await ApiRequester.send("Boards", id, RequestType.Put, {
-                    parentId: null,
-                    newBoardContent: JSON.stringify(encryptedBoard)
-                });
-
-                let groupNames = [];
-                for (const groupName of Defaults.groupNames)
-                    groupNames.push(await ContentFormatter.preBackend(groupName, cryptoKey));
-    
-                await ApiRequester.send("Boards", `${id}/Setup`, RequestType.Post, {
-                    groups: JSON.stringify(groupNames)
-                });
-
-                location.href = `/Board/${id}`;
-            } catch (err) {
-                this.showErrors(JSON.parse(err.response))
-            }
-        } else {
-            // Send http request
-            try {
-                const response = await ApiRequester.send("Boards", "", RequestType.Post, board as Board);
-                const output = JSON.parse(response);
-    
-                // Setup board
-                await ApiRequester.send("Boards", `${output["id"]}/Setup`, RequestType.Post, {
-                    groups: JSON.stringify(Defaults.groupNames)
-                });
-    
-                location.href = `/Board/${output["id"]}`
-            } catch(err) {
-                this.showErrors(err.response);
-            };
+            // Redirect to the board.
+            location.href = `/Board/${id}`;
+        } catch (err) {
+            // Show model errors.
+            this.showErrors(JSON.parse(err.response))
         }
     }
 }

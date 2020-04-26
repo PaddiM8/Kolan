@@ -23,5 +23,11 @@ namespace Kolan.ViewModels
       [Compare("Password")]
       [DataType(DataType.Password)]
       public string RepeatPassword { get; set; }
+
+      [Required]
+      public string PublicKey { get; set; }
+
+      [Required]
+      public string PrivateKey { get; set; }
    }
 }

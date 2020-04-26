@@ -9,14 +9,14 @@ export class KeyStorer {
         });
     }
 
-    public set(type: string, cryptoKey: CryptoKey): Promise<any> {
+    public set(type: string, cryptoKey: CryptoKey | CryptoKeyPair): Promise<any> {
         return this.db.table("cryptoKeys").put({
             type: type,
             key: cryptoKey
         });
     }
 
-    public async get(type: string): Promise<CryptoKey> {
+    public async get(type: string): Promise<CryptoKey | CryptoKeyPair> {
         const result = await this.db.table("cryptoKeys").get(type);
 
         return result.key;

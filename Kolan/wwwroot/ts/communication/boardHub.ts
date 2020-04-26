@@ -53,12 +53,12 @@ export class BoardHub implements IHub {
         task.encrypted = BoardView.content.encrypted;
         task.encryptionKey = BoardView.content.encryptionKey;
 
-        const formattedTask = await new Task(task).processPreBackend();
+        const formattedTask = await new Task(task, BoardView.content.cryptoKey).processPreBackend();
         return this.connection.invoke("addBoard", this.boardId, formattedTask, underTask);
     }
 
     public async editTask(task: Task) {
-        const formattedTask = await new Task(task).processPreBackend();
+        const formattedTask = await new Task(task, BoardView.content.cryptoKey).processPreBackend();
 
         return this.connection.invoke("editBoard", this.boardId, formattedTask);
     }
@@ -78,7 +78,7 @@ export class BoardHub implements IHub {
     }
 
     private async onReceiveNewBoard(task: Task, groupId: string): Promise<void> {
-        const processedTask = await new Task(task).processPostBackend();
+        const processedTask = await new Task(task, BoardView.content.cryptoKey).processPostBackend();
         BoardView.tasklistControllers[groupId].addTask(processedTask);
     }
 
@@ -93,7 +93,7 @@ export class BoardHub implements IHub {
         const board = document.querySelector(`#tasklists [data-id="${newTaskContent.id}"]`);
         const tasklistId = board.parentElement.dataset.id;
 
-        const processedTask = await new Task(newTaskContent).processPostBackend();
+        const processedTask = await new Task(newTaskContent, BoardView.content.cryptoKey).processPostBackend();
         BoardView.tasklistControllers[tasklistId].editTask(processedTask);
     }
 
@@ -102,7 +102,7 @@ export class BoardHub implements IHub {
         if (item) item.parentNode.removeChild(item);
     }
 
-    private onRequestReload(id: string): void {
+    private onRequestReload(): void {
         BoardView.reload();
     }
 

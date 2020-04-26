@@ -7,7 +7,7 @@ import { ToastController } from "../controllers/toastController";
 import { ToastType } from "../enums/toastType";
 import { BoardView } from "../views/boardView";
 import { PermissionLevel } from "../enums/permissionLevel";
-
+import { Crypto, RSAType } from "../processing/crypto";
 
 @customElement("share-dialog")
 export class ShareDialog extends DialogBox {
@@ -39,6 +39,12 @@ export class ShareDialog extends DialogBox {
     async onOpen(): Promise<void> {
         this.list.removableItems = BoardView.permissionLevel == PermissionLevel.All;
         this.list.items = BoardView.collaborators.map(x => ({ name: x }));
+
+        if (BoardView.content.encrypted) {
+            // Encrypted boards cannot be made public.
+            this.shadowRoot.querySelector("input[name='public'").parentElement.style.display = "none";
+        }
+
     }
 
     async submitHandler(): Promise<void> {
@@ -54,15 +60,35 @@ export class ShareDialog extends DialogBox {
 
     private async onUserAdded(e: CustomEvent): Promise<void> {
         try {
+            const username = e.detail["value"];
+            let encryptionKey: string;
+
+            if (BoardView.content.encrypted) {
+                // Get the added user's public key
+                const response = await ApiRequester.send("Users", `${username}/PublicKey`, RequestType.Get);
+
+                // Import the public key so that it can be used
+                const publicKey = await Crypto.importRSAKey(JSON.parse(response).key, RSAType.Public)
+
+                // Wrap the board's encryption key using the added user's public key,
+                // so that they can unwrap it using their own private key.
+                encryptionKey = await Crypto.wrapAnyKey(
+                    BoardView.content.cryptoKey,
+                    publicKey
+                );
+            }
+            
             await ApiRequester.send("Boards", `${BoardView.id}/Users`, RequestType.Post, {
-                username: e.detail["value"]
+                username: username,
+                encryptionKey: encryptionKey // If encryption is not enabled on the board, this will simply be null.
             });
 
-            BoardView.collaborators.push(e.detail["value"])
+            BoardView.collaborators.push(username);
             ToastController.new("Collaborator added", ToastType.Info);
-        } catch {
+        } catch (err) {
             ToastController.new("Failed to add collaborator", ToastType.Error);
             e.detail["object"].undoAdd();
+            console.log(err);
         }
     }
 

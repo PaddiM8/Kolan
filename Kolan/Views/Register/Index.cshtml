@@ -6,7 +6,6 @@
       <title>Register - Kolan</title>
       <link rel="stylesheet" type="text/css" href="https://rsms.me/inter/inter.css">
       <link rel="stylesheet" type="text/css" href="~/css/login.css">
-      <script src="~/dist/components.js"></script>
    </head>
    <body>
       <img class="logo" src="/res/logo.png" />
@@ -25,9 +24,13 @@
                <input asp-for="Password" class="input" placeholder="Password..." /><br />
                <label class="error">@Html.ValidationMessageFor(m => m.RepeatPassword)</label>
                <input asp-for="RepeatPassword" class="input" placeholder="Repeat Password..." /><br />
+
+               <input asp-for="PublicKey" hidden aria-hidden />
+               <input asp-for="PrivateKey" hidden aria-hidden />
                <input type="submit" value="Register" />
             </form>
          </section>
       </main>
+      <script src="~/dist/register.js"></script>
    </body>
 </html>

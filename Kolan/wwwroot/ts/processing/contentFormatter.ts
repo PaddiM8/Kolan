@@ -14,7 +14,6 @@ const md = new MarkdownIt({ // Doing it the normal way does not work apparently!
  */
 export class ContentFormatter {
     private static markdownRenderer = md;
-    private static keyStorer = new KeyStorer();
 
     /**
      * Converts markdown to HTML

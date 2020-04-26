@@ -33,8 +33,25 @@ namespace Kolan.Controllers.Api
             if (!Config.Values.AllowRegistrations) return Unauthorized();
 
             string passwordHash = PBKDF2.Hash(model.Password);
-            await _uow.Users.AddAsync(new User { Username = model.Username, Password = passwordHash });
+            await _uow.Users.AddAsync(new User
+            {
+                Username = model.Username,
+                Password = passwordHash,
+                PublicKey = model.PublicKey,
+                PrivateKey = model.PrivateKey
+            });
+
             return Ok();
+        }
+
+        /// <summary>
+        /// Lets any user get a user's public key
+        /// </summary>
+        /// <param name="username">Get the key from this user</param>
+        [HttpGet("{username}/PublicKey")]
+        public async Task<IActionResult> GetPublicKey(string username)
+        {
+            return Ok(new { key = await _uow.Users.GetPublicKey(username) });
         }
 
         /// <summary>

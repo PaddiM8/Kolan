@@ -1,8 +1,9 @@
+using System;
 using System.Threading.Tasks;
 using Neo4jClient;
 using Kolan.Models;
 using System.Linq;
-using System.Collections;
+using Newtonsoft.Json;
 
 namespace Kolan.Repositories
 {
@@ -23,6 +24,26 @@ namespace Kolan.Repositories
                 .WithParam("newUser", entity)
                 .WithParam("newGroup", new Group { Name = "root", Id = entity.Username })
                 .ExecuteWithoutResultsAsync();
+        }
+
+        public async Task<string> GetPublicKey(string username)
+        {
+            return (await Client.Cypher
+                .Match("(user:User)")
+                .Where((User user) => user.Username == username)
+                .Return<string>("user.publicKey")
+                .ResultsAsync)
+                .SingleOrDefault();
+        }
+
+        public async Task<string> GetPrivateKey(string username)
+        {
+            return (await Client.Cypher
+                .Match("(user:User)")
+                .Where((User user) => user.Username == username)
+                .Return<string>("user.privateKey")
+                .ResultsAsync)
+                .SingleOrDefault();
         }
 
         public async Task<bool> ValidatePasswordAsync(string username, string password)

@@ -14,7 +14,7 @@ namespace Kolan.Repositories
 {
     public class BoardRepository : Repository<Board>
     {
-        private Generator _generator;
+        private readonly Generator _generator;
 
         public BoardRepository(IGraphClient client)
             : base(client)
@@ -26,15 +26,33 @@ namespace Kolan.Repositories
         /// Return all the root boards of a user.
         /// <param name="username">User to get the boards from.</param>
         /// </summary>
-        public async Task<IEnumerable<Board>> GetAllAsync(string username)
+        public async Task<dynamic> GetAllAsync(string username)
         {
             var result = await Client.Cypher
-                .Match("(user:User)-[:CHILD_BOARD]->(board:Board)")
+                .Match("(user:User)-[rel:CHILD_BOARD]->(board:Board)")
                 .Where((User user) => user.Username == username)
-                .Return(board => board.As<Board>())
+                .Return((board, rel) => new
+                {
+                    Board = board.As<Board>(),
+                    Owned = Return.As<bool>("NOT rel.shared"),
+                    EncryptionKeyIfShared = Return.As<string>("rel.encryptionKey")
+                })
                 .ResultsAsync;
+            
+            var keys = (await Client.Cypher
+                .Match("(user:User)")
+                .Where((User user) => user.Username == username)
+                .With("user.publicKey AS publicKey, user.privateKey AS privateKey")
+                .Return((publicKey, privateKey) => new {
+                    PublicKey = publicKey.As<string>(),
+                    PrivateKey = privateKey.As<string>(),
+                })
+                .ResultsAsync).FirstOrDefault();
 
-            return result;
+            return new {
+                Boards = result,
+                Keys = keys
+            };
         }
 
         /// <summary>
@@ -44,20 +62,24 @@ namespace Kolan.Repositories
         /// <param name="username">User requesting the board data</param>
         public async Task<dynamic> GetAsync(string id, string username)
         {
-            var result = await Client.Cypher
+            var result = (await Client.Cypher
                 .Match("(board:Board)")
                 .Where((Board board) => board.Id == id)
                 .OptionalMatch("(board)-[groupRel:CHILD_GROUP]->(group:Group)")
                 .OptionalMatch("(group)-[:NEXT*]->(childBoard:Board)-[:NEXT*]->(:End)")
                 .With("board, group, groupRel, {group: group, boards: collect(childBoard)} AS groups")
                 .OrderBy("groupRel.order")
-                .OptionalMatch("path=(board)<-[:CHILD_BOARD*0..]-(rootBoard)<-[:CHILD_BOARD]-(user:User)")
+                .OptionalMatch("path=(board)<-[:CHILD_BOARD*0..]-(rootBoard)<-[childBoardRel:CHILD_BOARD]-(user:User)")
                 .Where((User user) => user.Username == username)
-                .With("user, board, group, groups, path")
+                .With("user, board, group, groups, path, rootBoard, childBoardRel")
                 .OptionalMatch("sharedPath=(rootBoard)<-[:SHARED_BOARD]-()<-[:NEXT]-()<-[:CHILD_GROUP]-(user)")
-                .Return((board, group, groups, path, sharedPath) => new
+                .Return((board, group, groups, path, sharedPath, childBoardRel) => new
                 {
                     Board = board.As<Board>(),
+                    EncryptionKey = Return.As<string>(@"CASE WHEN path IS NULL
+                                                        THEN NULL
+                                                        ELSE CASE WHEN sharedPath IS NOT NULL THEN childBoardRel.encryptionKey ELSE rootBoard.encryptionKey END
+                                                        END"),
                     Groups = Return.As<IEnumerable<Groups>>("CASE WHEN group IS NULL THEN NULL ELSE collect(groups) END"),
                     Ancestors = Return.As<IEnumerable<Board>>("tail([b in nodes(path) WHERE (b:Board) | b])"),
                     UserAccess = Return.As<PermissionLevel>(@"CASE WHEN path IS NULL
@@ -65,9 +87,12 @@ namespace Kolan.Repositories
                                                               ELSE CASE WHEN sharedPath IS NOT NULL THEN 2 ELSE 3 END
                                                               END")
                 })
-                .ResultsAsync;
+                .ResultsAsync)
+                .SingleOrDefault();
 
-            return result.SingleOrDefault();
+            result.Board.EncryptionKey = result.EncryptionKey;
+
+            return result;
         }
 
         /// <summary>
@@ -114,7 +139,8 @@ namespace Kolan.Repositories
                 .Match("(user)-[:CHILD_GROUP]->(previous)-[oldRel:NEXT]->(next)")
                 .Create("(previous)-[:NEXT]->(board:Board {newBoard})-[:NEXT]->(next)")
                 .WithParam("newBoard", entity)
-                .Create("(user)-[:CHILD_BOARD]->(board)")
+                .Create("(user)-[childBoardRel:CHILD_BOARD]->(board)")
+                .Set("childBoardRel.shared = false")
                 .Delete("oldRel")
                 .With("user")
                 .Set("user.boardCount = user.boardCount + 1")
@@ -147,7 +173,6 @@ namespace Kolan.Repositories
                 .WithParam("newBoard", entity)
                 .Create("(parent)-[:CHILD_BOARD]->(board)")
                 .Set("board.encrypted = parent.encrypted")
-                .Set("board.encryptionKey = parent.encryptionKey")
                 .Delete("oldRel")
                 .ExecuteWithoutResultsAsync();
 
@@ -180,7 +205,7 @@ namespace Kolan.Repositories
                 .Match("(board:Board)")
                 .Where("board.id = {id}")
                 .WithParam("id", boardId)
-                .Set("board.public = {publicity}")
+                .Set("CASE WHEN board.encrypted = false THEN board.public = {publicity} END")
                 .WithParam("publicity", publicity)
                 .ExecuteWithoutResultsAsync();
         }
@@ -353,7 +378,8 @@ namespace Kolan.Repositories
         /// </summary>
         /// <param name="boardId">Id of the relevant board</param>
         /// <param name="username">Username of user to add</param>
-        public async Task<bool> AddUserAsync(string boardId, string username)
+        /// <param name="encryptionKey">(This should be encrypted) Encryption key used to encrypt and decrypt the board.</param>
+        public async Task<bool> AddUserAsync(string boardId, string username, string encryptionKey = null)
         {
             // Don't add user if it already has access to the board
             if (await GetUserPermissionLevel(boardId, username) >= PermissionLevel.Edit) return false;
@@ -365,7 +391,10 @@ namespace Kolan.Repositories
                 .Match("(sharedBoard:Board)", "(user)-[:CHILD_GROUP]->(previous)-[oldRel:NEXT]->(next)")
                 .Where((Board sharedBoard) => sharedBoard.Id == boardId)
                 .Create("(previous)-[:NEXT]->(link:Link)-[:NEXT]->(next)")
-                .Create("(user)-[:CHILD_BOARD]->(sharedBoard)")
+                .Create("(user)-[childBoardRel:CHILD_BOARD]->(sharedBoard)")
+                .Set("childBoardRel.shared = true")
+                .Set("childBoardRel.encryptionKey = {encryptionKey}")
+                .WithParam("encryptionKey", encryptionKey)
                 .Delete("oldRel")
                 .Create("(link)-[:SHARED_BOARD]->(sharedBoard)")
                 .Return((user) => user.As<User>().Username)

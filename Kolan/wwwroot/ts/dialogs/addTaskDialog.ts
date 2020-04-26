@@ -76,8 +76,8 @@ export class AddTaskDialog extends DialogBox {
     async submitHandler(): Promise<void> {
         let data = this.getFormData();
         const onTop: boolean = data["onTop"];
-        delete data["onTop"];
 
+        // The board hub deals with the pre-backend processing
         const response = await BoardView.boardHub.addTask(data as Task, this.groupId);
         if (response.statusCode != 200) {
             this.showErrors(response.value);

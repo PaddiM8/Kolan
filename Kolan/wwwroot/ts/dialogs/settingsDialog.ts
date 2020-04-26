@@ -44,6 +44,7 @@ export class SettingsDialog extends DialogBox {
     }
     private itemHasBeenMoved = false;
     private contentHasChanged = false;
+    private itemAddedOrRemoved = false;
 
     constructor() {
         super();
@@ -60,8 +61,13 @@ export class SettingsDialog extends DialogBox {
             BoardView.content.name = formData["name"];
             BoardView.content.description = formData["description"];
 
+            // Process (eg. encrypt) data before sending it to the backend.
             const processedBoard = await new Board(BoardView.content).processPreBackend();
-            const parentId = BoardView.ancestors.length > 0 ? BoardView.ancestors[BoardView.ancestors.length - 1] : BoardView.id;
+
+            // Get the parent's id
+            // If there are ancestors, get the last item in the ancestors list, this will be the parent id
+            // Otherwise, there is no parent.
+            const parentId = BoardView.ancestors.length > 0 ?? BoardView.ancestors[BoardView.ancestors.length - 1];
             
             try {
                 // parentId is empty if there is no parent. The backend will understand this.
@@ -81,7 +87,9 @@ export class SettingsDialog extends DialogBox {
             await ApiRequester.send("Boards", `${BoardView.id}/ChangeGroupOrder`, RequestType.Post, {
                 groupIds: JSON.stringify(this.list.items.map(x => x.id))
             });
+        }
 
+        if (this.itemHasBeenMoved || this.itemAddedOrRemoved) {
             await BoardView.boardHub.requestReload();
             location.reload(); // It won't automatically reload since the dialog is open
         }

@@ -15,5 +15,11 @@ namespace Kolan
 
       [JsonProperty("password")]
       public string Password { get; set; }
+
+      [JsonProperty("publicKey")]
+      public string PublicKey { get; set; }
+
+      [JsonProperty("privateKey")]
+      public string PrivateKey { get; set; }
    }
 }

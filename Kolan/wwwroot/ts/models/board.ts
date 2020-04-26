@@ -10,14 +10,15 @@ export class Board {
     public public?: boolean;
     public tags?: string;
 
+    // Making sure the crypto key doesn't get converted to JSON and such, while still being accessible.
     private _cryptoKey: CryptoKey;
-
     public get cryptoKey(): CryptoKey {
         return this._cryptoKey;
     }
 
-    constructor(obj?: object) {
+    constructor(obj?: object, cryptoKey?: CryptoKey) {
         if (obj) Object.assign(this, obj);
+        if (cryptoKey) this._cryptoKey = cryptoKey;
     }
 
     /**
@@ -40,7 +41,9 @@ export class Board {
 
     protected async process(func: Function): Promise<void> {
         // If encryption is disabled and there is no crypto key in the object yet, set this._cryptoKey to a cryptokey.
-        if (this.encrypted && !this.cryptoKey) this._cryptoKey = await Crypto.unwrapKey(this.encryptionKey);
+        if (this.encrypted && !this.cryptoKey) {
+            this._cryptoKey = await Crypto.unwrapEncryptionKey(this.encryptionKey);
+        }
 
         for (const key in this) {
             if (key == "id" || key == "encryptionKey") continue;

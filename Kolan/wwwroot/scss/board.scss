@@ -105,6 +105,10 @@ tasklist {
 
 .list-head .item span {
     margin: auto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: calc(100% - 80px);
 }
 
 .plus {
@@ -164,8 +168,10 @@ draggable-item {
     }
 
     h2 {
+        max-width: 100%;
         display: inline-block; // to force it to be only the size of the text
         font-size: 1.2em;
+        word-wrap: break-word;
         cursor: text;
     }
 

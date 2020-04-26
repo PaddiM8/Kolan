@@ -134,6 +134,11 @@ draggable-item {
     h2 {
         font-weight: 500;
         font-size: 1.8em;
+        word-wrap: break-word;
+    }
+
+    p {
+        word-wrap: break-word;
     }
 }
 

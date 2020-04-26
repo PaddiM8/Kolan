@@ -57,6 +57,14 @@
             background-color: #E5E5E5;
         }
     }
+
+    .red {
+        background-color: #D32F2F;
+
+        &:hover {
+            background-color: #C62828;
+        }
+    }
 }
 
 @mixin checkbox($size) {

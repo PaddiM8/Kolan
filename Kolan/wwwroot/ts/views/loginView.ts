@@ -7,6 +7,11 @@ class LoginView extends View {
     constructor() {
         super();
 
+        const spans = document.querySelectorAll("form > label > span") as NodeListOf<HTMLSpanElement>;
+        for (const span of spans) {
+            if (span.innerHTML) span.parentElement.style.display = "inline-block";
+        }
+
         const form = document.querySelector("form");
         form.addEventListener("submit", e => {
             e.preventDefault();

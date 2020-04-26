@@ -66,6 +66,7 @@ export class DialogBox extends LitElement {
         if (this.shown) {
             this.submittedAlready = false;
             this.style.display = "block";
+            (this.shadowRoot.querySelector(".dialog") as HTMLElement).style.top = (window.scrollY + 50) + "px";
             this.dispatchEvent(new CustomEvent("openDialog"));
             this.onOpen();
         } else {
@@ -189,6 +190,7 @@ export class DialogBox extends LitElement {
     */
     protected showErrors(errorString: string): void {
         const errors = JSON.parse(errorString);
+        this.submittedAlready = false;
 
         for (const name in errors) {
             const label = this.shadowRoot.querySelector(`label[for="${name}"]`) as HTMLLabelElement;

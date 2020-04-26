@@ -9,7 +9,6 @@ import { Crypto } from "../processing/crypto";
 import { ContentFormatter } from "../processing/contentFormatter";
 
 window.addEventListener("load", () => new BoardsView());
-declare const viewData;
 
 class BoardsView extends View {
     /**
@@ -46,7 +45,7 @@ class BoardsView extends View {
         const jsonObj = JSON.parse(result as string);
 
         // Import/unwrap and save the RSA keys. These will be used to wrap/unwrap board encryption keys.
-        Crypto.setRSAKeys(jsonObj.keys.publicKey, jsonObj.keys.privateKey);
+        await Crypto.setRSAKeys(jsonObj.keys.publicKey, jsonObj.keys.privateKey);
 
         for (const boardData of jsonObj.boards) {
             // If the current user does not own the board, the encryption key saved on the board itself won't work,

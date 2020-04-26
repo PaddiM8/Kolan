@@ -51,3 +51,8 @@ hr {
         background-color: #000000;
     }
 }
+@media (prefers-color-scheme: no-preference) {
+    #themeTester {
+        background-color: #000000;
+    }
+}

@@ -1,11 +1,25 @@
+$primary-color: #212121;
+$lighter-color: #424242;
+
 :host, .dialog, body, #list, #list li {
-    background-color: #424242;
+    background-color: $primary-color;
     color: white;
 }
 
+input[type="text"], input[type="email"], input[type="password"], input[type="date"], textarea {
+    background-color: $lighter-color;
+    border-color: $lighter-color;
+    color: white;
+}
+
+::placeholder {
+    color:#BDBDBD;
+}
+
 #board header {
+    background-color: $primary-color;
     box-shadow: none;
-    border-bottom: 2px solid gray;
+    border-bottom: 2px solid $lighter-color;
 }
 
 a, header #title a:visited {
@@ -13,11 +27,11 @@ a, header #title a:visited {
 }
 
 header, .list-head .item, tasklist, #list {
-    border-color: #757575;
+    border-color: $lighter-color;
 }
 
 #list li {
-    border-color: #616161;
+    border-color: $lighter-color;
 }
 
 .icon, .iconLink, .plus {
@@ -25,11 +39,11 @@ header, .list-head .item, tasklist, #list {
 }
 
 draggable-item {
-    background-color: #1565Ce;
+    background-color: #1565CE;
 }
 
 .board-list .dragger {
-    background-color: #1565Ce;
+    background-color: #1565CE;
 }
 
 .board-list draggable-item:hover {
@@ -41,7 +55,7 @@ draggable-item {
 }
 
 input[type="submit"], button, #boards draggable-item {
-    box-shadow: 1px 1px 2px 1px #302f2f;
+    box-shadow: 1px 1px 2px 1px #302F2F;
 }
 
 hr {
@@ -50,7 +64,7 @@ hr {
 }
 
 .toast.info {
-    background-color: #212121;
+    background-color: #424242;
 }
 
 .toast.warning {

@@ -1,10 +1,9 @@
 import { LitElement, html, css, property, customElement, TemplateResult } from "lit-element";
-import { ApiRequester } from "../communication/apiRequester";
-import { RequestParameter } from "../communication/requestParameter";
 import { InputType } from "../enums/inputType";
 import { DialogType } from "../enums/dialogType";
 import { InputList } from "./inputList";
 import { ThemeManager } from "../themes/themeManager";
+import { DialogOptions, DialogField } from "../models/dialogOptions";
 
 /**
  * Dialog element that takes an IDialogTemplate as input and returns an object with the values as an event.
@@ -13,8 +12,8 @@ import { ThemeManager } from "../themes/themeManager";
 @customElement('dialog-box')
 export class DialogBox extends LitElement {
     @property({type: Boolean}) shown = false;
-    @property({type: Array<object>()}) fields;
-    @property({type: String}) options;
+    @property({type: Array<Object>()}) fields: DialogField[];
+    @property({type: Object}) options: DialogOptions;
     protected list: InputList;
     private enterToSubmit = true;
     private submittedAlready = false;
@@ -25,6 +24,7 @@ export class DialogBox extends LitElement {
 
     render() {
         const dialogTypeClass = this.options.dialogType == DialogType.Disposable ? "disposable": "";
+        const submitButtonClass = this.options.redSubmitButton == true ? "red" : "";
 
         const componentHtml = html`
          <link rel="stylesheet" type="text/css" href="../css/components/dialog.css">
@@ -33,9 +33,9 @@ export class DialogBox extends LitElement {
          <section class="dialog ${dialogTypeClass}">
             <h2>${html`${this.options.title}`}</h2>
             <div id="inputs">
-                ${this.fields.map(x => html`${this.getComponentHtml(x.inputType, x.key, x.value, x.title, x.placeholder, x.optional)}`)}
+                ${this.fields.map(x => html`${this.getComponentHtml(x)}`)}
             </div>
-            <button class="submit" @click="${this.submit}">${html`${this.options.primaryButton}`}</button>
+            <button class="submit ${submitButtonClass}" @click="${this.submit}">${html`${this.options.primaryButton}`}</button>
             <button class="cancel secondary" @click="${this.cancelHandler}">Cancel</button>
          </section>`;
 
@@ -224,50 +224,55 @@ export class DialogBox extends LitElement {
     /**
      * Create the HTML for a given input type.
      */
-    private getComponentHtml(inputType: InputType, name: string, value: string, title: string = null, placeholder: string = null, optional: boolean = false): TemplateResult {
-        placeholder = placeholder == null ? value + "..." : placeholder; // Set placeholder to title if it's not specified
+    private getComponentHtml(field: DialogField): TemplateResult {
+        field.placeholder = field.placeholder == null ? field.value + "..." : field.placeholder; // Set placeholder to title if it's not specified
+        const name = field.key;
 
-        const label = optional
+        const label = field.optional
             ? html`<label class="checkboxLabel">
-                       <input type="checkbox" class="${name}Toggle" onchange="this.parentElement.nextElementSibling.nextElementSibling.disabled = !this.checked" />${value}
+                       <input type="checkbox"
+                              class="${name}Toggle"
+                              onchange="this.parentElement.nextElementSibling.nextElementSibling.disabled = !this.checked" />
+                              ${field.value}
                    </label>`
-            : html`<p>${value}</p>`;
+            : html`<p>${field.value}</p>`;
 
-        switch (inputType) {
+        switch (field.inputType) {
             case InputType.Text:
                 return html`${label}
                             <label for="${name}" class="error"></label>
-                            <input type="text" name="${name}" placeholder="${placeholder}" ?disabled=${optional} /><br />`;
+                            <input type="text" name="${name}" placeholder="${field.placeholder}" ?disabled=${field.optional} /><br />`;
             case InputType.Password:
                 return html`${label}
                             <label for="${name}" class="error"></label>
-                            <input type="password" name="${name}" placeholder="${placeholder}" ?disabled=${optional} /><br />`;
+                            <input type="password" name="${name}" placeholder="${field.placeholder}" ?disabled=${field.optional} /><br />`;
             case InputType.TextArea:
                 this.enterToSubmit = false;
 
                 return html`${label}
                             <label for="${name}" class="error"></label>
-                            <textarea name="${name}" placeholder="${placeholder}" ?disabled=${optional}></textarea>`;
+                            <textarea name="${name}" placeholder="${field.placeholder}" ?disabled=${field.optional}></textarea>`;
             case InputType.InputList:
                 this.enterToSubmit = false;
 
-                this.list = new InputList(value);
+                this.list = new InputList(field.value);
                 let listElement = this.list as HTMLElement;
                 listElement.setAttribute("name", name);
-                return html`<h3>${title}</h3>${listElement}`;
+                return html`<h3>${field.title}</h3>${listElement}`;
             case InputType.Checkbox:
-                return html`<label class="checkboxLabel" class="error"><input type="checkbox" name="${name}" />${value}</label>`
+                return html`<label class="checkboxLabel" class="error"><input type="checkbox" name="${name}" />${field.value}</label>`
             case InputType.Color:
-                return html`<p style="display: inline-block;">${value}:</p>
+                return html`<p style="display: inline-block;">${field.value}:</p>
                             <label for="${name}" class="error"></label>
                             <input type="color" name="${name}" /><br />`;
             case InputType.Date:
                 return html`${label}
                             <label for="${name}" class="error"></label>
-                            <input type="date" name="${name}" ?disabled=${optional} /><br />`;
+                            <input type="date" name="${name}" ?disabled=${field.optional} /><br />`;
             case InputType.Button:
+                const additionalClassName = field.red ? "red" : "";
                 return html`${label}
-                            <button class="${name}">${value}</button>`;
+                            <button class="${name} ${additionalClassName}">${field.value}</button>`;
             default:
                 return html``;
         }

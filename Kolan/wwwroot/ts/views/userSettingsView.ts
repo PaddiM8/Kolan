@@ -34,7 +34,7 @@ class UserSettingsView extends View {
         // Remove user
         const removeUserButton = document.getElementById("removeUserButton");
         removeUserButton.addEventListener("click", () => {
-            const dialog = new PasswordDialog("Confirm password to delete (this will remove ALL your boards)", "Delete");
+            const dialog = new PasswordDialog("Confirm password to delete (this will remove ALL your boards)", "Delete", true);
             document.body.appendChild(dialog);
             dialog.shown = true;
 

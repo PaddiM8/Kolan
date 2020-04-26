@@ -18,12 +18,14 @@ export class PasswordDialog extends DialogBox {
     @property({type: Object}) options = {
         title: "",
         primaryButton: "",
-        dialogType: DialogType.Disposable
+        dialogType: DialogType.Disposable,
+        redSubmitButton: false
     }
 
-    constructor(message: string, buttonText: string) {
+    constructor(message: string, buttonText: string, redSubmitButton = false) {
         super();
         this.options.title = message;
         this.options.primaryButton = buttonText;
+        this.options.redSubmitButton = redSubmitButton;
     }
 }

@@ -26,7 +26,7 @@ export class ShareDialog extends DialogBox {
     ];
     @property({type: Object}) options = {
         title: "Share",
-        primaryButton: "Done"
+        primaryButton: "Save"
     }
 
     constructor() {

@@ -41,7 +41,7 @@ export class EditTaskDialog extends DialogBox {
     ];
     @property({type: Object}) options = {
         title: "Edit Task",
-        primaryButton: "Edit"
+        primaryButton: "Save"
     }
 
     constructor() {

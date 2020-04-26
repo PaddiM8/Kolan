@@ -9,10 +9,11 @@ import { Task } from "../models/task";
 import { Board } from "../models/board";
 import { Crypto } from "../processing/crypto";
 import { Defaults } from "../defaults";
+import { DialogOptions, DialogField } from "../models/dialogOptions";
 
 @customElement("add-board-dialog")
 export class AddBoardDialog extends DialogBox {
-    @property({type: Array<object>()}) fields = [
+    @property({type: Array<Object>()}) fields: DialogField[] = [
         {
             key: "name",
             value: "Board name",
@@ -29,7 +30,7 @@ export class AddBoardDialog extends DialogBox {
             inputType: InputType.Checkbox,
         }
     ];
-    @property({type: Object}) options = {
+    @property({type: Object}) options: DialogOptions = {
         title: "Add Board",
         primaryButton: "Add"
     }

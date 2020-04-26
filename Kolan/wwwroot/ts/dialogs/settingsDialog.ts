@@ -35,12 +35,13 @@ export class SettingsDialog extends DialogBox {
         {
             key: "deleteBoard",
             value: "Delete board",
-            inputType: InputType.Button
+            inputType: InputType.Button,
+            red: true
         }
     ];
     @property({type: Object}) options = {
         title: "Board Settings",
-        primaryButton: "Done"
+        primaryButton: "Save"
     }
     private itemHasBeenMoved = false;
     private contentHasChanged = false;
@@ -136,7 +137,7 @@ export class SettingsDialog extends DialogBox {
     }
 
     private async deleteBoard(): Promise<void> {
-        const confirmDialog = new ConfirmDialog("Are you sure you want to delete the board?", "Yes");
+        const confirmDialog = new ConfirmDialog("Are you sure you want to delete the board?", "Yes", true);
         document.body.appendChild(confirmDialog);
 
         confirmDialog.addEventListener("submitDialog", async () => {

@@ -17,10 +17,9 @@ namespace Kolan.Controllers
             _uow = uow;
         }
 
-        public async Task<IActionResult> Index(string privateKey = null)
+        public async Task<IActionResult> Index()
         {
             ViewData["username"] = User.Identity.Name;
-            ViewData["privateKey"] = await _uow.Users.GetPrivateKey(User.Identity.Name);
 
             return View();
         }

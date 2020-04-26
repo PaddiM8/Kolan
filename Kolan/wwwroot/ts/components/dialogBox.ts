@@ -67,8 +67,7 @@ export class DialogBox extends LitElement {
             this.submittedAlready = false;
             this.style.display = "block";
             this.dispatchEvent(new CustomEvent("openDialog"));
-            this.onOpen().then();
-            window.scrollTo(0, 0);
+            this.onOpen();
         } else {
             this.style.display = "none";
         }

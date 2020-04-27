@@ -1,3 +1,5 @@
+@import "icons";
+
 @mixin text-input($size) {
     input[type="text"], input[type="password"], input[type="email"], textarea, input[type="date"] {
         padding: 10px 12px 10px 12px;
@@ -81,7 +83,41 @@
             display: inline-block;
             vertical-align: middle;
             padding-bottom: 2px;
-            margin-right: 7px;
+            margin-right: 10px;
+            margin-top: 0;
+            cursor: pointer;
+        }
+
+        input::before {
+            display: inline-block;
+            width: 1.3em;
+            height: 1.3em;
+            margin-right: 10px;
+
+            //content: " ";
+            content: "";
+            text-align: center;
+            padding-top: 1px;
+            background-color: get-text-color($background-color);
+
+            box-sizing: border-box;
+            transform: translateY(-2px);
+
+            color: get-text-color($background-color);
+            transition: 120ms ease color, .3s ease background-color;
+        }
+
+        input:hover::before {
+            background-color: #D3D3D3;
+        }
+
+        input:checked::before {
+            font-family: "iconfont";
+            @if get-text-color($background-color) == #000000 {
+                color: #FFFFFF;
+            } @else {
+                color: #000000;
+            }
         }
     }
 }

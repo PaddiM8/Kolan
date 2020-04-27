@@ -16,62 +16,23 @@ export class ToastNotif extends LitElement {
         this.persistent = persistent;
     }
 
-    static get styles() {
-        return css `
-            :host {
-                position: absolute;
-                min-width: 300px;
-                font-family: "Inter", sans-serif;
-                top: 0;
-
-                margin-left: 50%;
-                transform: translateX(-50%);
-                transition: 1s ease all;
-                z-index: 999999;
-            }
-
-            :host > div {
-                width: 100%;
-                height: 100%;
-                padding: 15px;
-                transform: translateY(-80px);
-                border-radius: 8px;
-                color: white;
-                transition: .2s ease all;
-            }
-
-            div.slide-down {
-                transform: translateY(10px);
-            }
-
-            fa-icon {
-                display: inline-block;
-                margin-left: 5px;
-                margin-right: 10px;
-                float: left;
-            }
-
-            span {
-                display: inline-block;
-            }
-
-            .info {
-                background-color: #424242;
-            }
-
-            .warning {
-                background-color: #F9A825;
-            }
-
-            .error {
-                background-color: #E53935;
-            }
-        `;
-    }
-
     render() {
+        // The :host style block needs to be applied immediately.
         return html`
-        <link rel="stylesheet" type="text/css" href="../css/themes/${ThemeManager.getTheme()}.css">
+        <style>
+        :host {
+            position: absolute;
+            min-width: 300px;
+            font-family: "Inter", sans-serif;
+            top: 0;
+
+            margin-left: 50%;
+            transform: translateX(-50%);
+            transition: 1s ease all;
+            z-index: 999999;
+        }
+        </style>
+        <link rel="stylesheet" type="text/css" href="../css/components/toastNotif.${ThemeManager.getTheme()}.css">
         <div id="content" class="toast ${this.type}" @click="${this.onClick}">
             <fa-icon class="fas fa-${this.getIconName()}" size="18px" color="#fff" path-prefix="/node_modules"></fa-icon>
             <span>${this.message}</span>

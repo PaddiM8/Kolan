@@ -2,7 +2,7 @@ import { ThemeManager } from "../themes/themeManager";
 
 export class View {
     constructor() {
-        ThemeManager.injectStyle();
+        ThemeManager.setToPreferedTheme();
     }
 
     protected showFormErrors(form: HTMLFormElement, errorString: string): void {

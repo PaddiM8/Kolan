@@ -1,40 +1,33 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-        <meta name="description" content="Kolan login. A recursive and real-time collaborative Kanban">
-        <title>Boards - Kolan</title>
+@{  
+   ViewData["title"] = "Boards"; 
+   ViewData["name"] = "boards"; 
+   ViewData["style"] = "boards"; 
+   Layout = "~/Views/Shared/_Layout.cshtml"; 
+}
 
-        <link rel="stylesheet" type="text/css" href="https://rsms.me/inter/inter.css">
-        <link rel="stylesheet" type="text/css" href="~/css/boards.css">
-    </head>
-    <body id="boards">
-        <div class="top left">
-            <button id="logoutButton" class="icon icon-sign-out logout" alt="logout" tabindex="1"></button>
-            <label>Logout</label>
+<div class="top left">
+    <button id="logoutButton" class="icon icon-sign-out logout" alt="logout" tabindex="1"></button>
+    <label>Logout</label>
+</div>
+<div class="top right">
+    <label>@ViewData["username"] - Settings</label>
+    <a href="/UserSettings" class="iconLink" tabindex="3"><span class="icon icon-cog gear" alt="settings" role="button"></span></a>
+</div>
+<main>
+    <header>
+        <h1>Boards</h1>
+        <button id="addBoard" class="plus" tabindex="2">+</button>
+        <hr />
+    </header>
+    <section class="board-list">
+        <placeholder></placeholder>
+        <div class="draggableContainer">
         </div>
-        <div class="top right">
-            <label>@ViewData["username"] - Settings</label>
-            <a href="/UserSettings" class="iconLink" tabindex="3"><span class="icon icon-cog gear" alt="settings" role="button"></span></a>
-        </div>
-        <main>
-            <header>
-                <h1>Boards</h1>
-                <button id="addBoard" class="plus" tabindex="2">+</button>
-                <hr />
-            </header>
-            <section class="board-list">
-                <placeholder></placeholder>
-                <div class="draggableContainer">
-                </div>
-            </section>
-        </main>
-        <script>
-            const viewData = {
-                username: '@ViewData["username"]'
-            };
-        </script>
-        <script src="~/dist/boards.js"></script>
-    </body>
-</html>
+    </section>
+</main>
+<script>
+    const viewData = {
+        username: '@ViewData["username"]'
+    };
+</script>
+<script src="~/dist/boards.js"></script>

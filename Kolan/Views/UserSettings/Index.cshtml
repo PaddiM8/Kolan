@@ -1,52 +1,49 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-        <title>User Settings - Kolan</title>
+@{  
+   ViewData["title"] = "User Settings"; 
+   ViewData["name"] = "userSettings";
+   ViewData["style"] = "userSettings";
+   Layout = "~/Views/Shared/_Layout.cshtml"; 
+}
 
-        <link rel="stylesheet" type="text/css" href="https://rsms.me/inter/inter.css">
-        <link rel="stylesheet" type="text/css" href="~/css/userSettings.css">
-        <script src="~/dist/userSettings.js"></script><!-- In the head to load drop-down properly since it is not created dynamically -->
-    </head>
-    <body id="userSettings">
-        <header>
-            <a href="../" class="iconLink">
-                <span id="backButton"
-                      class="icon icon-arrow-left"
-                      role="button">
-                      </span>
-            </a>
-            <h1>User Settings</h1>
-            <hr />
-        </header>
-        <main>
-            <h3>Change Password</h3>
-            @model ChangePasswordViewModel
-            <form asp-action="ChangePassword" method="post">
-                <label class="error">@Html.ValidationMessageFor(m => m.CurrentPassword)</label>
-                <input asp-for="CurrentPassword" class="input" placeholder="Current password..." />
-                <label class="error">@Html.ValidationMessageFor(m => m.NewPassword)</label>
-                <input asp-for="NewPassword" class="input" placeholder="New password..." />
-                <label class="error">@Html.ValidationMessageFor(m => m.RepeatPassword)</label>
-                <input asp-for="RepeatPassword" class="input" placeholder="Repeat password..." />
-                <input type="submit" value="Change" />
-            </form>
+@section head {
+   <script src="~/dist/userSettings.js"></script><!-- In the head to load drop-down properly since it is not created dynamically -->
+}
 
-            <h3>Appearance</h3>
-            <label>Theme: </label><drop-down id="themeSelect"></drop-down>
+<header>
+    <a href="../" class="iconLink">
+        <span id="backButton"
+                class="icon icon-arrow-left"
+                role="button">
+                </span>
+    </a>
+    <h1>User Settings</h1>
+    <hr />
+</header>
+<main>
+    <h3>Change Password</h3>
+    @model ChangePasswordViewModel
+    <form asp-action="ChangePassword" method="post">
+        <label class="error">@Html.ValidationMessageFor(m => m.CurrentPassword)</label>
+        <input asp-for="CurrentPassword" class="input" placeholder="Current password..." />
+        <label class="error">@Html.ValidationMessageFor(m => m.NewPassword)</label>
+        <input asp-for="NewPassword" class="input" placeholder="New password..." />
+        <label class="error">@Html.ValidationMessageFor(m => m.RepeatPassword)</label>
+        <input asp-for="RepeatPassword" class="input" placeholder="Repeat password..." />
+        <input type="submit" value="Change" />
+    </form>
 
-            <h3>Remove Account</h3>
-            <button id="removeUserButton">Remove</button>
-        </main>
-        <script>
-            const tempData = {
-                message: '@TempData["message"]'
-            };
+    <h3>Appearance</h3>
+    <label>Theme: </label><drop-down id="themeSelect"></drop-down>
 
-            const viewData = {
-                username: '@ViewData["username"]'
-            }
-        </script>
-    </body>
-</html>
+    <h3>Remove Account</h3>
+    <button id="removeUserButton">Remove</button>
+</main>
+<script>
+    const tempData = {
+        message: '@TempData["message"]'
+    };
+
+    const viewData = {
+        username: '@ViewData["username"]'
+    }
+</script>

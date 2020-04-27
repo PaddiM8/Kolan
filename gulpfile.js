@@ -6,17 +6,19 @@ const terser  = require("gulp-terser");
 const webpack = require("webpack-stream");
 const prefix  = require("gulp-autoprefixer");
 const notify  = require("gulp-notify");
-const tsProject = ts.createProject('tsconfig.json');
+const tsProject  = ts.createProject('tsconfig.json');
+const sassThemes = require("./sass-themes.js");
 
 sass.compiler = require("node-sass");
 
 gulp.task("sass", function() {
     return gulp.src("./Kolan/wwwroot/scss/**/*.scss")
+        .pipe(sassThemes("themes/_*.scss", { cwd: "./Kolan/wwwroot/scss" }))
         .pipe(sass({
-            outputStyle: 'compressed'
+            outputStyle: "compressed"
         }).on("error", sass.logError))
         .pipe(prefix({
-            browsers: ['last 2 versions'],
+            browsers: ["last 2 versions"],
             cascade: false
         }))
         .pipe(gulp.dest("./Kolan/wwwroot/css"));

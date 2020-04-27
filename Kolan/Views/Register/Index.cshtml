@@ -1,33 +1,30 @@
-<!DOCTYPE html>
-<html lang="en">
-   <head>
-      <meta charset="utf-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-      <title>Register - Kolan</title>
-      <link rel="stylesheet" type="text/css" href="https://rsms.me/inter/inter.css">
-      <link rel="stylesheet" type="text/css" href="~/css/login.css">
-   </head>
-   <body>
-      <img class="logo" src="/res/logo.png" />
-      <main>
-         <header>
-            <h1>Register</h1>
-         </header>
-         <section>
-            <form>
-               <label class="error" for="emailInput"></label>
-               <input type="email" id="emailInput" class="input" placeholder="Email..." /><br />
-               <label class="error" for="usernameInput"></label>
-               <input type="text" id="usernameInput" class="input" placeholder="Username..." /><br />
-               <label class="error" for="passwordInput"></label>
-               <input type="password" id="passwordInput" class="input" placeholder="Password..." /><br />
-               <label class="error" for="repeatPasswordInput"></label>
-               <input type="password" id="repeatPasswordInput" class="input" placeholder="Repeat Password..." /><br />
+@{  
+   ViewData["title"] = "Register"; 
+   ViewData["style"] = "login"; 
+   Layout = "~/Views/Shared/_Layout.cshtml"; 
+}
 
-               <input type="submit" value="Register" />
-            </form>
-         </section>
-      </main>
-      <script src="~/dist/register.js"></script>
-   </body>
-</html>
+@section meta {
+   <meta name="description" content="Kolan register. A recursive and real-time collaborative Kanban">
+}
+
+<img class="logo" src="/res/logo.png" />
+<main>
+   <header>
+      <h1>Register</h1>
+   </header>
+   <section>
+      <form>
+         <label class="error" for="emailInput"></label>
+         <input type="email" id="emailInput" class="input" placeholder="Email..." /><br />
+         <label class="error" for="usernameInput"></label>
+         <input type="text" id="usernameInput" class="input" placeholder="Username..." /><br />
+         <label class="error" for="passwordInput"></label>
+         <input type="password" id="passwordInput" class="input" placeholder="Password..." /><br />
+         <label class="error" for="repeatPasswordInput"></label>
+         <input type="password" id="repeatPasswordInput" class="input" placeholder="Repeat Password..." /><br />
+
+         <input type="submit" value="Register" />
+      </form>
+   </section>
+</main>

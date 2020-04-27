@@ -1,15 +1,19 @@
-@import "reset";
 @import "icons";
 
-$white: #fafafa;
-$dark: #343434;
-$primary: #6163dd;
-$secondary: #d8A147;
-$gray: #dbdbdb;
+@function get-text-color($background-color) {
+    @if (lightness($background-color) > 70) {
+        @return #000000;
+    } @else {
+        @return #FFFFFF;
+    }
+}
+
+html {
+    font-size: 12px;
+}
 
 body {
-    background-color: $white;
-    margin: 0;
+    background-color: $background-color;    margin: 0;
     font-family: "Inter", sans-serif;
 }
 
@@ -23,10 +27,6 @@ h2 {
 
 h3 {
     font-size: 1.5em;
-}
-
-.shadow {
-    box-shadow: 2px 2px 2px 1px $gray;
 }
 
 .iconLink {
@@ -50,6 +50,11 @@ hr {
     display: none;
     color: red;
     margin-bottom: 3px;
+}
+
+#themeTester {
+    width: 0;
+    height: 0;
 }
 
 @media (prefers-color-scheme: dark) {

@@ -25,8 +25,7 @@ export class InputList extends LitElement {
 
     render() {
         return html`
-        <link rel="stylesheet" type="text/css" href="../css/components/dialog.css">
-        <link rel="stylesheet" type="text/css" href="../css/themes/${ThemeManager.getTheme()}.css">
+        <link rel="stylesheet" type="text/css" href="../css/components/dialog.${ThemeManager.getTheme()}.css">
         <style>
             :host {
                 font-family: "Inter", sans-serif;
@@ -99,13 +98,15 @@ export class InputList extends LitElement {
                 margin-bottom: -3px;
             }
         </style>
-        <section class="inputBlock">
-            <input id="textInput" type="text" placeholder="${this.inputPlaceholder}" />
-            <button @click="${(e) => this.addItem()}">Add</button>
-        </section>
-        <ul id="list">
-            ${this.items.map((item) => this.createItem(item.name))}
-        </ul>
+        <div class="inputList">
+            <section class="inputBlock">
+                <input id="textInput" type="text" placeholder="${this.inputPlaceholder}" />
+                <button @click="${(e) => this.addItem()}">Add</button>
+            </section>
+            <ul id="list">
+                ${this.items.map((item) => this.createItem(item.name))}
+            </ul>
+        </div>
         `;
     }
 

@@ -27,8 +27,7 @@ export class DialogBox extends LitElement {
         const submitButtonClass = this.options.redSubmitButton == true ? "red" : "";
 
         const componentHtml = html`
-         <link rel="stylesheet" type="text/css" href="../css/components/dialog.css">
-         <link rel="stylesheet" type="text/css" href="../css/themes/${ThemeManager.getTheme()}.css">
+         <link rel="stylesheet" type="text/css" href="../css/components/dialog.${ThemeManager.getTheme()}.css">
          <div class="dialogBackground ${dialogTypeClass}"></div>
          <section class="dialog ${dialogTypeClass}">
             <h2>${html`${this.options.title}`}</h2>

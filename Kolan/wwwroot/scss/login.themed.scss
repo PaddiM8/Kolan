@@ -25,6 +25,7 @@ main {
    left: 50%;
    font-family: "Inter", sans-serif;
    transform: translate(-50%, -70%);
+   color: get-text-color($background-color);
 
    form {
       width: 100%;
@@ -41,7 +42,12 @@ main {
       }
 
       a.registerLink {
-          font-size: 1.3em;
+          font-size: 1.5em;
+          line-height: 2em;
+      }
+
+      a, a:visited {
+          color: $link-color;
       }
    }
 }

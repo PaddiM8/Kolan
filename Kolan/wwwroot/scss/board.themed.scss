@@ -1,20 +1,21 @@
 @import "./common";
 
 body {
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 main {
     display: grid;
-    grid-template-rows: 75px calc(100% - 75px);
+    grid-template-rows: auto 1fr;
+    min-height: 100vh;
     overflow: hidden;
 }
 
 header {
     display: flex;
     font-family: 'Inter', sans-serif;
-    background-color: #424242;
-    color: white;
+    background-color: $board-page-header-color;
+    color: get-text-color($board-page-header-color);
     padding: 15px;
     box-sizing: border-box;
     box-shadow: 0px 2px 2px -1px rgba(0, 0, 0, 0.4);
@@ -30,7 +31,7 @@ header {
         }
 
         a, a:visited {
-            color: #42A5F5;
+            color: $link-color;
         }
 
         a, span {
@@ -57,13 +58,16 @@ header {
         .icon {
             cursor: pointer;
             margin-left: 5px;
-            font-size: 38px;
+            font-size: 2.5em;
+            color: get-text-color($board-page-header-color);
         }
     }
 }
 
 .content {
-    width: 100vw;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    width: calc(100vw + 2px);
     overflow-x: auto;
 }
 
@@ -73,7 +77,8 @@ header {
 
 .tasklists, .list-head {
     display: grid;
-    width: calc(100vw - 10px);
+    //width: calc(100vw - 10px);
+    background-color: $background-color;
     font-family: "Inter", sans-serif;
     grid-template-columns: repeat(4, 1fr);
 }
@@ -83,18 +88,17 @@ tasklist, .list-head .item {
 }
 
 .list-head .item {
-    border-right: 2px solid $gray;
-    height: 50px;
+    border-right: $tasklist-border;
     padding-right: 10px;
     box-sizing: border-box;
     text-align: center;
-    line-height: 50px;
-    border-bottom: 2px solid $gray;
+    border-bottom: $tasklist-border;
+    border-top: $tasklist-border;
 }
 
 tasklist {
     min-height: calc(100vh - 144px);
-    border-right: 2px solid $gray;
+    border-right: $tasklist-border;
     box-sizing: border-box;
     overflow: hidden;
 }
@@ -107,7 +111,9 @@ tasklist {
     margin: auto;
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
+    text-overflow: ellipsis;;
+    font-size: 1.2em;
+    color: get-text-color($background-color);
     max-width: calc(100% - 80px);
 }
 
@@ -118,7 +124,7 @@ tasklist {
     font-family: sans-serif;
     font-size: 30px;
     font-weight: 100;
-    color: black;
+    color: get-text-color($background-color);
 
     background-color: transparent;
     border: 0;
@@ -151,9 +157,9 @@ draggable-item {
     font-family: "Inter", sans-serif;
     padding: 20px;
     padding-right: 30px;
-    background-color: $primary;
+    background-color: $board-background-color;
     border-radius: 9px;
-    color: white;
+    color: get-text-color($board-background-color);
     margin: 12px;
     overflow: hidden;
     cursor: grabbing;
@@ -163,19 +169,20 @@ draggable-item {
     }
 
     a {
-        color: white;
-        cursor: text;
+        color: get-text-color($board-background-color);
+        cursor: pointer;
     }
 
     h2 {
         max-width: 100%;
         display: inline-block; // to force it to be only the size of the text
-        font-size: 1.2em;
+        font-size: 1.5em;
         word-wrap: break-word;
         cursor: text;
     }
 
     .description {
+        font-size: 1.2em;
         word-wrap: break-word;
         cursor: text;
     }
@@ -288,7 +295,7 @@ draggable-item.dragged {
     }
 
     #list-head > .item.selected {
-        background-color: #D3D3D3;
+        background-color: darken($background-color, 20%);
     }
 
     .draggableContainer {

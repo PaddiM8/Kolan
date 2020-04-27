@@ -7,6 +7,7 @@ body {
     display: grid;
     grid-template-columns: auto 500px auto;
     grid-template-rows: 150px auto;
+    color: get-text-color($background-color);
 }
 
 h1 {
@@ -25,7 +26,7 @@ header {
 
     .iconLink {
         text-decoration: none;
-        color: black;
+        color: get-text-color($background-color);
 
         &:active {
             outline: none;
@@ -38,14 +39,16 @@ header {
         margin-right: 10px;
         margin-top: 6px;
         vertical-align: middle;
-        font-size: 30px;
+        font-size: 2.5em;
 
         cursor: pointer;
-        transition: .2s ease transform;
+        transition: .2s ease padding-right, .2s ease margin-left;
     }
 
     .icon:hover {
-        transform: translateX(-8px);
+        //transform: translateX(-8px);
+        padding-right: 8px;
+        margin-left: -8px;
     }
 
     h1 {

@@ -1,32 +1,29 @@
-<!DOCTYPE html>
-<html lang="en">
-   <head>
-      <meta charset="utf-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-      <title>Login - Kolan</title>
-      <link rel="stylesheet" type="text/css" href="https://rsms.me/inter/inter.css">
-      <link rel="stylesheet" type="text/css" href="~/css/login.css">
-      <script src="~/dist/components.js"></script>
-   </head>
-   <body>
-      <img class="logo" src="/res/logo.png" />
-      <main>
-         <header>
-            <h1>Kolan</h1>
-         </header>
-         <section>
-            @model LoginViewModel
-            <form asp-action="Login" method="post">
-               <label class="error">@Html.ValidationMessageFor(m => m.Username)</label>
-               <input asp-for="Username" class="input" placeholder="Username..." /><br />
-               <label class="error">@Html.ValidationMessageFor(m => m.Password)</label>
-               <input asp-for="Password" class="input" placeholder="Password..." /><br />
+@{  
+   ViewData["title"] = "Login"; 
+   ViewData["style"] = "login"; 
+   Layout = "~/Views/Shared/_Layout.cshtml"; 
+}
 
-               <input type="submit" value="Login" />
-               @if (Config.Values.AllowRegistrations) { <a class="registerLink" href="/Register">Create account</a> }
-            </form>
-         </section>
-      </main>
-      <script src="~/dist/login.js"></script>
-   </body>
-</html>
+@section meta {
+   <meta name="description" content="Kolan login. A recursive and real-time collaborative Kanban">
+}
+
+<img class="logo" src="/res/logo.png" />
+<main>
+   <header>
+      <h1>Kolan</h1>
+   </header>
+   <section>
+      @model LoginViewModel
+      <form asp-action="Login" method="post">
+         <label class="error">@Html.ValidationMessageFor(m => m.Username)</label>
+         <input asp-for="Username" class="input" placeholder="Username..." /><br />
+         <label class="error">@Html.ValidationMessageFor(m => m.Password)</label>
+         <input asp-for="Password" class="input" placeholder="Password..." /><br />
+
+         <input type="submit" value="Login" />
+         @if (Config.Values.AllowRegistrations) { <a class="registerLink" href="/Register">Create account</a> }
+      </form>
+   </section>
+</main>
+<script src="~/dist/login.js"></script>

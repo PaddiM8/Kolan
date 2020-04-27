@@ -97,8 +97,15 @@
             //content: " ";
             content: "";
             text-align: center;
-            padding-top: 1px;
+            padding-top: 2px;
+            border-radius: 2px;
             background-color: get-text-color($background-color);
+            @if get-text-color($background-color) == #FFFFFF {
+                background-color: #D3D3D3;
+            } @else {
+                background-color: #E0E0E0;
+                border-bottom: 1px solid #BDBDBD;
+            }
 
             box-sizing: border-box;
             transform: translateY(-2px);
@@ -108,16 +115,16 @@
         }
 
         input:hover::before {
-            background-color: #D3D3D3;
+            @if get-text-color($background-color) == #FFFFFF {
+                background-color: #BDBDBD;
+            } @else {
+                background-color: #D3D3D3;
+            }
         }
 
         input:checked::before {
             font-family: "iconfont";
-            @if get-text-color($background-color) == #000000 {
-                color: #FFFFFF;
-            } @else {
-                color: #000000;
-            }
+            color: #000000;
         }
     }
 }

@@ -1,54 +1,23 @@
+$v: "0";
 @font-face {
-  font-family: 'icomoon';
-  src:  url('/res/fonts/icomoon.eot?z0643n');
-  src:  url('/res/fonts/icomoon.eot?z0643n#iefix') format('embedded-opentype'),
-    url('/res/fonts/icomoon.ttf?z0643n') format('truetype'),
-    url('/res/fonts/icomoon.woff?z0643n') format('woff'),
-    url('/res/fonts/icomoon.svg?z0643n#icomoon') format('svg');
-  font-weight: normal;
-  font-style: normal;
-  font-display: block;
+	font-family: "iconfont";
+	src: url("../res/fonts/iconfont.eot?v=#{$v}");
+	src: url("../res/fonts/iconfont.eot?v=#{$v}#iefix") format("eot"),
+		url("../res/fonts/iconfont.woff?v=#{$v}") format("woff"),
+		url("../res/fonts/iconfont.ttf?v=#{$v}") format("truetype"),
 }
 
-[class^="icon-"], [class*=" icon-"] {
-  /* use !important to prevent issues with browser extensions that change fonts */
-  font-family: 'icomoon' !important;
-  speak: none;
-  font-style: normal;
-  font-weight: normal;
-  font-variant: normal;
-  text-transform: none;
-  line-height: 1;
-
-  /* Better Font Rendering =========== */
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+.icon:before {
+	font-family: "iconfont";
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	font-style: normal;
+	font-variant: normal;
+	font-weight: normal;
+	/* speak: none; only necessary if not using the private unicode range (firstGlyph option) */
+	text-decoration: none;
+	text-transform: none;
+	line-height: 1;
 }
 
-.icon-clock:before {
-  content: "\e900";
-}
-.icon-sign-out:before {
-  content: "\e901";
-}
-.icon-trash:before {
-  content: "\e902";
-}
-.icon-share-alt:before {
-  content: "\e903";
-}
-.icon-pen:before {
-  content: "\e904";
-}
-.icon-cog:before {
-  content: "\e905";
-}
-.icon-bars:before {
-  content: "\e906";
-}
-.icon-arrow-left:before {
-  content: "\e907";
-}
-.icon-times:before {
-  content: "\e908";
-}
+@import "glyphs";

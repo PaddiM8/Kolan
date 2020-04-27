@@ -34,7 +34,7 @@ export class ToastNotif extends LitElement {
         </style>
         <link rel="stylesheet" type="text/css" href="../css/components/toastNotif.${ThemeManager.getTheme()}.css">
         <div id="content" class="toast ${this.type}" @click="${this.onClick}">
-            <fa-icon class="fas fa-${this.getIconName()}" size="18px" color="#fff" path-prefix="/node_modules"></fa-icon>
+            <span class="icon icon-${this.getIconName()}"></span>
             <span>${this.message}</span>
         </div>
         `;
@@ -66,8 +66,8 @@ export class ToastNotif extends LitElement {
     private getIconName(): string {
         switch (this.type) {
             case ToastType.Info:    return "info";
-            case ToastType.Warning: return "exclamation-triangle";
-            case ToastType.Error:   return "exclamation-circle";
+            case ToastType.Warning: return "warning";
+            case ToastType.Error:   return "error";
         }
     }
 

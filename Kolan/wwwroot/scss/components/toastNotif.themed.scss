@@ -8,13 +8,15 @@
     border-radius: 8px;
     color: white;
     transition: .2s ease all;
+    font-size: 1.2em;
 }
 
 div.slide-down {
     transform: translateY(10px);
 }
 
-fa-icon {
+.icon {
+    font-size: 1.2em;
     margin-left: 5px;
     margin-right: 10px;
     float: left;

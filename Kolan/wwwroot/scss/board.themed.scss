@@ -25,6 +25,8 @@ header {
         display: inline-block;
         font-size: 2em;
         font-weight: 400;
+        margin-top: auto;
+        margin-bottom: auto;
 
         a {
             max-width: 100px;
@@ -50,15 +52,13 @@ header {
     }
 
     .right {
-        display: inline-block;
-        height: 100%;
         margin-left: auto;
-        margin-right: 10px;
+        margin-bottom: -10px;
 
         .icon {
             cursor: pointer;
             margin-left: 5px;
-            font-size: 2.5em;
+            font-size: 3em;
             color: get-text-color($board-page-header-color);
         }
     }
@@ -109,9 +109,12 @@ tasklist {
 
 .list-head .item span {
     margin: auto;
+    padding-top: 12px;
+    padding-bottom: 12px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;;
+
     font-size: 1.2em;
     color: get-text-color($background-color);
     max-width: calc(100% - 80px);
@@ -165,7 +168,7 @@ draggable-item {
     cursor: grabbing;
 
     &:hover {
-        filter: brightness(92%);
+        filter: $board-hover-filter;
     }
 
     a {

@@ -148,8 +148,8 @@ placeholder {
 placeholder {
     display: none;
     padding: 17px;
-    border: 3px dashed black;
-    border-radius: 9px;
+    border: $placeholder-border;
+    border-radius: $placeholder-border-radius;
     z-index: 9;
     margin: 20px;
 }
@@ -158,8 +158,6 @@ draggable-item {
     display: block;
     position: relative;
     font-family: "Inter", sans-serif;
-    padding: 20px;
-    padding-right: 30px;
     background-color: $board-background-color;
     border-radius: 9px;
     color: get-text-color($board-background-color);
@@ -213,6 +211,8 @@ draggable-item {
 
     .content {
         position: relative;
+        padding: 20px;
+        padding-right: 30px;
         width: 100%;
         height: 100%;
         z-index: 100;

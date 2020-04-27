@@ -167,8 +167,8 @@ draggable-item:hover {
 placeholder {
     display: none;
     padding: 17px;
-    border: 3px dashed black;
-    border-radius: 9px;
+    border: $placeholder-border;
+    border-radius: $placeholder-border-radius;
     z-index: 9;
     margin: 10px;
 }

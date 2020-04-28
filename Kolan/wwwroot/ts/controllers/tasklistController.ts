@@ -1,12 +1,8 @@
 const seedrandom = require("seedrandom");
 import { DraggableItem } from "../components/draggableItem";
-import { RequestParameter } from "../communication/requestParameter";
-import { ApiRequester } from "../communication/apiRequester";
 import { Task } from "../models/task";
-import { Board } from "../models/board";
 import { BoardView } from "../views/boardView";
 import { ContentFormatter } from "../processing/contentFormatter";
-import { BoardHub } from "../communication/boardHub";
 import { ConfirmDialog } from "../dialogs/confirmDialog";
 import { PermissionLevel } from "../enums/permissionLevel";
 

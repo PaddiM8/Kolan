@@ -20,6 +20,8 @@ class RegisterView extends View {
 
             // Create the user's public/private key pair. This will also save the keys locally.
             const keyPair = await Crypto.createWrappingKeyPair(password, username);
+            console.log(await Crypto.exportRSAKey(keyPair.publicKey));
+            console.log(await Crypto.wrapPrivateKey(keyPair.privateKey));
 
             ApiRequester.send("Users", "Create", RequestType.Post, {
                 email: email,

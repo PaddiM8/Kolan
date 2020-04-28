@@ -18,8 +18,6 @@ export class DraggableItem extends LitElement {
     private lastHoveredDraggable: DraggableItem;
     private currentTasklist: HTMLElement;
     private currentIndex: number;
-    private container: HTMLElement;
-    private containerRect;
 
     static get styles() {
         return css`
@@ -101,6 +99,7 @@ export class DraggableItem extends LitElement {
         element.style.top = "";
         element.style.left = "";
         element.style.zIndex = "";
+        e.target.style.userSelect = "";
 
         // Move to placeholder
         const placeholder: HTMLElement = this.currentTasklist.parentElement.querySelector(this.placeholder);

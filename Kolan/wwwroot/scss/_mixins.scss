@@ -85,6 +85,7 @@
             padding-bottom: 2px;
             margin-right: 10px;
             margin-top: 0;
+            padding: 10px;
             cursor: pointer;
         }
 
@@ -92,14 +93,11 @@
             display: inline-block;
             width: 1.3em;
             height: 1.3em;
-            margin-right: 10px;
 
-            //content: " ";
-            content: "";
+            content: " ";
             text-align: center;
             padding-top: 2px;
             border-radius: 2px;
-            background-color: get-text-color($background-color);
             @if get-text-color($background-color) == #FFFFFF {
                 background-color: #D3D3D3;
             } @else {
@@ -114,6 +112,16 @@
             transition: 120ms ease color, .3s ease background-color;
         }
 
+        input:focus {
+            outline: 0;
+        }
+
+        input:focus::before {
+            border: 2px solid #0062ff;
+            border-radius: 2px;
+            padding-top: 0;
+        }
+
         input:hover::before {
             @if get-text-color($background-color) == #FFFFFF {
                 background-color: #BDBDBD;
@@ -125,6 +133,7 @@
         input:checked::before {
             font-family: "iconfont";
             color: #000000;
+            content: "";
         }
     }
 }

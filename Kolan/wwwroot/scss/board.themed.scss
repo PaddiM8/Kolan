@@ -19,6 +19,7 @@ header {
     padding: 15px;
     box-sizing: border-box;
     box-shadow: 0px 2px 2px -1px rgba(0, 0, 0, 0.4);
+    border-bottom: $tasklist-border;
 
     #title {
         position: relative;
@@ -67,7 +68,6 @@ header {
 .content {
     display: grid;
     grid-template-rows: auto 1fr;
-    width: calc(100vw + 2px);
     overflow-x: auto;
 }
 
@@ -93,7 +93,10 @@ tasklist, .list-head .item {
     box-sizing: border-box;
     text-align: center;
     border-bottom: $tasklist-border;
-    border-top: $tasklist-border;
+}
+
+.list-head .item:last-child, .tasklists tasklist:last-child {
+    border-right: 0;
 }
 
 tasklist {
@@ -300,7 +303,7 @@ draggable-item.dragged {
     }
 
     #list-head > .item.selected {
-        background-color: darken($background-color, 20%);
+        background-color: darken($background-color, 4%);
     }
 
     .draggableContainer {

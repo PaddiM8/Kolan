@@ -54,11 +54,15 @@ export class InputList extends LitElement {
             }
 
             li, placeholder {
-                padding: 15px;
+                padding: 12px;
                 border-top: 1px solid #9e9e9e;
                 border-bottom: 1px solid #9e9e9e;
                 margin-top: -1px;
                 background-color: white;
+                box-sizing: border-box;
+            }
+
+            #list {
                 box-sizing: border-box;
             }
 
@@ -75,11 +79,15 @@ export class InputList extends LitElement {
             }
 
             li span {
-                vertical-align: middle;
+                font-size: 1.2em;
+            }
+
+            .itemValue {
+                margin-top: -3px;
             }
 
             .icon {
-                font-size: 21px;
+                font-size: 2em;
             }
 
             .delete {

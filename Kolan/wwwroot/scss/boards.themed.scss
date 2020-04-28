@@ -7,24 +7,23 @@ body {
 
 .top {
     position: absolute;
-    top: 10px;
-    margin: 15px;
+    margin: 10px;
+    margin-top: 15px;
     border: 0;
 
     .iconLink {
         text-decoration: none;
     }
 
-    $icon-size: 4em;
     .icon {
         padding: 0;
-        font-size: $icon-size;
+        font-size: 3.6em;
         color: get-text-color($background-color);
         cursor: pointer;
     }
 
     label {
-        font-size: 1.8em;
+        font-size: 1.6em;
         line-height: 2.3em; // Change this to something more dynamic
     }
 }
@@ -38,7 +37,7 @@ body {
     }
 
     label {
-        margin-left: 15px;
+        margin-left: 10px;
         float: right;
     }
 }
@@ -53,7 +52,7 @@ body {
 
     label {
         float: left;
-        margin-right: 15px;
+        margin-right: 10px;
     }
 }
 

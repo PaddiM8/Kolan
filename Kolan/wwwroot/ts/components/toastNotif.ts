@@ -31,6 +31,16 @@ export class ToastNotif extends LitElement {
             transition: 1s ease all;
             z-index: 999999;
         }
+
+        :host > div {
+            width: 100%;
+            height: 100%;
+            padding: 15px;
+            transform: translateY(-80px);
+            border-radius: 8px;
+            transition: .2s ease all;
+            font-size: 1.2em;
+        }
         </style>
         <link rel="stylesheet" type="text/css" href="../css/components/toastNotif.${ThemeManager.getTheme()}.css">
         <div id="content" class="toast ${this.type}" @click="${this.onClick}">

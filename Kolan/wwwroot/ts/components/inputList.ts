@@ -119,7 +119,7 @@ export class InputList extends LitElement {
 
         if (this.draggableItems) {
             const dragger = document.createElement("span") as FaIcon;
-            dragger.className = "icon icon-bars dragger";
+            dragger.className = "icon icon-hamburger dragger";
             dragger.addEventListener("mousedown", e => this.onItemMouseDown(e));
             li.appendChild(dragger);
         }

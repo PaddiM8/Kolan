@@ -160,6 +160,7 @@ draggable-item {
     font-family: "Inter", sans-serif;
     background-color: $board-background-color;
     border-radius: 9px;
+    padding-right: 35px;
     color: get-text-color($board-background-color);
     margin: 12px;
     overflow: hidden;
@@ -212,10 +213,11 @@ draggable-item {
     .content {
         position: relative;
         padding: 20px;
-        padding-right: 30px;
+        padding-right: 0;
         width: 100%;
         height: 100%;
         z-index: 100;
+        box-sizing: border-box;
     }
 
     .overdue-icon {

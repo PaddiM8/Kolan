@@ -41,7 +41,7 @@ export class BoardListController {
         item.dataset.id = board.id;
         board.description = board.description ? board.description : "";
 
-        item.insertAdjacentHTML("beforeend", `<span class="dragger"></span><h2></h2><p></p>`);
+        item.insertAdjacentHTML("beforeend", `<div class="side"><span class="dragger icon icon-hamburger"></span></div><h2></h2><p></p>`);
         item.querySelector("h2").textContent = board.name;
         item.querySelector("p").textContent = board.description;
 

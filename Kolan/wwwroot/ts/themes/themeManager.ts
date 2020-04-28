@@ -14,7 +14,7 @@ export class ThemeManager {
     * Set the theme using the theme name
     */
     public static setTheme(themeName: string): void {
-        document.cookie = "theme=" + themeName;
+        document.cookie = "theme=" + themeName + ";path=/";
     }
 
     /**

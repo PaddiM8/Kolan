@@ -7,10 +7,11 @@
       <title>@ViewData["title"] - Kolan</title>
       <link rel="stylesheet" type="text/css" href="https://rsms.me/inter/inter.css">
       @RenderSection("head", required: false)
-      @if (Context.Request.Cookies["theme"] != null && @ViewData["style"] != null)
-      {
-          @Html.Raw($"<link rel='stylesheet' type='text/css' href='/css/{@ViewData["style"]}.{Context.Request.Cookies["theme"]}.css'>")
+      @{
+        string themeName = Context.Request.Cookies["theme"] ?? "dark";
+        string styleSheetName = $"/css/{ViewData["style"]}.{themeName}.css";
       }
+      @if (@ViewData["style"] != null) { <link rel="stylesheet" type="text/css" href="@styleSheetName"> }
    </head>
    <body id='@ViewData["name"]'>
        <div id="themeTester"></div>

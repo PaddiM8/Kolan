@@ -128,19 +128,27 @@ draggable-item {
     transition: .3s ease background-color;
     box-shadow: $button-shadow;
 
-    .dragger {
+    .side {
+        display: flex;
         position: absolute;
-        padding-left: 35px;
+        padding-left: 20px;
         padding-right: 20px;
         border-top-left-radius: 9px;
         border-bottom-left-radius: 9px;
         height: 100%;
         top: 0;
         left: 0;
-        background: url("../res/hamburger.svg") no-repeat center;
-        background-size: 30px auto;
+        box-sizing: border-box;
+        //background: url("../res/hamburger.svg") no-repeat center;
+        //background-size: 30px auto;
         background-color: $board-background-color;
-        cursor: pointer;
+
+        .icon  {
+            color: white;
+            font-size: 2em;
+            margin: auto;
+            cursor: pointer;
+        }
     }
 
     h2 {

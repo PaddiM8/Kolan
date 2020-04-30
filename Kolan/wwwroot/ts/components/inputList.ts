@@ -87,7 +87,7 @@ export class InputList extends LitElement {
             }
 
             .icon {
-                font-size: 2em;
+                font-size: 1.5em;
             }
 
             .delete {

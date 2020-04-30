@@ -28,6 +28,8 @@ namespace Kolan.Repositories
 
         public async Task<bool> Exists(string username)
         {
+            username = username.ToLower();
+
             return (await Client.Cypher
                 .Match("(user:User)")
                 .Where((User user) => user.Username == username)
@@ -38,6 +40,8 @@ namespace Kolan.Repositories
 
         public async Task<string> GetPublicKey(string username)
         {
+            username = username.ToLower();
+
             return (await Client.Cypher
                 .Match("(user:User)")
                 .Where((User user) => user.Username == username)
@@ -48,6 +52,7 @@ namespace Kolan.Repositories
 
         public async Task<string> GetPrivateKey(string username)
         {
+            username = username.ToLower();
             return (await Client.Cypher
                 .Match("(user:User)")
                 .Where((User user) => user.Username == username)
@@ -58,6 +63,8 @@ namespace Kolan.Repositories
 
         public async Task<bool> ValidatePasswordAsync(string username, string password)
         {
+            username = username.ToLower();
+
             var result = await Client.Cypher
                 .Match("(user:User)")
                 .Where((User user) => user.Username == username)
@@ -71,6 +78,8 @@ namespace Kolan.Repositories
 
         public async Task ChangePasswordAsync(string username, string newPassword)
         {
+            username = username.ToLower();
+
             await Client.Cypher
                 .Match("(user:User)")
                 .Where((User user) => user.Username == username)
@@ -83,7 +92,7 @@ namespace Kolan.Repositories
         {
             await Client.Cypher
                 .Match("path=(user:User)-[:CHILD_GROUP|CHILD_BOARD|NEXT]->(n1)-[:CHILD_GROUP|CHILD_BOARD|NEXT*0..]->(n2)")
-                .Where((User user) => user.Username == username)
+                .Where((User user) => user.Username == username.ToLower())
                 .With("relationships(path) as rels, n1, n2, user")
                 .Unwind("rels", "rel")
                 .Delete("rel, n1, n2, user")

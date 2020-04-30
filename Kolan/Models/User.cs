@@ -13,6 +13,9 @@ namespace Kolan
       [JsonProperty("username")]
       public string Username { get; set; }
 
+      [JsonProperty("displayName")]
+      public string DisplayName { get; set; }
+
       [JsonProperty("password")]
       public string Password { get; set; }
 

@@ -35,7 +35,9 @@ namespace Kolan.Controllers.Api
             if (!Config.Values.AllowRegistrations) return Unauthorized();
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            if (await _uow.Users.Exists(model.Username)) 
+            string username = model.Username.ToLower();
+
+            if (await _uow.Users.Exists(username)) 
             {
                 ModelState.AddModelError("username", "Username is already in use.");
                 return BadRequest(ModelState);
@@ -44,7 +46,8 @@ namespace Kolan.Controllers.Api
             string passwordHash = PBKDF2.Hash(model.Password);
             await _uow.Users.AddAsync(new User
             {
-                Username = model.Username,
+                Username = username,
+                DisplayName = model.Username,
                 Password = passwordHash,
                 PublicKey = model.PublicKey,
                 PrivateKey = model.PrivateKey

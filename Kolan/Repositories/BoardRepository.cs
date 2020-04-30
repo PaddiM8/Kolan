@@ -28,6 +28,7 @@ namespace Kolan.Repositories
         /// </summary>
         public async Task<dynamic> GetAllAsync(string username)
         {
+            username = username.ToLower();
             var result = await Client.Cypher
                 .Match("(user:User)-[rel:CHILD_BOARD]->(board:Board)")
                 .Where((User user) => user.Username == username)
@@ -62,6 +63,8 @@ namespace Kolan.Repositories
         /// <param name="username">User requesting the board data</param>
         public async Task<dynamic> GetAsync(string id, string username)
         {
+            username = username.ToLower();
+
             var result = (await Client.Cypher
                 .Match("(board:Board)")
                 .Where((Board board) => board.Id == id)
@@ -102,6 +105,7 @@ namespace Kolan.Repositories
         /// <param name="username">Username of the user to check for permission for</param>
         public async Task<PermissionLevel> GetUserPermissionLevel(string boardId, string username)
         {
+            username = username.ToLower();
 
             var result = await Client.Cypher
                 .Match("path=(board)<-[:CHILD_BOARD*0..]-(rootBoard)<-[:CHILD_BOARD]-(user:User)")
@@ -129,6 +133,7 @@ namespace Kolan.Repositories
         /// <param name="username">User to add it to.</param>
         public async Task<string> AddAsync(Board entity, string username)
         {
+            username = username.ToLower();
             string id = _generator.NewId(username);
             entity.Id = id;
 
@@ -160,6 +165,7 @@ namespace Kolan.Repositories
         /// <param name="username">Username of the owner</param>
         public async Task<string> AddAsync(Board entity, string groupId, string username)
         {
+            username = username.ToLower();
             string id = _generator.NewId(username);
             entity.Id = id;
 
@@ -333,7 +339,11 @@ namespace Kolan.Repositories
         public async Task MoveAsync(string hostId, string boardId, string targetId, bool isRoot)
         {
             string whereHostId = "host.id = {hostId}";
-            if (isRoot) whereHostId = "host.username = {hostId}"; // Username
+            if (isRoot) 
+            {
+                hostId = hostId.ToLower();
+                whereHostId = "host.username = {hostId}"; // Username
+            }
 
             await Client.Cypher
                 .Match("(host)")
@@ -360,6 +370,8 @@ namespace Kolan.Repositories
         /// <param name="encryptionKey">(This should be encrypted) Encryption key used to encrypt and decrypt the board.</param>
         public async Task<bool> AddUserAsync(string boardId, string username, string encryptionKey = null)
         {
+            username = username.ToLower();
+
             // Don't add user if it already has access to the board
             if (await GetUserPermissionLevel(boardId, username) >= PermissionLevel.Edit) return false;
 
@@ -389,6 +401,8 @@ namespace Kolan.Repositories
         /// <param name="username">Username of user to remove</param>
         public async Task RemoveUserAsync(string boardId, string username)
         {
+            username = username.ToLower();
+
             await Client.Cypher
                 .Match("(user:User)")
                 .Where((User user) => user.Username == username)
@@ -412,21 +426,8 @@ namespace Kolan.Repositories
                 .Match("(board:Board)")
                 .Where((Board board) => board.Id == boardId)
                 .Match("(user:User)-[:CHILD_GROUP]->(:Group)-[:NEXT]->(:Link)-[:SHARED_BOARD]->(board)")
-                .Return<string>("user.username")
+                .Return<string>("user.displayName")
                 .ResultsAsync;
-        }
-
-        private async Task ClearCollaborators(string id)
-        {
-            var collaborators = await Client.Cypher
-                .Match("(user:User)-[:CHILD_BOARD]->(board)")
-                .Where((Board board) => board.Id == id)
-                .Return<string>("user.username")
-                .ResultsAsync;
-
-            // Remove protential collaborators before removing board
-            foreach (string collaborator in collaborators)
-                await RemoveUserAsync(id, collaborator);
         }
     }
 }

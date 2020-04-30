@@ -41,7 +41,7 @@ export class SettingsDialog extends DialogBox {
     ];
     @property({type: Object}) options = {
         title: "Board Settings",
-        primaryButton: "Save"
+        primaryButton: "Done"
     }
     private itemHasBeenMoved = false;
     private contentHasChanged = false;

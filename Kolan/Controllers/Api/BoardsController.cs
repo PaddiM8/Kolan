@@ -135,7 +135,7 @@ namespace Kolan.Controllers.Api
         [AuthorizeForBoard(PermissionLevel = PermissionLevel.All)]
         public async Task<IActionResult> Delete(string id)
         {
-            await _uow.Boards.DeleteAsync(id, User.Identity.Name);
+            await _uow.Boards.DeleteAsync(id);
 
             return Ok();
         }

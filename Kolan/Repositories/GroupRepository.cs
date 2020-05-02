@@ -21,7 +21,7 @@ namespace Kolan.Repositories
 
             await Client.Cypher
                 .Match("(board:Board)")
-                .Where((Board board) => board.Id == boardId)
+                .Where((BoardTask board) => board.Id == boardId)
                 .Create("(board)-[rel:CHILD_GROUP]->(group:Group {group})-[:NEXT]->(:End)")
                 .WithParam("group", group)
                 .With("board, rel")

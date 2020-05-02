@@ -66,7 +66,7 @@ export class TasklistController {
      */
     public createTaskItem(task: Task): HTMLElement {
         const item = new DraggableItem();
-        item.movable = BoardView.permissionLevel >= PermissionLevel.Edit;
+        item.movable = BoardView.board.userAccess >= PermissionLevel.Edit;
         item.dataset.id = task.id;
         item.dataset.description = task.description ? task.description : "";
         item.dataset.deadline = task.deadline.toString();
@@ -106,7 +106,7 @@ export class TasklistController {
         // Events
         item.addEventListener("draggableClick", e => this.onClickEvent(e));
 
-        if (BoardView.permissionLevel >= PermissionLevel.Edit) {
+        if (BoardView.board.userAccess >= PermissionLevel.Edit) {
             item.addEventListener("mouseover", () => this.onHoverEvent(item));
             item.addEventListener("mouseleave", () => this.onMouseLeaveEvent(item));
         }
@@ -118,7 +118,7 @@ export class TasklistController {
             this.onExternalMove(e.target as HTMLElement, e["detail"]["toItem"], e["detail"]["toTasklist"]));
 
         // Add event listeners to overlay buttons if the user has permission to use them, otherwise remove them
-        if (BoardView.permissionLevel >= PermissionLevel.Edit) {
+        if (BoardView.board.userAccess >= PermissionLevel.Edit) {
             item.querySelector(".edit").addEventListener("click", () =>
                 this.onEditClick(item));
 

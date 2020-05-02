@@ -16,7 +16,7 @@ namespace Kolan.Tests
     {
         private UnitOfWork _uow;
         private IGraphClient _graphClient;
-        private Board _defaultBoard;
+        private Task _defaultBoard;
         private const string _username1 = "testUser1";
         private const string _username2 = "testUser2";
 
@@ -45,7 +45,7 @@ namespace Kolan.Tests
             _graphClient = Database.Client;
             _uow = new UnitOfWork(_graphClient);
 
-            _defaultBoard = new Board
+            _defaultBoard = new Task
             {
                 Name = "name",
                 Description = "some description"
@@ -100,7 +100,7 @@ namespace Kolan.Tests
             string boardId3 = await _uow.Boards.AddAsync(_defaultBoard, username2);
             await _uow.Boards.AddUserAsync(boardId3, _username1);
 
-            List<Board> returnedBoards = (await _uow.Boards.GetAllAsync(_username1)).ToList();
+            List<Task> returnedBoards = (await _uow.Boards.GetAllAsync(_username1)).ToList();
 
             // Assert
             Assert.That(returnedBoards.Any(x => x.Id == boardId1 && !x.Shared), Is.True);
@@ -126,7 +126,7 @@ namespace Kolan.Tests
 
                 bool groupWasAdded = (await _graphClient.Cypher
                     .Match("(board:Board)-[:CHILD_GROUP]->(group:Group)")
-                    .Where((Board board) => board.Id == returnedId)
+                    .Where((Task board) => board.Id == returnedId)
                     .AndWhere((Group group) => group.Id == returnedGroup.Id)
                     .Return((group) => Return.As<int>("count(group)"))
                     .ResultsAsync)
@@ -151,17 +151,17 @@ namespace Kolan.Tests
                 // Assert
                 bool childBoardRelExists = (await _graphClient.Cypher
                     .Match("(parent:Board)-[:CHILD_BOARD]->(child:Board)")
-                    .Where((Board parent) => parent.Id == parentId)
-                    .AndWhere((Board child) => child.Id == childId)
+                    .Where((Task parent) => parent.Id == parentId)
+                    .AndWhere((Task child) => child.Id == childId)
                     .Return((child) => Return.As<int>("count(child)"))
                     .ResultsAsync)
                     .Single() == 1;
 
                 bool wasAddedInLinkedList = (await _graphClient.Cypher
                     .Match("(parent:Board)-[:CHILD_GROUP]->(group:Group)-[:NEXT*]->(child:Board)-[:NEXT*]->(:End)")
-                    .Where((Board parent) => parent.Id == parentId)
-                    .AndWhere((Board group) => group.Id == parentGroup.Id)
-                    .AndWhere((Board child) => child.Id == childId)
+                    .Where((Task parent) => parent.Id == parentId)
+                    .AndWhere((Task group) => group.Id == parentGroup.Id)
+                    .AndWhere((Task child) => child.Id == childId)
                     .Return((child) => Return.As<int>("count(child)"))
                     .ResultsAsync)
                     .Single() == 1;
@@ -186,8 +186,8 @@ namespace Kolan.Tests
             var result = _graphClient.Cypher
                 .Match("(user:User)-[:CHILD_GROUP]->(:Group)-[:NEXT]->(board:Board)")
                 .Where((User user) => user.Username == _username1)
-                .AndWhere((Board board) => board.Id == boardId)
-                .Return((board) => board.As<Board>().Id)
+                .AndWhere((Task board) => board.Id == boardId)
+                .Return((board) => board.As<Task>().Id)
                 .ResultsAsync;
 
             Assert.That(result.Result.Single(), Is.EqualTo(boardId));
@@ -210,10 +210,10 @@ namespace Kolan.Tests
             // Assert
             var result = _graphClient.Cypher
                 .Match("(parent:Board)-[:CHILD_GROUP]->(group:Group)-[:NEXT]->(board:Board)")
-                .Where((Board parent) => parent.Id == parentId)
+                .Where((Task parent) => parent.Id == parentId)
                 .AndWhere((Group group) => group.Id == groupId)
-                .AndWhere((Board board) => board.Id == boardId)
-                .Return((board) => board.As<Board>().Id)
+                .AndWhere((Task board) => board.Id == boardId)
+                .Return((board) => board.As<Task>().Id)
                 .ResultsAsync;
 
             Assert.That(result.Result.Single(), Is.EqualTo(boardId));
@@ -233,7 +233,7 @@ namespace Kolan.Tests
             bool addedCorrectly = (await _graphClient.Cypher
                 .Match("(user1:User)-[:CHILD_BOARD]->(board:Board)<-[:SHARED_BOARD]-(link:Link)")
                 .Where((User user1) => user1.Username == _username1)
-                .AndWhere((Board board) => board.Id == boardId)
+                .AndWhere((Task board) => board.Id == boardId)
                 .Match("(user2:User)-[:CHILD_GROUP]->(:Group)-[:NEXT]->(link)")
                 .Where((User user2) => user2.Username == _username2)
                 .Return((board) => Return.As<int>("count(board)"))
@@ -257,7 +257,7 @@ namespace Kolan.Tests
             bool removedCorrectly = (await _graphClient.Cypher
                 .Match("(user2:User)-[:CHILD_BOARD]->(:Link)-[:SHARED_BOARD]->(board:Board)")
                 .Where((User user2) => user2.Username == _username2)
-                .AndWhere((Board board) => board.Id == boardId)
+                .AndWhere((Task board) => board.Id == boardId)
                 .Return((board) => Return.As<int>("count(board)"))
                 .ResultsAsync)
                 .Single() == 0;
@@ -273,7 +273,7 @@ namespace Kolan.Tests
 
             // Act
             dynamic boardContent = await _uow.Boards.GetAsync(nestedBoards.deepestChildId, _username1);
-            List<Board> ancestors = boardContent.Ancestors;
+            List<Task> ancestors = boardContent.Ancestors;
 
             // Assert
             Assert.That(ancestors[0].Id, Is.EqualTo(nestedBoards.ancestorIds[0]));
@@ -291,7 +291,7 @@ namespace Kolan.Tests
 
             // Act
             dynamic boardContent = await _uow.Boards.GetAsync(nestedBoards.deepestChildId, _username2);
-            List<Board> ancestors = boardContent.Ancestors;
+            List<Task> ancestors = boardContent.Ancestors;
 
             // Assert
             Assert.That(ancestors, Is.Null);

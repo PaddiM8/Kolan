@@ -75,6 +75,7 @@ export class AddTaskDialog extends DialogBox {
 
     async submitHandler(): Promise<void> {
         let data = this.getFormData();
+        data["encryptionKey"] = null;
         const onTop: boolean = data["onTop"];
 
         // The board hub deals with the pre-backend processing

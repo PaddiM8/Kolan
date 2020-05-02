@@ -1,4 +1,3 @@
-import { Board } from "../models/board";
 import { Task } from "../models/task";
 import { PasswordDialog } from "../dialogs/passwordDialog";
 import { Crypto } from "./crypto";

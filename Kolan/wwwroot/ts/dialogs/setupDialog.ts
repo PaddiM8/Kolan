@@ -13,7 +13,7 @@ export class SetupDialog extends DialogBox {
     }
 
     async submitHandler(): Promise<void> {
-        const response = await ApiRequester.send("Boards", `${BoardView.id}/Setup`, RequestType.Post, {
+        const response = await ApiRequester.send("Boards", `${BoardView.board.content.id}/Setup`, RequestType.Post, {
             groups: "[]" // Let the backend automatically provide the groups
         });
 

@@ -44,7 +44,7 @@ namespace Kolan.Controllers.Api
         [HttpGet("{id}")]
         public async Task<IActionResult> GetBoard(string id)
         {
-            dynamic result = await _uow.Boards.GetAsync(id, User.Identity.Name);
+            Board result = await _uow.Boards.GetAsync(id, User.Identity.Name);
             if (result == null) return NotFound();
             if (result.UserAccess == PermissionLevel.None) return Unauthorized(); // No AuthorizeForBoard attribute here since this GetAsync() already retrieves this (for other reason). Also, later on users should be able to make boards visible to the public
 
@@ -76,7 +76,7 @@ namespace Kolan.Controllers.Api
         /// <returns>The id assigned to the new board</returns>
         [HttpPost]
         [ValidateModel]
-        public async Task<IActionResult> Create([FromForm]Board board)
+        public async Task<IActionResult> Create([FromForm] BoardTask board)
         {
             string id = await _uow.Boards.AddAsync(board, User.Identity.Name); // Add board to current user
 
@@ -93,7 +93,7 @@ namespace Kolan.Controllers.Api
         [HttpPost("{parentId}")]
         [ValidateModel]
         [AuthorizeForBoard]
-        public async Task<IActionResult> Create(string parentId, [FromForm]string groupId, [FromForm]Board board)
+        public async Task<IActionResult> Create(string parentId, [FromForm]string groupId, [FromForm] BoardTask board)
         {
             string id = await _uow.Boards.AddAsync(board, groupId,
                                                    User.Identity.Name); // Add board to parent board
@@ -113,7 +113,7 @@ namespace Kolan.Controllers.Api
         [AuthorizeForBoard]
         public async Task<IActionResult> Edit(string id, string parentId, [FromForm]string newBoardContent)
         {
-            var board = JsonConvert.DeserializeObject<Board>(newBoardContent);
+            var board = JsonConvert.DeserializeObject<BoardTask>(newBoardContent);
             var validation = ModelValidator.Validate(board);
             if (!validation.isValid) return BadRequest(validation.errors);
 

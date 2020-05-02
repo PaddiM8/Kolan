@@ -7,9 +7,9 @@ namespace Kolan.Hubs
 {
     public interface IBoardClient
     {
-        Task ReceiveNewBoard(Board board, string groupName);
+        Task ReceiveNewBoard(BoardTask board, string groupName);
         Task MoveBoard(string boardId, string targetId);
-        Task EditBoard(Board newBoardContents);
+        Task EditBoard(BoardTask newBoardContents);
         Task DeleteBoard(string id);
         Task RequestReload();
     }

@@ -8,7 +8,7 @@ import { RequestType } from "../enums/requestType";
 import { ToastType } from "../enums/toastType";
 import { ToastController } from "../controllers/toastController";
 import { PermissionLevel } from "../enums/permissionLevel";
-import { Board } from "../models/board";
+import { Task } from "../models/task";
 import { ContentFormatter } from "../processing/contentFormatter";
 
 declare const viewData;
@@ -59,20 +59,20 @@ export class SettingsDialog extends DialogBox {
         // If eg. name or description has been changed, update this information.
         if (this.contentHasChanged) {
             const formData = this.getFormData();
-            BoardView.content.name = formData["name"];
-            BoardView.content.description = formData["description"];
+            BoardView.board.content.name = formData["name"];
+            BoardView.board.content.description = formData["description"];
 
             // Process (eg. encrypt) data before sending it to the backend.
-            const processedBoard = await new Board(BoardView.content).processPreBackend();
+            const processedBoard = await new Task(BoardView.board.content).processPreBackend();
 
             // Get the parent's id
             // If there are ancestors, get the last item in the ancestors list, this will be the parent id
             // Otherwise, there is no parent.
-            const parentId = BoardView.ancestors.length > 0 ?? BoardView.ancestors[BoardView.ancestors.length - 1];
+            const parentId = BoardView.board.ancestors.length > 0 ?? BoardView.board.ancestors[BoardView.board.ancestors.length - 1];
             
             try {
                 // parentId is empty if there is no parent. The backend will understand this.
-                await ApiRequester.send("Boards", BoardView.id, RequestType.Put, {
+                await ApiRequester.send("Boards", BoardView.board.content.id, RequestType.Put, {
                     parentId: parentId,
                     newBoardContent: JSON.stringify(processedBoard)
                 });
@@ -85,7 +85,7 @@ export class SettingsDialog extends DialogBox {
 
         // Send a request to change the group order only if it has been changed.
         if (this.itemHasBeenMoved) {
-            await ApiRequester.send("Boards", `${BoardView.id}/ChangeGroupOrder`, RequestType.Post, {
+            await ApiRequester.send("Boards", `${BoardView.board.content.id}/ChangeGroupOrder`, RequestType.Post, {
                 groupIds: JSON.stringify(this.list.items.map(x => x.id))
             });
         }
@@ -101,8 +101,8 @@ export class SettingsDialog extends DialogBox {
     async onOpen(): Promise<void> {
         // Change delete button to leave button if the board isn't owned by the user.
         const deleteButton = this.shadowRoot.querySelector(".deleteBoard");
-        if (BoardView.permissionLevel != PermissionLevel.All) {
-            if (BoardView.ancestors[-1].id) {
+        if (BoardView.board.userAccess != PermissionLevel.All) {
+            if (BoardView.board.ancestors[-1].id) {
                 deleteButton.previousElementSibling.remove();
                 deleteButton.remove();
             } else {
@@ -119,8 +119,8 @@ export class SettingsDialog extends DialogBox {
 
         // Set the values
         // TODO: Use the dialogbox.setValues() function for this...
-        name.value = BoardView.content.name;
-        description.value = BoardView.content.description;
+        name.value = BoardView.board.content.name;
+        description.value = BoardView.board.content.description;
         name.oninput = () => this.contentHasChanged = true;
         description.oninput = () => this.contentHasChanged = true;
 
@@ -142,21 +142,21 @@ export class SettingsDialog extends DialogBox {
 
         confirmDialog.addEventListener("submitDialog", async () => {
             // If it's not a root board
-            const parentId = BoardView.ancestors.length > 0 ? BoardView.ancestors[-1].id : null;
-            if (BoardView.ancestors.length > 0) {
+            const parentId = BoardView.board.ancestors.length > 0 ? BoardView.board.ancestors[-1].id : null;
+            if (BoardView.board.ancestors.length > 0) {
                 await ApiRequester.send("Boards", parentId, RequestType.Delete, {
-                    boardId: BoardView.id
+                    boardId: BoardView.board.content.id
                 });
                 location.href = `/Board/${parentId}`;
             } else {
-                await ApiRequester.send("Boards", "", RequestType.Delete, { id: BoardView.id });
+                await ApiRequester.send("Boards", "", RequestType.Delete, { id: BoardView.board.content.id });
                 location.href = `/`;
             }
         });
     }
 
     private async leaveBoard(): Promise<void> {
-        await ApiRequester.send("Boards", `${BoardView.id}/Users`, RequestType.Delete, {
+        await ApiRequester.send("Boards", `${BoardView.board.content.id}/Users`, RequestType.Delete, {
             username: viewData.username
         });
 
@@ -164,9 +164,9 @@ export class SettingsDialog extends DialogBox {
     }
 
     private async onItemAdded(e: CustomEvent): Promise<void> {
-        const groupName = await ContentFormatter.preBackend(e.detail["value"], BoardView.content.cryptoKey);
+        const groupName = await ContentFormatter.preBackend(e.detail["value"], BoardView.board.content.cryptoKey);
         const req = await ApiRequester.send("Groups", "", RequestType.Post, {
-            boardId: BoardView.id,
+            boardId: BoardView.board.content.id,
             name: groupName
         })
 
@@ -182,7 +182,7 @@ export class SettingsDialog extends DialogBox {
         }
 
         ApiRequester.send("Groups", `${groupId}`, RequestType.Delete, {
-            boardId: BoardView.id
+            boardId: BoardView.board.content.id
         });
     }
 }

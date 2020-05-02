@@ -6,7 +6,6 @@ import { RequestType } from "../enums/requestType";
 import { ApiRequester } from "../communication/apiRequester";
 import { ContentFormatter } from "../processing/contentFormatter";
 import { Task } from "../models/task";
-import { Board } from "../models/board";
 import { Crypto } from "../processing/crypto";
 import { Defaults } from "../defaults";
 import { DialogOptions, DialogField } from "../models/dialogOptions";
@@ -36,7 +35,7 @@ export class AddBoardDialog extends DialogBox {
     }
 
     async submitHandler(): Promise<void> {
-        let board = new Board(this.getFormData());
+        let board = new Task(this.getFormData());
 
         // If encryption is enabled, create the board's encryption key and then wrap it to create an encrypted portable version of it.
         // It is then put on the board and sent to the backend (encrypted, of course).

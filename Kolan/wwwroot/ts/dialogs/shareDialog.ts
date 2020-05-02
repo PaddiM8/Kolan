@@ -37,10 +37,10 @@ export class ShareDialog extends DialogBox {
     }
 
     async onOpen(): Promise<void> {
-        this.list.removableItems = BoardView.permissionLevel == PermissionLevel.All;
+        this.list.removableItems = BoardView.board.userAccess == PermissionLevel.All;
         this.list.items = BoardView.collaborators.map(x => ({ name: x }));
 
-        if (BoardView.content.encrypted) {
+        if (BoardView.board.content.encrypted) {
             // Encrypted boards cannot be made public.
             this.shadowRoot.querySelector("input[name='public'").parentElement.style.display = "none";
         }
@@ -49,11 +49,11 @@ export class ShareDialog extends DialogBox {
 
     async submitHandler(): Promise<void> {
         const isPublic = this.getFormData()["public"];
-        await ApiRequester.send("Boards", `${BoardView.id}/ChangePublicity`, RequestType.Post, {
+        await ApiRequester.send("Boards", `${BoardView.board.content.id}/ChangePublicity`, RequestType.Post, {
             publicity: isPublic
         });
 
-        BoardView.content.public = isPublic;
+        BoardView.board.content.public = isPublic;
 
         this.hide();
     }
@@ -63,7 +63,7 @@ export class ShareDialog extends DialogBox {
             const username = e.detail["value"];
             let encryptionKey: string;
 
-            if (BoardView.content.encrypted) {
+            if (BoardView.board.content.encrypted) {
                 // Get the added user's public key
                 const response = await ApiRequester.send("Users", `${username}/PublicKey`, RequestType.Get);
 
@@ -73,12 +73,12 @@ export class ShareDialog extends DialogBox {
                 // Wrap the board's encryption key using the added user's public key,
                 // so that they can unwrap it using their own private key.
                 encryptionKey = await Crypto.wrapAnyKey(
-                    BoardView.content.cryptoKey,
+                    BoardView.board.content.cryptoKey,
                     publicKey
                 );
             }
             
-            await ApiRequester.send("Boards", `${BoardView.id}/Users`, RequestType.Post, {
+            await ApiRequester.send("Boards", `${BoardView.board.content.id}/Users`, RequestType.Post, {
                 username: username,
                 encryptionKey: encryptionKey // If encryption is not enabled on the board, this will simply be null.
             });
@@ -94,7 +94,7 @@ export class ShareDialog extends DialogBox {
 
     private async onUserRemoved(e): Promise<void> {
         try {
-            await ApiRequester.send("Boards", `${BoardView.id}/Users`, RequestType.Delete, {
+            await ApiRequester.send("Boards", `${BoardView.board.content.id}/Users`, RequestType.Delete, {
                 username: e.detail["item"].name
             });
 

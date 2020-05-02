@@ -9,7 +9,7 @@ namespace Kolan.Models
         [JsonProperty("group")]
         public Group Group  { get; set; }
 
-        [JsonProperty("boards")]
-        public IEnumerable<Board> Boards { get; set; }
+        [JsonProperty("tasks")]
+        public IEnumerable<BoardTask> Tasks { get; set; }
     }
 }

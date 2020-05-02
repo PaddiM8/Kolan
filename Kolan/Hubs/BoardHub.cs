@@ -37,7 +37,7 @@ namespace Kolan.Hubs
         /// <param name="parentId">Parent board id</param>
         /// <param name="board">Board object</param>
         /// <param name="groupId">Id of the group to add it under</param>
-        public async Task<IActionResult> AddBoard(string parentId, Board board, string groupId)
+        public async Task<IActionResult> AddBoard(string parentId, BoardTask board, string groupId)
         {
             var validation = ModelValidator.Validate(board);
             if (!validation.isValid) return new BadRequestObjectResult(validation.errors);
@@ -66,7 +66,7 @@ namespace Kolan.Hubs
         /// </summary>
         /// <param name="parentId">Parent board id</param>
         /// <param name="newBoardContents">Board object with the new contents</param>
-        public async Task<IActionResult> EditBoard(string parentId, Board newBoardContents)
+        public async Task<IActionResult> EditBoard(string parentId, BoardTask newBoardContents)
         {
             var validation = ModelValidator.Validate(newBoardContents);
             if (!validation.isValid) return new BadRequestObjectResult(validation.errors);

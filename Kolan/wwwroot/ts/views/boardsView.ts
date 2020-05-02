@@ -2,7 +2,7 @@ import "../components/components";
 import { View } from "./view";
 import { BoardListController } from "../controllers/boardListController";
 import { ApiRequester } from "../communication/apiRequester";
-import { Board } from "../models/board";
+import { Task } from "../models/task";
 import { RequestType } from "../enums/requestType";
 import { AddBoardDialog } from "../dialogs/addBoardDialog";
 import { Crypto } from "../processing/crypto";
@@ -47,13 +47,9 @@ class BoardsView extends View {
         // Import/unwrap and save the RSA keys. These will be used to wrap/unwrap board encryption keys.
         await Crypto.setRSAKeys(jsonObj.keys.publicKey, jsonObj.keys.privateKey);
 
-        for (const boardData of jsonObj.boards) {
-            // If the current user does not own the board, the encryption key saved on the board itself won't work,
-            // Use the encryption key meant for the current user, instead.
-            if (!boardData.owned) boardData.board.encryptionKey = boardData.encryptionKeyIfShared;
-
+        for (const board of jsonObj.boards) {
             // Encryption and such, if needed
-            const processedBoard = await new Board(boardData.board).processPostBackend()
+            const processedBoard = await new Task(board).processPostBackend()
             boardListController.addBoardToBottom(processedBoard);
         }
     }

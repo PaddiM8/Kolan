@@ -8,7 +8,6 @@ import { Group } from "../models/group";
 import { ToastType } from "../enums/toastType";
 import { RequestType } from "../enums/requestType";
 import { ToastController } from "../controllers/toastController";
-import { Board } from "../models/board";
 import { PermissionLevel } from "../enums/permissionLevel";
 import { ContentFormatter } from "../processing/contentFormatter";
 import { Crypto } from "../processing/crypto";
@@ -23,15 +22,19 @@ import { SettingsDialog } from "../dialogs/settingsDialog";
 window.addEventListener("load", () => new BoardView());
 declare const viewData;
 
+class Board {
+    public content: Task;
+    public groups: { group: Group, tasks: Task[] }[]
+    public ancestors: { id: string, name: string }[];
+    public userAccess: PermissionLevel;
+}
+
 /**
  * In charge of controlling the "Board" page.
  */
 export class BoardView extends View {
-    public static id: string = viewData.id;
-    public static content: Board;
-    public static ancestors: { id: string, name: string }[];
+    public static board: Board;
     public static collaborators: string[];
-    public static permissionLevel: PermissionLevel;
     public static dialogs;
     public static tasklistControllers = {};
     public static viewData;
@@ -55,7 +58,7 @@ export class BoardView extends View {
             shareButton.addEventListener("click", e => {
                 BoardView.dialogs.share.shown = true
                 BoardView.dialogs.share.setValues({
-                    public: BoardView.content.public
+                    public: BoardView.board.content.public
                 });
             });
     
@@ -121,7 +124,9 @@ export class BoardView extends View {
     public static getRootId(): string {
         // If the board has ancestors, the the root board id will be the first ancestor's id.
         // If the board doesn't have ancestors, the board is the root board, and this board's id is the root id.
-        return BoardView.ancestors.length > 0 ? BoardView.ancestors[BoardView.ancestors.length - 1].id : BoardView.id;
+        return BoardView.board.ancestors.length > 0
+            ? BoardView.board.ancestors[BoardView.board.ancestors.length - 1].id
+            : BoardView.board.content.id;
     }
 
     /**
@@ -139,7 +144,7 @@ export class BoardView extends View {
 
         item.appendChild(nameSpan);
 
-        if (BoardView.permissionLevel >= PermissionLevel.Edit)
+        if (BoardView.board.userAccess >= PermissionLevel.Edit)
             item.insertAdjacentHTML("beforeend", "<button class='plus'>+</button>")
 
         listhead.appendChild(item);
@@ -206,7 +211,7 @@ export class BoardView extends View {
     */
     private async setTitle(title: string, ancestors: object[], encryptionKey: string = null): Promise<void> {
         document.title = title + " - Kolan";
-        let html = BoardView.permissionLevel >= PermissionLevel.Edit
+        let html = BoardView.board.userAccess >= PermissionLevel.Edit
             ? `<a href="/">Boards</a> / `
             : `<a href="/">Kolan</a> / `;
 
@@ -226,7 +231,7 @@ export class BoardView extends View {
                     ? await Crypto.unwrapEncryptionKey(encryptionKey, BoardView.permissionLevel != PermissionLevel.All)
                     : null;*/
 
-                const name = await ContentFormatter.postBackend(ancestor["name"], BoardView.content.cryptoKey);
+                const name = await ContentFormatter.postBackend(ancestor["name"], BoardView.board.content.cryptoKey);
                 html += `<a href="./${ancestor["id"]}">${name}</a> / `;
             }
         }
@@ -242,12 +247,12 @@ export class BoardView extends View {
     private async loadBoard(): Promise<void> {
         try {
             // Get board content
-            const result = await ApiRequester.send("Boards", BoardView.id, RequestType.Get);
-            let boardContent = JSON.parse(result);
-            boardContent.board = new Board(boardContent.board);
+            const result = await ApiRequester.send("Boards", viewData.id, RequestType.Get);
+            let board = JSON.parse(result) as Board;
+            board.content = new Task(board.content);
 
             // If the request returns nothing, the board hasn't been set up yet. Display the setup dialog.
-            if (!boardContent.groups) {
+            if (!board.groups) {
                 const setupDialog = new SetupDialog();
                 document.body.appendChild(setupDialog);
                 setupDialog.shown = true;
@@ -257,40 +262,33 @@ export class BoardView extends View {
                 return;
             }
 
-            // Save the ancestors
-            BoardView.ancestors = boardContent.ancestors;
-
-            // Get permission level
-            BoardView.permissionLevel = boardContent.userAccess as PermissionLevel;
+            BoardView.board = board;
 
             // Process board data post-backend (eg. decrypt)
-            await boardContent.board.processPostBackend();
-
-            BoardView.content = boardContent.board;
+            await board.content.processPostBackend();
 
             // Set title on the client side, both on the board page and in the document title.
-            await this.setTitle(boardContent.board.name, boardContent.ancestors, boardContent.board.encryptionKey);
+            await this.setTitle(board.content.name, board.ancestors, board.content.encryptionKey);
 
             const tasklists = document.getElementById("tasklists");
             const listHead = document.getElementById("list-head");
-            tasklists.style.gridTemplateColumns = `repeat(${boardContent.groups.length}, 1fr)`;
+            tasklists.style.gridTemplateColumns = `repeat(${board.groups.length}, 1fr)`;
             listHead.style.gridTemplateColumns = tasklists.style.gridTemplateColumns;
 
-            for (const groupObject of boardContent.groups) {
-                groupObject.group.name = await ContentFormatter.postBackend(groupObject.group.name, boardContent.board.cryptoKey);
+            for (const groupObject of board.groups) {
+                groupObject.group.name = await ContentFormatter.postBackend(groupObject.group.name, board.content.cryptoKey);
                 this.addGroup(groupObject.group as Group);
 
-                //let formattedTaskPromises: Promise<Board | Task>[] = [];
-                for (const task of groupObject.boards) {
+                for (const task of groupObject.tasks) {
                     // Format the boards (eg. decrypt if needed), and then save the promises returned in an array
-                    const processedTask = await (new Task(task, BoardView.content.cryptoKey)).processPostBackend();
+                    const processedTask = await (new Task(task, BoardView.board.content.cryptoKey)).processPostBackend();
                     this.addTask(groupObject.group.id, processedTask);
                 }
             }
 
-            if (BoardView.permissionLevel >= PermissionLevel.Edit) {
+            if (BoardView.board.userAccess >= PermissionLevel.Edit) {
                 // Connect to SignalR
-                BoardView.boardHub.join(BoardView.id);
+                BoardView.boardHub.join(BoardView.board.content.id);
             } else {
                 // Remove header icons
                 const headerIcons = document.querySelector("header .right");
@@ -298,7 +296,7 @@ export class BoardView extends View {
             }
 
             // Get collaborators
-            ApiRequester.send("Boards", `${BoardView.id}/Users`, RequestType.Get)
+            ApiRequester.send("Boards", `${BoardView.board.content.id}/Users`, RequestType.Get)
                 .then(response => {
                     BoardView.collaborators = JSON.parse(response as string);
                 });

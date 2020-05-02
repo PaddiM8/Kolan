@@ -1,6 +1,6 @@
 import { ApiRequester } from "../communication/apiRequester";
 import { RequestParameter } from "../communication/requestParameter";
-import { Board } from "../models/board";
+import { Task } from "../models/task";
 import { RequestType } from "../enums/requestType";
 import { DraggableItem } from "../components/draggableItem";
 
@@ -20,7 +20,7 @@ export class BoardListController {
     /**
      * Add a board to the top of the list.
      */
-    public addBoard(board: Board): void {
+    public addBoard(board: Task): void {
         const item = this.createBoard(board);
         this.boardlist.insertBefore(item, this.boardlist.firstElementChild); // Insert at top
     }
@@ -28,7 +28,7 @@ export class BoardListController {
     /**
      * Add a board to the bottom of the list.
      */
-    public addBoardToBottom(board: Board): void {
+    public addBoardToBottom(board: Task): void {
         const item = this.createBoard(board);
         this.boardlist.appendChild(item); // Insert at bottom
     }
@@ -36,7 +36,7 @@ export class BoardListController {
     /**
      * Create a board item without placing it
      */
-    private createBoard(board: Board): HTMLElement {
+    private createBoard(board: Task): HTMLElement {
         const item = new DraggableItem();
         item.dataset.id = board.id;
         board.description = board.description ? board.description : "";

@@ -369,18 +369,13 @@ namespace Kolan.Repositories
         /// </summary>
         public async Task MoveAsync(string hostId, string boardId, string targetId, bool isRoot)
         {
-            string whereHostId = "host.id = {hostId}";
-            if (isRoot) 
-            {
-                hostId = hostId.ToLower();
-                whereHostId = "host.username = {hostId}"; // Username
-            }
+            if (isRoot ) hostId = hostId.ToLower();
 
             await Client.Cypher
                 .Match("(host)")
-                .Where(whereHostId)
-                .Call("apoc.lock.nodes([host])")
+                .Where(isRoot ? "host.username = {hostId}" : "host.id = {hostId}")
                 .WithParam("hostId", hostId)
+                .Call("apoc.lock.nodes([host])")
                 .Match("(previous)-[previousRel:NEXT]->(board:Board)-[nextRel:NEXT]->(next)")
                 .Where((BoardTask board) => board.Id == boardId)
                 .AndWhere((BoardTask previous) => previous.Id != targetId)

@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 using Newtonsoft.Json;
+using Kolan.Enums;
 
 namespace Kolan.Tests
 {
@@ -16,16 +17,30 @@ namespace Kolan.Tests
     {
         private UnitOfWork _uow;
         private IGraphClient _graphClient;
-        private Task _defaultBoard;
+        private BoardTask _defaultBoard;
         private const string _username1 = "testUser1";
         private const string _username2 = "testUser2";
+        private static readonly string[] _defaultGroups = { "group1", "group2", "group3" };
 
         [SetUp]
         public async Task Setup()
         {
             new Database().Setup();
-            await new UsersController(_uow).Create(_username1, "pass1");
-            await new UsersController(_uow).Create(_username2, "pass2");
+            await new UsersController(_uow).Create(new ViewModels.RegisterViewModel
+            {
+                Email = "test1@test.test",
+                Username = _username1,
+                Password = "pass1",
+                RepeatPassword = "pass1"
+            });
+
+            await new UsersController(_uow).Create(new ViewModels.RegisterViewModel
+            {
+                Email = "test2@test.test",
+                Username = _username2,
+                Password = "pass2",
+                RepeatPassword = "pass2"
+            });
         }
 
         [TearDown]
@@ -45,7 +60,7 @@ namespace Kolan.Tests
             _graphClient = Database.Client;
             _uow = new UnitOfWork(_graphClient);
 
-            _defaultBoard = new Task
+            _defaultBoard = new BoardTask
             {
                 Name = "name",
                 Description = "some description"
@@ -68,14 +83,14 @@ namespace Kolan.Tests
         {
             // Act
             string returnedId = await _uow.Boards.AddAsync(_defaultBoard, _username1);
-            dynamic returnedBoard = await _uow.Boards.GetAsync(returnedId, _username1);
+            Board returnedBoard = await _uow.Boards.GetAsync(returnedId, _username1);
 
             // Assert
-            Assert.That(returnedBoard.Board.Name, Is.EqualTo(_defaultBoard.Name));
-            Assert.That(returnedBoard.Board.Description, Is.EqualTo(_defaultBoard.Description));
+            Assert.That(returnedBoard.Content.Name, Is.EqualTo(_defaultBoard.Name));
+            Assert.That(returnedBoard.Content.Description, Is.EqualTo(_defaultBoard.Description));
             Assert.That(returnedBoard.Groups, Is.Null);
             Assert.That(returnedBoard.Ancestors, Is.Empty);
-            Assert.That(returnedBoard.UserAccess, Is.EqualTo(2));
+            Assert.That(returnedBoard.UserAccess, Is.EqualTo(PermissionLevel.All));
         }
 
         [TestCase(_username2)]
@@ -85,10 +100,10 @@ namespace Kolan.Tests
         {
             // Act
             string returnedId = await _uow.Boards.AddAsync(_defaultBoard, _username1);
-            dynamic returnedBoard = await _uow.Boards.GetAsync(returnedId, unauthorizedUser);
+            Board returnedBoard = await _uow.Boards.GetAsync(returnedId, unauthorizedUser);
 
             // Assert
-            Assert.That(returnedBoard.UserAccess, Is.EqualTo(0));
+            Assert.That(returnedBoard.UserAccess, Is.EqualTo(PermissionLevel.None));
         }
 
         [TestCase(_username2)]
@@ -100,12 +115,12 @@ namespace Kolan.Tests
             string boardId3 = await _uow.Boards.AddAsync(_defaultBoard, username2);
             await _uow.Boards.AddUserAsync(boardId3, _username1);
 
-            List<Task> returnedBoards = (await _uow.Boards.GetAllAsync(_username1)).ToList();
+            BoardTask[] returnedBoards = (await _uow.Boards.GetAllAsync(_username1)).Boards;
 
             // Assert
-            Assert.That(returnedBoards.Any(x => x.Id == boardId1 && !x.Shared), Is.True);
-            Assert.That(returnedBoards.Any(x => x.Id == boardId2 && !x.Shared), Is.True);
-            Assert.That(returnedBoards.Any(x => x.Id == boardId3 && x.Shared), Is.True);
+            Assert.That(returnedBoards.Any(x => x.Id == boardId1), Is.True);
+            Assert.That(returnedBoards.Any(x => x.Id == boardId2), Is.True);
+            Assert.That(returnedBoards.Any(x => x.Id == boardId3), Is.True);
         }
 
         [Test]
@@ -115,19 +130,20 @@ namespace Kolan.Tests
             string returnedId = await _uow.Boards.AddAsync(_defaultBoard, _username1);
 
             // Act
-            IEnumerable<GroupNode> returnedGroups = await _uow.Boards.SetupAsync(returnedId);
+            string[] returnedGroups = await _uow.Boards.SetupAsync(returnedId, _defaultGroups);
 
             // Assert
             Assert.That(returnedGroups.Count(), Is.GreaterThan(0));
 
-            foreach (GroupNode returnedGroup in returnedGroups)
+            for (int i = 0; i < returnedGroups.Length; i++)
             {
-                Assert.That(returnedGroup.Id, Is.Not.Null);
+                string groupName = returnedGroups[i];
+                Assert.That(groupName, Is.EqualTo(_defaultGroups[i]));
 
                 bool groupWasAdded = (await _graphClient.Cypher
                     .Match("(board:Board)-[:CHILD_GROUP]->(group:Group)")
-                    .Where((Task board) => board.Id == returnedId)
-                    .AndWhere((GroupNode group) => group.Id == returnedGroup.Id)
+                    .Where((BoardTask board) => board.Id == returnedId)
+                    .AndWhere((GroupNode group) => group.Name == groupName)
                     .Return((group) => Return.As<int>("count(group)"))
                     .ResultsAsync)
                     .Single() == 1;
@@ -141,27 +157,35 @@ namespace Kolan.Tests
         {
             // Arrange
             string parentId = await _uow.Boards.AddAsync(_defaultBoard, _username1);
-            IEnumerable<GroupNode> groups = await _uow.Boards.SetupAsync(parentId);
+            string[] groups = await _uow.Boards.SetupAsync(parentId, _defaultGroups);
 
             // Act
-            foreach (GroupNode parentGroup in groups)
+            foreach (string groupName in groups)
             {
-                string childId = await _uow.Boards.AddAsync(_defaultBoard, parentGroup.Id, _username1);
+                string groupId = (await _graphClient.Cypher
+                    .Match("(parent:Board)-[:CHILD_GROUP]->(group:Group)")
+                    .Where((BoardTask parent) => parent.Id == parentId)
+                    .AndWhere((GroupNode group) => group.Name == groupName)
+                    .Return<string>("group.id")
+                    .ResultsAsync)
+                    .First();
+
+                string childId = await _uow.Boards.AddAsync(_defaultBoard, groupId, _username1);
 
                 // Assert
                 bool childBoardRelExists = (await _graphClient.Cypher
                     .Match("(parent:Board)-[:CHILD_BOARD]->(child:Board)")
-                    .Where((Task parent) => parent.Id == parentId)
-                    .AndWhere((Task child) => child.Id == childId)
+                    .Where((BoardTask parent) => parent.Id == parentId)
+                    .AndWhere((BoardTask child) => child.Id == childId)
                     .Return((child) => Return.As<int>("count(child)"))
                     .ResultsAsync)
                     .Single() == 1;
 
                 bool wasAddedInLinkedList = (await _graphClient.Cypher
                     .Match("(parent:Board)-[:CHILD_GROUP]->(group:Group)-[:NEXT*]->(child:Board)-[:NEXT*]->(:End)")
-                    .Where((Task parent) => parent.Id == parentId)
-                    .AndWhere((Task group) => group.Id == parentGroup.Id)
-                    .AndWhere((Task child) => child.Id == childId)
+                    .Where((BoardTask parent) => parent.Id == parentId)
+                    .AndWhere((BoardTask group) => group.Name == groupName)
+                    .AndWhere((BoardTask child) => child.Id == childId)
                     .Return((child) => Return.As<int>("count(child)"))
                     .ResultsAsync)
                     .Single() == 1;
@@ -183,14 +207,15 @@ namespace Kolan.Tests
             await _uow.Boards.MoveAsync(_username1, boardId, _username1, true);
 
             // Assert
-            var result = _graphClient.Cypher
+            var result = await _graphClient.Cypher
                 .Match("(user:User)-[:CHILD_GROUP]->(:Group)-[:NEXT]->(board:Board)")
-                .Where((User user) => user.Username == _username1)
-                .AndWhere((Task board) => board.Id == boardId)
-                .Return((board) => board.As<Task>().Id)
+                .Where("user.username = {username}")
+                .WithParam("username", _username1.ToLower())
+                .AndWhere((BoardTask board) => board.Id == boardId)
+                .Return((board) => board.As<BoardTask>().Id)
                 .ResultsAsync;
 
-            Assert.That(result.Result.Single(), Is.EqualTo(boardId));
+            Assert.That(result.Single(), Is.EqualTo(boardId));
         }
 
         [Test]
@@ -198,7 +223,13 @@ namespace Kolan.Tests
         {
             // Arrange
             string parentId = await _uow.Boards.AddAsync(_defaultBoard, _username1);
-            string groupId = (await _uow.Boards.SetupAsync(parentId)).First().Id;
+            string groupName = (await _uow.Boards.SetupAsync(parentId, _defaultGroups)).First();
+            string groupId = (await _graphClient.Cypher
+                .Match("(group:Group)")
+                .Where((GroupNode group) => group.Name == groupName)
+                .Return<string>("group.id")
+                .ResultsAsync)
+                .First();
 
             await _uow.Boards.AddAsync(_defaultBoard, groupId, _username1);
             await _uow.Boards.AddAsync(_defaultBoard, groupId, _username1);
@@ -210,10 +241,9 @@ namespace Kolan.Tests
             // Assert
             var result = _graphClient.Cypher
                 .Match("(parent:Board)-[:CHILD_GROUP]->(group:Group)-[:NEXT]->(board:Board)")
-                .Where((Task parent) => parent.Id == parentId)
-                .AndWhere((GroupNode group) => group.Id == groupId)
-                .AndWhere((Task board) => board.Id == boardId)
-                .Return((board) => board.As<Task>().Id)
+                .Where((BoardTask parent) => parent.Id == parentId)
+                .AndWhere((BoardTask board) => board.Id == boardId)
+                .Return((board) => board.As<BoardTask>().Id)
                 .ResultsAsync;
 
             Assert.That(result.Result.Single(), Is.EqualTo(boardId));
@@ -224,7 +254,7 @@ namespace Kolan.Tests
         {
             // Arrange
             string boardId = await _uow.Boards.AddAsync(_defaultBoard, _username1);
-            await _uow.Boards.SetupAsync(boardId);
+            await _uow.Boards.SetupAsync(boardId, _defaultGroups);
 
             // Act
             await _uow.Boards.AddUserAsync(boardId, _username2);
@@ -232,10 +262,12 @@ namespace Kolan.Tests
             // Assert
             bool addedCorrectly = (await _graphClient.Cypher
                 .Match("(user1:User)-[:CHILD_BOARD]->(board:Board)<-[:SHARED_BOARD]-(link:Link)")
-                .Where((User user1) => user1.Username == _username1)
-                .AndWhere((Task board) => board.Id == boardId)
+                .Where("user1.username = {username1}")
+                .WithParam("username1", _username1.ToLower())
+                .AndWhere((BoardTask board) => board.Id == boardId)
                 .Match("(user2:User)-[:CHILD_GROUP]->(:Group)-[:NEXT]->(link)")
-                .Where((User user2) => user2.Username == _username2)
+                .Where("user2.username = {username2}")
+                .WithParam("username2", _username2.ToLower())
                 .Return((board) => Return.As<int>("count(board)"))
                 .ResultsAsync)
                 .Single() == 1;
@@ -248,7 +280,7 @@ namespace Kolan.Tests
         {
             // Arrange
             string boardId = await _uow.Boards.AddAsync(_defaultBoard, _username1);
-            await _uow.Boards.SetupAsync(boardId);
+            await _uow.Boards.SetupAsync(boardId, _defaultGroups);
 
             // Act
             await _uow.Boards.RemoveUserAsync(boardId, _username2);
@@ -257,7 +289,7 @@ namespace Kolan.Tests
             bool removedCorrectly = (await _graphClient.Cypher
                 .Match("(user2:User)-[:CHILD_BOARD]->(:Link)-[:SHARED_BOARD]->(board:Board)")
                 .Where((User user2) => user2.Username == _username2)
-                .AndWhere((Task board) => board.Id == boardId)
+                .AndWhere((BoardTask board) => board.Id == boardId)
                 .Return((board) => Return.As<int>("count(board)"))
                 .ResultsAsync)
                 .Single() == 0;
@@ -272,8 +304,8 @@ namespace Kolan.Tests
             var nestedBoards = await CreateNestedBoards();
 
             // Act
-            dynamic boardContent = await _uow.Boards.GetAsync(nestedBoards.deepestChildId, _username1);
-            List<Task> ancestors = boardContent.Ancestors;
+            Board boardContent = await _uow.Boards.GetAsync(nestedBoards.deepestChildId, _username1);
+            Ancestor[] ancestors = boardContent.Ancestors.ToArray();
 
             // Assert
             Assert.That(ancestors[0].Id, Is.EqualTo(nestedBoards.ancestorIds[0]));
@@ -286,15 +318,15 @@ namespace Kolan.Tests
         {
             // Arrange
             var nestedBoards = await CreateNestedBoards();
-            await _uow.Boards.SetupAsync(nestedBoards.deepestChildId);
+            await _uow.Boards.SetupAsync(nestedBoards.deepestChildId, _defaultGroups);
             await _uow.Boards.AddUserAsync(nestedBoards.deepestChildId, _username2);
 
             // Act
-            dynamic boardContent = await _uow.Boards.GetAsync(nestedBoards.deepestChildId, _username2);
-            List<Task> ancestors = boardContent.Ancestors;
+            Board boardContent = await _uow.Boards.GetAsync(nestedBoards.deepestChildId, _username2);
+            var ancestors = boardContent.Ancestors;
 
             // Assert
-            Assert.That(ancestors, Is.Null);
+            Assert.That(ancestors, Is.Empty);
         }
 
         private async Task<(string deepestChildId, string[] ancestorIds)> CreateNestedBoards()
@@ -303,30 +335,47 @@ namespace Kolan.Tests
             await _uow.Boards.AddAsync(_defaultBoard, _username1);
             string rootId = await _uow.Boards.AddAsync(_defaultBoard, _username1);
             await _uow.Boards.AddAsync(_defaultBoard, _username1);
-            IEnumerable<GroupNode> rootGroups = await _uow.Boards.SetupAsync(rootId);
+            string[] rootGroups = await _uow.Boards.SetupAsync(rootId, _defaultGroups);
 
             // Add a board in each group of the root board
             string rootChildId = "";
             int i = 0;
-            foreach (GroupNode rootGroup in rootGroups)
+            foreach (string groupName in rootGroups)
             {
-                await _uow.Boards.AddAsync(_defaultBoard, rootGroup.Id, _username1);
+                string groupId = (await _graphClient.Cypher
+                    .Match("(group:Group)")
+                    .Where((GroupNode group) => group.Name == groupName)
+                    .Return<string>("group.id")
+                    .ResultsAsync)
+                    .First();
+
+                await _uow.Boards.AddAsync(_defaultBoard, groupId, _username1);
 
                 // Add two extra boards in one of them
                 if (i == 1)
                 {
-                    rootChildId = await _uow.Boards.AddAsync(_defaultBoard, rootGroup.Id, _username1); // The chosen one
-                    await _uow.Boards.AddAsync(_defaultBoard, rootGroup.Id, _username1);
+                    rootChildId = await _uow.Boards.AddAsync(_defaultBoard, groupId, _username1); // The chosen one
+                    await _uow.Boards.AddAsync(_defaultBoard, groupId, _username1);
                 }
 
                 i++;
             }
 
             // Add some boards in one of the root board's children
-            string rootChildGroupId = (await _uow.Boards.SetupAsync(rootChildId)).First().Id;
+            string rootChildGroupName = (await _uow.Boards.SetupAsync(rootChildId, _defaultGroups)).First();
+            string rootChildGroupId = (await _graphClient.Cypher
+                .Match("(board:Board)-[:CHILD_GROUP]->(group:Group)")
+                .Where((BoardTask board) => board.Id == rootChildId)
+                .AndWhere((GroupNode group) => group.Name == rootChildGroupName)
+                .Return<string>("group.id")
+                .ResultsAsync)
+                .First();
+
             await _uow.Boards.AddAsync(_defaultBoard, rootChildGroupId, _username1);
             string deepestChildId = await _uow.Boards.AddAsync(_defaultBoard, rootChildGroupId, _username1);
             await _uow.Boards.AddAsync(_defaultBoard, rootChildGroupId, _username1);
+
+            await _uow.Boards.SetupAsync(deepestChildId, _defaultGroups);
 
             return (deepestChildId, new string[] { rootChildId, rootId });
         }

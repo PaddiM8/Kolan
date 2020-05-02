@@ -115,19 +115,19 @@ namespace Kolan.Tests
             string returnedId = await _uow.Boards.AddAsync(_defaultBoard, _username1);
 
             // Act
-            IEnumerable<Group> returnedGroups = await _uow.Boards.SetupAsync(returnedId);
+            IEnumerable<GroupNode> returnedGroups = await _uow.Boards.SetupAsync(returnedId);
 
             // Assert
             Assert.That(returnedGroups.Count(), Is.GreaterThan(0));
 
-            foreach (Group returnedGroup in returnedGroups)
+            foreach (GroupNode returnedGroup in returnedGroups)
             {
                 Assert.That(returnedGroup.Id, Is.Not.Null);
 
                 bool groupWasAdded = (await _graphClient.Cypher
                     .Match("(board:Board)-[:CHILD_GROUP]->(group:Group)")
                     .Where((Task board) => board.Id == returnedId)
-                    .AndWhere((Group group) => group.Id == returnedGroup.Id)
+                    .AndWhere((GroupNode group) => group.Id == returnedGroup.Id)
                     .Return((group) => Return.As<int>("count(group)"))
                     .ResultsAsync)
                     .Single() == 1;
@@ -141,10 +141,10 @@ namespace Kolan.Tests
         {
             // Arrange
             string parentId = await _uow.Boards.AddAsync(_defaultBoard, _username1);
-            IEnumerable<Group> groups = await _uow.Boards.SetupAsync(parentId);
+            IEnumerable<GroupNode> groups = await _uow.Boards.SetupAsync(parentId);
 
             // Act
-            foreach (Group parentGroup in groups)
+            foreach (GroupNode parentGroup in groups)
             {
                 string childId = await _uow.Boards.AddAsync(_defaultBoard, parentGroup.Id, _username1);
 
@@ -211,7 +211,7 @@ namespace Kolan.Tests
             var result = _graphClient.Cypher
                 .Match("(parent:Board)-[:CHILD_GROUP]->(group:Group)-[:NEXT]->(board:Board)")
                 .Where((Task parent) => parent.Id == parentId)
-                .AndWhere((Group group) => group.Id == groupId)
+                .AndWhere((GroupNode group) => group.Id == groupId)
                 .AndWhere((Task board) => board.Id == boardId)
                 .Return((board) => board.As<Task>().Id)
                 .ResultsAsync;
@@ -303,12 +303,12 @@ namespace Kolan.Tests
             await _uow.Boards.AddAsync(_defaultBoard, _username1);
             string rootId = await _uow.Boards.AddAsync(_defaultBoard, _username1);
             await _uow.Boards.AddAsync(_defaultBoard, _username1);
-            IEnumerable<Group> rootGroups = await _uow.Boards.SetupAsync(rootId);
+            IEnumerable<GroupNode> rootGroups = await _uow.Boards.SetupAsync(rootId);
 
             // Add a board in each group of the root board
             string rootChildId = "";
             int i = 0;
-            foreach (Group rootGroup in rootGroups)
+            foreach (GroupNode rootGroup in rootGroups)
             {
                 await _uow.Boards.AddAsync(_defaultBoard, rootGroup.Id, _username1);
 

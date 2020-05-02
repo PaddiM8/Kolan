@@ -89,7 +89,7 @@ namespace Kolan.Repositories
                 // Get the groups and the boards under them
                 .OptionalMatch("(board)-[groupRel:CHILD_GROUP]->(g:Group)")
                 .OptionalMatch("(g)-[:NEXT*]->(childBoard:Board)-[:NEXT*]->(:End)")
-                .With("groupRel, board, {group: g, tasks: collect(childBoard)} AS group")
+                .With("groupRel, board, {groupNode: g, tasks: collect(childBoard)} AS group")
                 .OrderBy("groupRel.order")
 
                 // Get the path from the board to the user. This makes it possible to check if the user owns the board
@@ -109,7 +109,7 @@ namespace Kolan.Repositories
                 // Build the board object
                 .With(@"{
                     content: board { .*, encryptionKey: encryptionKey },
-                    groups: collect(group),
+                    groups: CASE WHEN group.groupNode IS NULL THEN NULL ELSE collect(group) END,
                     ancestors: tail([b in nodes(path) WHERE (b:Board) | { id: b.id, name: b.name }]),
                     userAccess: CASE WHEN path IS NULL
                                     THEN CASE WHEN board.public = false THEN 0 ELSE 1 END
@@ -194,7 +194,7 @@ namespace Kolan.Repositories
 
             await Client.Cypher
                 .Match("(parent:Board)-[:CHILD_GROUP]->(group:Group)")
-                .Where((Group group) => group.Id == groupId)
+                .Where((GroupNode group) => group.Id == groupId)
                 .Call("apoc.lock.nodes([group])")
                 .Match("(group)-[:NEXT*]->(next:End)")
                 .Match("(previous)-[oldRel:NEXT]->(next)")
@@ -218,8 +218,9 @@ namespace Kolan.Repositories
                 .Match("(board:Board)")
                 .Where("board.id = {id}")
                 .WithParam("id", newBoardContents.Id)
-                .Set("board = {newBoardContents}")
+                .With("board, {newBoardContents} AS newBoard")
                 .WithParam("newBoardContents", newBoardContents)
+                .Set("board = newBoard { .*, encrypted: board.encrypted }")
                 .ExecuteWithoutResultsAsync();
         }
 
@@ -333,10 +334,10 @@ namespace Kolan.Repositories
             }
 
             // Create group objects with randomly generated ids
-            var groups = new List<Group>(groupNames.Length);
+            var groups = new List<GroupNode>(groupNames.Length);
             for (int i = 0; i < groupNames.Length; i++)
             {
-                groups.Add(new Group
+                groups.Add(new GroupNode
                 {
                     Id = _generator.NewId(id + i.ToString()),
                     Name = groupNames[i]

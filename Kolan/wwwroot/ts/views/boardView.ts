@@ -24,7 +24,7 @@ declare const viewData;
 
 class Board {
     public content: Task;
-    public groups: { group: Group, tasks: Task[] }[]
+    public groups: { groupNode: Group, tasks: Task[] }[]
     public ancestors: { id: string, name: string }[];
     public userAccess: PermissionLevel;
 }
@@ -209,14 +209,15 @@ export class BoardView extends View {
     /**
     * Set the page title (with links to ancestors as well)
     */
-    private async setTitle(title: string, ancestors: object[], encryptionKey: string = null): Promise<void> {
+    private async setTitle(title: string): Promise<void> {
         document.title = title + " - Kolan";
         let html = BoardView.board.userAccess >= PermissionLevel.Edit
             ? `<a href="/">Boards</a> / `
             : `<a href="/">Kolan</a> / `;
 
         // Ancestors
-        if (ancestors) {
+        if (BoardView.board.ancestors) {
+            const ancestors = BoardView.board.ancestors;
             for (let i = 0; i < ancestors.length; i++) {
                 // If there are a lot of ancestors, hide the middle ones
                 if (ancestors.length >= 5 && i == 1)
@@ -227,12 +228,8 @@ export class BoardView extends View {
                 }
 
                 const ancestor = ancestors[ancestors.length - i - 1]; // Do backwards for correct order
-                /*const cryptoKey = encryptionKey
-                    ? await Crypto.unwrapEncryptionKey(encryptionKey, BoardView.permissionLevel != PermissionLevel.All)
-                    : null;*/
-
-                const name = await ContentFormatter.postBackend(ancestor["name"], BoardView.board.content.cryptoKey);
-                html += `<a href="./${ancestor["id"]}">${name}</a> / `;
+                const name = await ContentFormatter.postBackend(ancestor.name, BoardView.board.content.cryptoKey);
+                html += `<a href="./${ancestor.id}">${name}</a> / `;
             }
         }
 
@@ -250,6 +247,7 @@ export class BoardView extends View {
             const result = await ApiRequester.send("Boards", viewData.id, RequestType.Get);
             let board = JSON.parse(result) as Board;
             board.content = new Task(board.content);
+            BoardView.board = board;
 
             // If the request returns nothing, the board hasn't been set up yet. Display the setup dialog.
             if (!board.groups) {
@@ -262,27 +260,25 @@ export class BoardView extends View {
                 return;
             }
 
-            BoardView.board = board;
-
             // Process board data post-backend (eg. decrypt)
             await board.content.processPostBackend();
 
             // Set title on the client side, both on the board page and in the document title.
-            await this.setTitle(board.content.name, board.ancestors, board.content.encryptionKey);
+            await this.setTitle(board.content.name);
 
             const tasklists = document.getElementById("tasklists");
             const listHead = document.getElementById("list-head");
             tasklists.style.gridTemplateColumns = `repeat(${board.groups.length}, 1fr)`;
             listHead.style.gridTemplateColumns = tasklists.style.gridTemplateColumns;
 
-            for (const groupObject of board.groups) {
-                groupObject.group.name = await ContentFormatter.postBackend(groupObject.group.name, board.content.cryptoKey);
-                this.addGroup(groupObject.group as Group);
+            for (const group of board.groups) {
+                group.groupNode.name = await ContentFormatter.postBackend(group.groupNode.name, board.content.cryptoKey);
+                this.addGroup(group.groupNode as Group);
 
-                for (const task of groupObject.tasks) {
+                for (const task of group.tasks) {
                     // Format the boards (eg. decrypt if needed), and then save the promises returned in an array
                     const processedTask = await (new Task(task, BoardView.board.content.cryptoKey)).processPostBackend();
-                    this.addTask(groupObject.group.id, processedTask);
+                    this.addTask(group.groupNode.id, processedTask);
                 }
             }
 
@@ -303,10 +299,10 @@ export class BoardView extends View {
 
             ToastController.new("Loaded board", ToastType.Info);
         } catch (req) {
-            if (req.status == 404) this.setTitle("404 - Board does not exist", []);
-            else if (req.status == 401) this.setTitle("401 - Unauthorized. Are you logged in?", []);
-            else if (req.status > 400 && req.status < 499) this.setTitle(`${req.status} - Client error`, []);
-            else if (req.status > 500 && req.status < 599) this.setTitle(`${req.status} - Server error`, []);
+            if (req.status == 404) this.setTitle("404 - Board does not exist");
+            else if (req.status == 401) this.setTitle("401 - Unauthorized. Are you logged in?");
+            else if (req.status > 400 && req.status < 499) this.setTitle(`${req.status} - Client error`);
+            else if (req.status > 500 && req.status < 599) this.setTitle(`${req.status} - Server error`);
             console.log(req);
         }
     }

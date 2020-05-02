@@ -13,7 +13,7 @@ namespace Kolan.Models
         public BoardTask Content { get; set; }
 
         [JsonProperty("groups")]
-        public IEnumerable<Groups> Groups { get; set; }
+        public IEnumerable<Group> Groups { get; set; }
 
         [JsonProperty("ancestors")]
         public IEnumerable<Ancestor> Ancestors { get; set; }

@@ -22,7 +22,7 @@ namespace Kolan.Repositories
             await Client.Cypher
                 .Create("(u:User {newUser})-[:CHILD_GROUP]->(g:Group {newGroup})-[:NEXT]->(:End)")
                 .WithParam("newUser", entity)
-                .WithParam("newGroup", new Group { Name = "root", Id = entity.Username })
+                .WithParam("newGroup", new GroupNode { Name = "root", Id = entity.Username })
                 .ExecuteWithoutResultsAsync();
         }
 

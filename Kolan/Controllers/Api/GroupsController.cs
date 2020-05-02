@@ -31,7 +31,7 @@ namespace Kolan.Controllers.Api
         /// <param name="group">Group object to add</param>
         [HttpPost]
         [AuthorizeForBoard("boardId")]
-        public async Task<IActionResult> Create([FromForm]string boardId, Group group)
+        public async Task<IActionResult> Create([FromForm]string boardId, GroupNode group)
         {
             string id = await _uow.Groups.AddAsync(boardId, group);
 

@@ -14,7 +14,7 @@ namespace Kolan.Repositories
             _generator = new Generator();
         }
 
-        public async Task<string> AddAsync(string boardId, Group group)
+        public async Task<string> AddAsync(string boardId, GroupNode group)
         {
             string id = _generator.NewId(boardId);
             group.Id = id;
@@ -37,7 +37,7 @@ namespace Kolan.Repositories
         {
             await Client.Cypher
                 .Match("(:Board)-[rel:CHILD_GROUP]->(group:Group)-[nextRel:NEXT]->(end:End)") // Only remove empty groups
-                .Where((Group group) => group.Id == groupId)
+                .Where((GroupNode group) => group.Id == groupId)
                 .Delete("rel, nextRel, group, end")
                 .ExecuteWithoutResultsAsync();
         }

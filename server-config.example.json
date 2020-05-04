@@ -6,5 +6,9 @@
    "hashIterations": 20000,
    "saltLength": 16,
    "allowRegistrations": "true",
-   "taskColorSeed": "abc123"
+   "taskColorSeed": "abc123",
+
+   "testDatabaseUrl": "http://localhost:7484/db/data",
+   "testDatabaseUser": "neo4j",
+   "testDatabasePassword": "pass"
 }

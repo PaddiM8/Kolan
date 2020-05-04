@@ -12,10 +12,15 @@ namespace Kolan
 
         public void Init()
         {
+            Init(Config.Values.DatabaseUrl,
+                 Config.Values.DatabaseUser,
+                 Config.Values.DatabasePassword);
+        }
+
+        public void Init(string url, string user, string password)
+        {
             // Create graph client
-            Client = new GraphClient(new Uri(Config.Values.DatabaseUrl),
-                                     Config.Values.DatabaseUser,
-                                     Config.Values.DatabasePassword);
+            Client = new GraphClient(new Uri(url), user, password);
             Client.Connect();
 
             // Check if empty, if so, start setup process

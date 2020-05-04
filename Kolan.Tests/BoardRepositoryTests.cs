@@ -25,7 +25,9 @@ namespace Kolan.Tests
         [SetUp]
         public async Task Setup()
         {
-            new Database().Setup();
+            new Database().Init(Config.Values.TestDatabaseUrl,
+                                Config.Values.TestDatabaseUser,
+                                Config.Values.TestDatabasePassword);
             await new UsersController(_uow).Create(new ViewModels.RegisterViewModel
             {
                 Email = "test1@test.test",

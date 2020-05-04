@@ -38,6 +38,8 @@ namespace Kolan.Controllers
         [HttpPost("Login")]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
+            if (model.Username == null) return View("Index", model);
+
             // Validate password
             if (await _uow.Users.ValidatePasswordAsync(model.Username, model.Password) == false)
             {

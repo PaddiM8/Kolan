@@ -25,9 +25,6 @@ namespace Kolan.Tests
         [SetUp]
         public async Task Setup()
         {
-            new Database().Init(Config.Values.TestDatabaseUrl,
-                                Config.Values.TestDatabaseUser,
-                                Config.Values.TestDatabasePassword);
             await new UsersController(_uow).Create(new ViewModels.RegisterViewModel
             {
                 Email = "test1@test.test",
@@ -58,7 +55,9 @@ namespace Kolan.Tests
         public void SetupTests()
         {
             Config.Load("../../../../server-config.json");
-            new Database().Init();
+            new Database().Init(Config.Values.TestDatabaseUrl,
+                                Config.Values.TestDatabaseUser,
+                                Config.Values.TestDatabasePassword);
             _graphClient = Database.Client;
             _uow = new UnitOfWork(_graphClient);
 

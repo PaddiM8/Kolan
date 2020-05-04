@@ -102,7 +102,7 @@ export class SettingsDialog extends DialogBox {
         // Change delete button to leave button if the board isn't owned by the user.
         const deleteButton = this.shadowRoot.querySelector(".deleteBoard");
         if (BoardView.board.userAccess != PermissionLevel.All) {
-            if (BoardView.board.ancestors[-1].id) {
+            if (BoardView.board.ancestors[-1]) {
                 deleteButton.previousElementSibling.remove();
                 deleteButton.remove();
             } else {

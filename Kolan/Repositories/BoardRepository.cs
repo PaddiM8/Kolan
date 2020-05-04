@@ -80,7 +80,7 @@ namespace Kolan.Repositories
         /// <param name="username">User requesting the board data</param>
         public async Task<Board> GetAsync(string id, string username)
         {
-            username = username.ToLower();
+            if (username != null) username = username.ToLower();
 
             return (await Client.Cypher
                 .Match("(board:Board)")
@@ -98,12 +98,12 @@ namespace Kolan.Repositories
                 .With("user, board, group, path, rootBoard, childBoardRel")
 
                 // Find out if it's a shared board
-                .OptionalMatch("sharedPath=(rootBoard)<-[:SHARED_BOARD]-(link)<-[:NEXT]-()<-[:CHILD_GROUP]-(user)")
+                .OptionalMatch("sharedPath=(rootBoard)<-[:SHARED_BOARD]-(link)<-[:NEXT*0..]-()<-[:CHILD_GROUP]-(user)")
 
                 // Get the right encryption key for the user
                 .With(@"*, CASE WHEN path IS NULL
-                           THEN NULL
-                           ELSE CASE WHEN sharedPath IS NOT NULL THEN link.encryptionKey ELSE rootBoard.encryptionKey END
+                               THEN NULL
+                               ELSE CASE WHEN sharedPath IS NOT NULL THEN link.encryptionKey ELSE rootBoard.encryptionKey END
                            END AS encryptionKey")
 
                 // Build the board object
@@ -128,14 +128,14 @@ namespace Kolan.Repositories
         /// <param name="username">Username of the user to check for permission for</param>
         public async Task<PermissionLevel> GetUserPermissionLevel(string boardId, string username)
         {
-            username = username.ToLower();
+            if (username != null) username = username.ToLower();
 
             var result = await Client.Cypher
                 .Match("path=(board)<-[:CHILD_BOARD*0..]-(rootBoard)<-[:CHILD_BOARD]-(user:User)")
                 .Where((User user) => user.Username == username)
                 .AndWhere((BoardTask board) => board.Id == boardId)
                 .With("path, user, board, rootBoard")
-                .OptionalMatch("sharedPath=(rootBoard)<-[:SHARED_BOARD]-()<-[:NEXT]-()<-[:CHILD_GROUP]-(user)")
+                .OptionalMatch("sharedPath=(rootBoard)<-[:SHARED_BOARD]-()<-[:NEXT*0..]-()<-[:CHILD_GROUP]-(user)")
                 .Return((path, board, sharedPath) =>
                         Return.As<PermissionLevel>(@"CASE WHEN path IS NULL
                                                      THEN CASE WHEN board.public = false THEN 0 ELSE 1 END

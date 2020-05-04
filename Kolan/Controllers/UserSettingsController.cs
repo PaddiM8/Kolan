@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Kolan.Models;
 using Kolan.ViewModels;
 using Kolan.Repositories;
@@ -9,6 +10,7 @@ using System;
 
 namespace Kolan.Controllers
 {
+    [Authorize]
     public class UserSettingsController : Controller
     {
         private readonly UnitOfWork _uow;
@@ -17,6 +19,7 @@ namespace Kolan.Controllers
             _uow = uow;
         }
 
+        [Authorize]
         public IActionResult Index()
         {
             ViewData["username"] = User.Identity.Name;
@@ -30,6 +33,7 @@ namespace Kolan.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
         {

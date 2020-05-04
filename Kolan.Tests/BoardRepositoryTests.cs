@@ -196,6 +196,49 @@ namespace Kolan.Tests
         }
 
         [Test]
+        public async Task Delete_SharedChildBoard()
+        {
+            // Arrange
+            (string deepestChildId, string[] ancestorIds) nestedBoards = await CreateNestedBoards();
+            string boardId = nestedBoards.ancestorIds[0];
+            await _uow.Boards.AddUserAsync(boardId, _username2.ToLower());
+
+            int initialCount = (await _graphClient.Cypher
+                    .Match("(board:Board)")
+                    .Return<int>("count(board)")
+                    .ResultsAsync)
+                    .First();
+
+            int amountToBeDeleted = (await _graphClient.Cypher
+                .Match("(board:Board)-[:CHILD_BOARD]->(child:Board)")
+                .Where((BoardTask board) => board.Id == boardId)
+                .Return<int>("count(child) + 1")
+                .ResultsAsync)
+                .First();
+
+            // Act
+            await _uow.Boards.DeleteAsync(boardId);
+
+            bool deletedProperly = (await _graphClient.Cypher
+                .Match("(board:Board)")
+                .Return<int>("count(board)")
+                .ResultsAsync)
+                .First() == initialCount - amountToBeDeleted;
+
+            bool deletedFromCollaboratorProperly = (await _graphClient.Cypher
+                .Match("(user:User)-[:CHILD_GROUP]->(:Group)-[:NEXT]->(:End)")
+                .Where("user.username = {username}")
+                .WithParam("username", _username2.ToLower())
+                .Return<int>("count(user)")
+                .ResultsAsync)
+                .First() == 1;
+
+            // Assert
+            Assert.That(deletedProperly, Is.True);
+            Assert.That(deletedFromCollaboratorProperly, Is.True);
+        }
+
+        [Test]
         public async Task Move_RootBoardToTop()
         {
             // Arrange

@@ -131,9 +131,10 @@ namespace Kolan.Repositories
             if (username != null) username = username.ToLower();
 
             var result = await Client.Cypher
-                .Match("path=(board)<-[:CHILD_BOARD*0..]-(rootBoard)<-[:CHILD_BOARD]-(user:User)")
+                .Match("(board:Board)")
+                .Where((BoardTask board) => board.Id == boardId)
+                .OptionalMatch("path=(board)<-[:CHILD_BOARD*0..]-(rootBoard)<-[:CHILD_BOARD]-(user:User)")
                 .Where((User user) => user.Username == username)
-                .AndWhere((BoardTask board) => board.Id == boardId)
                 .With("path, user, board, rootBoard")
                 .OptionalMatch("sharedPath=(rootBoard)<-[:SHARED_BOARD]-()<-[:NEXT*0..]-()<-[:CHILD_GROUP]-(user)")
                 .Return((path, board, sharedPath) =>

@@ -10,13 +10,6 @@ namespace Kolan.Controllers
     [Authorize]
     public class BoardsController : Controller
     {
-        private readonly UnitOfWork _uow;
-
-        public BoardsController(UnitOfWork uow)
-        {
-            _uow = uow;
-        }
-
         [Authorize]
         public IActionResult Index()
         {

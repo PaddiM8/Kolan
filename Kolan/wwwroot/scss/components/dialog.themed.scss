@@ -75,7 +75,8 @@ input[type="color"] {
 }
 
 .error {
-    color: red;
+    font-size: 1.2em;
+    color: $error;
 }
 
 .inputList {

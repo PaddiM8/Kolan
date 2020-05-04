@@ -124,6 +124,37 @@ namespace Kolan.Tests
         }
 
         [Test]
+        public async Task GetPermissionLevel_ForUserAndBoard_ReturnsPermissionLevel()
+        {
+            // Arrange
+            string boardId = await _uow.Boards.AddAsync(_defaultBoard, _username1);
+            await _uow.Boards.AddUserAsync(boardId, _username2);
+
+            // Act
+            var boardAccessUser1 = await _uow.Boards.GetUserPermissionLevel(boardId, _username1.ToString());
+            var boardAccesUser2 = await _uow.Boards.GetUserPermissionLevel(boardId, _username2.ToString());
+            var boardAccessAnonymous = await _uow.Boards.GetUserPermissionLevel(boardId, "");
+
+            // Assert
+            Assert.That(boardAccessUser1, Is.EqualTo(PermissionLevel.All));
+            Assert.That(boardAccesUser2, Is.EqualTo(PermissionLevel.Edit));
+            Assert.That(boardAccessAnonymous, Is.EqualTo(PermissionLevel.None));
+        }
+
+        [Test]
+        public async Task SetPublicity_ForBoard()
+        {
+            // Arrange
+            string boardId = await _uow.Boards.AddAsync(_defaultBoard, _username1);
+
+            // Act
+            await _uow.Boards.SetPublicityAsync(boardId, true);
+
+            // Assert
+            Assert.That(await _uow.Boards.GetUserPermissionLevel(boardId, ""), Is.EqualTo(PermissionLevel.View));
+        }
+
+        [Test]
         public async Task Setup_EmptyBoard_ReturnsListOfGroups()
         {
             // Arrange

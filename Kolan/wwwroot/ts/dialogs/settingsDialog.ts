@@ -10,6 +10,7 @@ import { ToastController } from "../controllers/toastController";
 import { PermissionLevel } from "../enums/permissionLevel";
 import { Task } from "../models/task";
 import { ContentFormatter } from "../processing/contentFormatter";
+import { RedirectTo } from "../views/redirectTo";
 
 declare const viewData;
 
@@ -149,14 +150,15 @@ export class SettingsDialog extends DialogBox {
 
             // The backend will understand if parentId is null
             await ApiRequester.boards.delete(BoardView.board.content.id, parentId);
-            location.href = parentId ? `/Board/${parentId}` : "/";
+            if (parentId) RedirectTo.Board(parentId)
+            else          RedirectTo.Boards();
         });
     }
 
     private async leaveBoard(): Promise<void> {
         await ApiRequester.boards.removeUser(BoardView.board.content.id, viewData.username);
 
-        location.href = "/";
+        RedirectTo.Boards();
     }
 
     private async onItemAdded(e: CustomEvent): Promise<void> {

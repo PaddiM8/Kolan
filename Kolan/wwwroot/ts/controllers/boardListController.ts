@@ -2,6 +2,7 @@ import { ApiRequester } from "../communication/apiRequester";
 import { Task } from "../models/task";
 import { RequestType } from "../enums/requestType";
 import { DraggableItem } from "../components/draggableItem";
+import { RedirectTo } from "../views/redirectTo";
 
 declare const viewData;
 
@@ -56,7 +57,7 @@ export class BoardListController {
      */
     private onClickEvent(e: Event): void {
         const target = e.target as HTMLElement;
-        window.location.href = "../Board/" + target.dataset.id;
+        RedirectTo.Board(target.dataset.id);
     }
 
     /**

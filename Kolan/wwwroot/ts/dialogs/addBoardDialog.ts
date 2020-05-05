@@ -7,6 +7,7 @@ import { Task } from "../models/task";
 import { Crypto } from "../processing/crypto";
 import { Defaults } from "../defaults";
 import { DialogOptions, DialogField } from "../models/dialogOptions";
+import { RedirectTo } from "../views/redirectTo";
 
 @customElement("add-board-dialog")
 export class AddBoardDialog extends DialogBox {
@@ -40,7 +41,7 @@ export class AddBoardDialog extends DialogBox {
             const id = await ApiRequester.boards.add(board);
 
             // Redirect to the board.
-            location.href = `/Board/${id}`;
+            RedirectTo.Board(id);
         } catch (err) {
             // Show model errors.
             this.showErrors(err.response);

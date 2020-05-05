@@ -2,6 +2,7 @@ import { View } from "./view";
 import { Crypto, RSAType } from "../processing/crypto";
 import { ApiRequester } from "../communication/apiRequester";
 import { RequestType } from "../enums/requestType";
+import { RedirectTo } from "./redirectTo";
 
 window.addEventListener("load", () => new RegisterView());
 
@@ -23,7 +24,7 @@ class RegisterView extends View {
                 username,
                 password,
                 repeatPassword
-            ).then(() => location.href = "/")
+            ).then(() => RedirectTo.Login())
              .catch(err => this.showFormErrors(form, err.response));
         });
     }

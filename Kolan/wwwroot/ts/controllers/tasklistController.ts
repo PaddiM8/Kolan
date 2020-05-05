@@ -5,6 +5,7 @@ import { BoardView } from "../views/boardView";
 import { ContentFormatter } from "../processing/contentFormatter";
 import { ConfirmDialog } from "../dialogs/confirmDialog";
 import { PermissionLevel } from "../enums/permissionLevel";
+import { RedirectTo } from "../views/redirectTo";
 
 /**
  * Controller to add/remove/edit/etc. tasks in a tasklist.
@@ -140,7 +141,7 @@ export class TasklistController {
     private onClickEvent(e): void {
         if (e.detail["target"].classList.contains("content")) { // Only redirect if the background was clicked
             const id = e.target.dataset.id;
-            window.location.href = "./" + id;
+            RedirectTo.Board(id);
         }
     }
 

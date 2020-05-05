@@ -2,6 +2,7 @@ import { ApiClient } from "./apiClient";
 import { RequestType } from "../enums/requestType";
 import { RSAType } from "../processing/crypto";
 import { Crypto } from "../processing/crypto";
+import { RedirectTo } from "../views/redirectTo";
 
 export class UserApiClient extends ApiClient {
     public async add(email: string, username: string, password: string, repeatPassword: string): Promise<string> {
@@ -33,6 +34,6 @@ export class UserApiClient extends ApiClient {
 
     public async logout(): Promise<void> {
         await Crypto.clearKeys();
-        location.href = "/Logout";
+        RedirectTo.Logout();
     }
 }

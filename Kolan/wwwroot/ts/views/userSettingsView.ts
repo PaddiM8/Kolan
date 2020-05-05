@@ -7,6 +7,7 @@ import { ThemeManager } from "../themes/themeManager";
 import { PasswordDialog } from "../dialogs/passwordDialog";
 import { ApiRequester } from "../communication/apiRequester";
 import { RequestType } from "../enums/requestType";
+import { RedirectTo } from "./redirectTo";
 
 window.addEventListener("load", () => new UserSettingsView());
 declare const viewData;
@@ -46,6 +47,6 @@ class UserSettingsView extends View {
 
     private async removeUser(password: string): Promise<void> {
         await ApiRequester.users.delete(viewData.username, password);
-        location.href = "/Logout";
+        RedirectTo.Logout();
     }
 }

@@ -34,7 +34,7 @@ export class BoardApiClient extends ApiClient {
                     board.content.cryptoKey
                 );
             }
-
+        
         // Process grops
         if (board.groups)
             for (let group of board.groups) {
@@ -44,6 +44,7 @@ export class BoardApiClient extends ApiClient {
                 );
 
                 for (let i = 0; i < group.tasks.length; i++) {
+                    group.tasks[i].encryptionKey = board.content.encryptionKey;
                     group.tasks[i] = await new Task(group.tasks[i]).processPostBackend();
                 }
             }

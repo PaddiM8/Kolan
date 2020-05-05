@@ -32,6 +32,7 @@ export class BoardView extends View {
     public static viewData;
     public static pageReloadInProgress = false;
     public static boardHub: BoardHub;
+    private currentTasklistId: string;
     private previousTasklist: HTMLElement;
 
     constructor() {

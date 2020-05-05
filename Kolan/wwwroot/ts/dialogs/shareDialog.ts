@@ -59,18 +59,8 @@ export class ShareDialog extends DialogBox {
     private async onUserAdded(e: CustomEvent): Promise<void> {
         try {
             const username = e.detail["value"];
-            let encryptionKey: string;
 
-            if (BoardView.board.content.encrypted) {
-                // Wrap the board's encryption key using the added user's public key,
-                // so that they can unwrap it using their own private key.
-                encryptionKey = await Crypto.wrapAnyKey(
-                    BoardView.board.content.cryptoKey,
-                    await ApiRequester.users.getPublicKey(username)
-                );
-            }
-
-            await ApiRequester.boards.addUser(BoardView.board.content.id, username, encryptionKey);
+            await ApiRequester.boards.addUser(BoardView.board.content, username);
             BoardView.collaborators.push(username);
             ToastController.new("Collaborator added", ToastType.Info);
         } catch (err) {

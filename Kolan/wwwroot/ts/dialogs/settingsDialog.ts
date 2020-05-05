@@ -62,9 +62,6 @@ export class SettingsDialog extends DialogBox {
             BoardView.board.content.name = formData["name"];
             BoardView.board.content.description = formData["description"];
 
-            // Process (eg. encrypt) data before sending it to the backend.
-            const processedBoard = await new Task(BoardView.board.content).processPreBackend();
-
             // Get the parent's id
             // If there are ancestors, get the last item in the ancestors list, this will be the parent id
             // Otherwise, there is no parent.
@@ -74,7 +71,12 @@ export class SettingsDialog extends DialogBox {
             
             try {
                 // parentId is empty if there is no parent. The backend will understand this.
-                await ApiRequester.boards.edit(BoardView.board.content.id, parentId, processedBoard);
+                await ApiRequester.boards.edit(
+                    BoardView.board.content.id,
+                    parentId,
+                    BoardView.board.content
+                );
+
                 location.reload();
             } catch(err) {
                 this.showErrors(JSON.parse(err.response));
@@ -158,9 +160,7 @@ export class SettingsDialog extends DialogBox {
     }
 
     private async onItemAdded(e: CustomEvent): Promise<void> {
-        const groupName = await ContentFormatter.preBackend(e.detail["value"], BoardView.board.content.cryptoKey);
-        const groupId = await ApiRequester.groups.add(BoardView.board.content.id, groupName);
-
+        const groupId = await ApiRequester.groups.add(BoardView.board.content, e.detail["value"]);
         this.list.items[this.list.items.length - 1].id = groupId;
     }
 

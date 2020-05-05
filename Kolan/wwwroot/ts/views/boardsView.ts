@@ -28,8 +28,7 @@ class BoardsView extends View {
             addDialog.shown = true);
 
         document.getElementById("logoutButton").addEventListener("click", () => {
-            // Remove the stored keys and logout
-            Crypto.clearKeys().then(() => location.href = "/Logout");
+            ApiRequester.users.logout();
         });
     }
 
@@ -41,14 +40,8 @@ class BoardsView extends View {
             .querySelector(".board-list .draggableContainer"));
 
         const result = await ApiRequester.boards.getAll();
-
-        // Import/unwrap and save the RSA keys. These will be used to wrap/unwrap board encryption keys.
-        await Crypto.setRSAKeys(result.keys.publicKey, result.keys.privateKey);
-
         for (const board of result.boards) {
-            // Encryption and such, if needed
-            const processedBoard = await new Task(board).processPostBackend()
-            boardListController.addBoardToBottom(processedBoard);
+            boardListController.addBoardToBottom(board);
         }
     }
 }

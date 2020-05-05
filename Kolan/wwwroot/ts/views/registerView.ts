@@ -18,15 +18,11 @@ class RegisterView extends View {
             const password = (document.getElementById("passwordInput") as HTMLInputElement).value;
             const repeatPassword = (document.getElementById("repeatPasswordInput") as HTMLInputElement).value;
 
-            // Create the user's public/private key pair. This will also save the keys locally.
-            const keyPair = await Crypto.createWrappingKeyPair(password, username);
             ApiRequester.users.add(
                 email,
                 username,
                 password,
-                repeatPassword,
-                await Crypto.exportRSAKey(keyPair.publicKey),
-                await Crypto.wrapPrivateKey(keyPair.privateKey)
+                repeatPassword
             ).then(() => location.href = "/")
              .catch(err => this.showFormErrors(form, err.response));
         });

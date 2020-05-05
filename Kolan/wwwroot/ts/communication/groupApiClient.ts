@@ -1,11 +1,13 @@
 import { ApiClient } from "./apiClient";
 import { RequestType } from "../enums/requestType";
+import { Task } from "../models/task";
+import { ContentFormatter } from "../processing/contentFormatter";
 
 export class GroupApiClient extends ApiClient {
-    public async add(boardId: string, name: string): Promise<string> {
+    public async add(board: Task, name: string): Promise<string> {
         const response = await this.send("Groups", "", RequestType.Post, {
-            boardId: boardId,
-            name: name
+            boardId: board.id,
+            name: await ContentFormatter.preBackend(name, board.cryptoKey)
         });
 
         return JSON.parse(response).id;

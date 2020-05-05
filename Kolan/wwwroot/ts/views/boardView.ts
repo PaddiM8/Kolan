@@ -220,8 +220,7 @@ export class BoardView extends View {
                 }
 
                 const ancestor = ancestors[ancestors.length - i - 1]; // Do backwards for correct order
-                const name = await ContentFormatter.postBackend(ancestor.name, BoardView.board.content.cryptoKey);
-                html += `<a href="./${ancestor.id}">${name}</a> / `;
+                html += `<a href="./${ancestor.id}">${ancestor.name}</a> / `;
             }
         }
 
@@ -237,7 +236,6 @@ export class BoardView extends View {
         try {
             // Get board content
             let board = await ApiRequester.boards.get(viewData.id);
-            board.content = new Task(board.content);
             BoardView.board = board;
 
             // If the request returns nothing, the board hasn't been set up yet. Display the setup dialog.
@@ -251,9 +249,6 @@ export class BoardView extends View {
                 return;
             }
 
-            // Process board data post-backend (eg. decrypt)
-            await board.content.processPostBackend();
-
             // Set title on the client side, both on the board page and in the document title.
             await this.setTitle(board.content.name);
 
@@ -263,13 +258,10 @@ export class BoardView extends View {
             listHead.style.gridTemplateColumns = tasklists.style.gridTemplateColumns;
 
             for (const group of board.groups) {
-                group.groupNode.name = await ContentFormatter.postBackend(group.groupNode.name, board.content.cryptoKey);
                 this.addGroup(group.groupNode as Group);
 
                 for (const task of group.tasks) {
-                    // Format the boards (eg. decrypt if needed), and then save the promises returned in an array
-                    const processedTask = await (new Task(task, BoardView.board.content.cryptoKey)).processPostBackend();
-                    this.addTask(group.groupNode.id, processedTask);
+                    this.addTask(group.groupNode.id, task);
                 }
             }
 

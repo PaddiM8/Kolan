@@ -12,7 +12,7 @@ Kolan is a self-hostable project management website, that is built around the co
 * Collaborate with other users on the same board in real-time.
 * Assign different tasks to different users.
 * Create boards inside tasks, to more easily organise and plan larger tasks.
-* Both a light theme and a dark theme, with the possibility of creating your own themes if you know CSS and host your own instnace.
+* Both a light theme and a dark theme, with the possibility of creating your own themes if you know CSS and host your own instance.
 * Fairly good support for small devices (eg. phones, tablets). However, you cannot move tasks around on these.
 * Open source and easy to self-host.
 

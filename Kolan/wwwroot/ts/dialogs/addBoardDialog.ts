@@ -1,8 +1,6 @@
 import { DialogBox } from "../components/dialogBox";
-import { LitElement, property, customElement } from "lit-element";
+import { property, customElement } from "lit-element";
 import { InputType } from "../enums/inputType";
-import { BoardHub } from "../communication/boardHub";
-import { RequestType } from "../enums/requestType";
 import { ApiRequester } from "../communication/apiRequester";
 import { ContentFormatter } from "../processing/contentFormatter";
 import { Task } from "../models/task";
@@ -49,8 +47,7 @@ export class AddBoardDialog extends DialogBox {
 
         try {
             // Send the board to the backend, and retrieve the id created for it.
-            const response = await ApiRequester.send("Boards", "", RequestType.Post, processedBoard);
-            const id = JSON.parse(response)["id"];
+            const id = await ApiRequester.boards.add(processedBoard);
 
             // Create a list of the default group names (and process them)
             let groupNames = [];
@@ -58,9 +55,7 @@ export class AddBoardDialog extends DialogBox {
                 groupNames.push(await ContentFormatter.preBackend(groupName, cryptoKey));
 
             // Set up the board using the group names.
-            await ApiRequester.send("Boards", `${id}/Setup`, RequestType.Post, {
-                groups: JSON.stringify(groupNames)
-            });
+            await ApiRequester.boards.setup(id, groupNames);
 
             // Redirect to the board.
             location.href = `/Board/${id}`;

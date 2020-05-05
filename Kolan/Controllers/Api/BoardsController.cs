@@ -143,14 +143,14 @@ namespace Kolan.Controllers.Api
         /// <summary>
         /// Delete a child board
         /// </summary>
-        /// <param name="id">Parent board id</param>
-        /// <param name="boardId">Id of the board to delete</param>
-        [HttpDelete("{id}")]
-        [AuthorizeForBoard]
-        public async Task<IActionResult> Delete(string id, [FromForm]string boardId)
+        /// <param name="parentId">Parent board id</param>
+        /// <param name="id">Id of the board to delete</param>
+        [HttpDelete("{parentId}")]
+        [AuthorizeForBoard("parentId")]
+        public async Task<IActionResult> Delete(string parentId, [FromForm]string id)
         {
-            await _uow.Boards.DeleteAsync(boardId);
-            await _boardHubContext.Clients.Group(id).DeleteBoard(boardId);
+            await _uow.Boards.DeleteAsync(id);
+            await _boardHubContext.Clients.Group(parentId).DeleteBoard(id);
 
             return Ok();
         }
@@ -158,13 +158,13 @@ namespace Kolan.Controllers.Api
         /// <summary>
         /// Move a root board.
         /// </summary>
-        /// <param name="boardId">Id of the board to move</param>
+        /// <param name="id">Id of the board to move</param>
         /// <param name="targetId">Id of the board it will be placed under</param>
-        [HttpPost("ChangeOrder")]
-        [AuthorizeForBoard("boardId")]
-        public async Task<IActionResult> ChangeOrder([FromForm]string boardId, [FromForm]string targetId)
+        [HttpPost("Move")]
+        [AuthorizeForBoard]
+        public async Task<IActionResult> Move([FromForm]string id, [FromForm]string targetId)
         {
-            await _uow.Boards.MoveAsync(User.Identity.Name, boardId, targetId, true);
+            await _uow.Boards.MoveAsync(User.Identity.Name, id, targetId, true);
 
             return Ok();
         }

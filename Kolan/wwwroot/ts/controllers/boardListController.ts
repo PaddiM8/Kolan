@@ -1,5 +1,4 @@
 import { ApiRequester } from "../communication/apiRequester";
-import { RequestParameter } from "../communication/requestParameter";
 import { Task } from "../models/task";
 import { RequestType } from "../enums/requestType";
 import { DraggableItem } from "../components/draggableItem";
@@ -68,9 +67,6 @@ export class BoardListController {
         if (toItem) target = toItem.dataset.id;
         else        target = viewData.username; // If there is no item above, set the target to the user's username.
 
-        ApiRequester.send("Boards", "ChangeOrder", RequestType.Post, {
-            boardId: item.dataset.id,
-            targetId: target
-        });
+        ApiRequester.boards.move(item.dataset.id, target);
     }
 }

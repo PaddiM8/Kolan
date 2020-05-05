@@ -1,5 +1,4 @@
 import { View } from "./view"
-import { InputList } from "../components/inputList"
 import { TasklistController } from "../controllers/tasklistController";
 import { ApiRequester } from "../communication/apiRequester";
 import { BoardHub } from "../communication/boardHub";
@@ -10,7 +9,7 @@ import { RequestType } from "../enums/requestType";
 import { ToastController } from "../controllers/toastController";
 import { PermissionLevel } from "../enums/permissionLevel";
 import { ContentFormatter } from "../processing/contentFormatter";
-import { Crypto } from "../processing/crypto";
+import { Board } from "../models/board";
 
 // Dialogs
 import { AddTaskDialog } from "../dialogs/addTaskDialog";
@@ -21,13 +20,6 @@ import { SettingsDialog } from "../dialogs/settingsDialog";
 
 window.addEventListener("load", () => new BoardView());
 declare const viewData;
-
-class Board {
-    public content: Task;
-    public groups: { groupNode: Group, tasks: Task[] }[]
-    public ancestors: { id: string, name: string }[];
-    public userAccess: PermissionLevel;
-}
 
 /**
  * In charge of controlling the "Board" page.
@@ -244,8 +236,7 @@ export class BoardView extends View {
     private async loadBoard(): Promise<void> {
         try {
             // Get board content
-            const result = await ApiRequester.send("Boards", viewData.id, RequestType.Get);
-            let board = JSON.parse(result) as Board;
+            let board = await ApiRequester.boards.get(viewData.id);
             board.content = new Task(board.content);
             BoardView.board = board;
 
@@ -292,10 +283,7 @@ export class BoardView extends View {
             }
 
             // Get collaborators
-            ApiRequester.send("Boards", `${BoardView.board.content.id}/Users`, RequestType.Get)
-                .then(response => {
-                    BoardView.collaborators = JSON.parse(response as string);
-                });
+            BoardView.collaborators = await ApiRequester.boards.getUsers(BoardView.board.content.id);
 
             ToastController.new("Loaded board", ToastType.Info);
         } catch (req) {

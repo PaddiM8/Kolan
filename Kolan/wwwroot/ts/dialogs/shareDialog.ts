@@ -49,10 +49,8 @@ export class ShareDialog extends DialogBox {
 
     async submitHandler(): Promise<void> {
         const isPublic = this.getFormData()["public"];
-        await ApiRequester.send("Boards", `${BoardView.board.content.id}/ChangePublicity`, RequestType.Post, {
-            publicity: isPublic
-        });
 
+        await ApiRequester.boards.changePublicity(BoardView.board.content.id, isPublic);
         BoardView.board.content.public = isPublic;
 
         this.hide();
@@ -64,25 +62,15 @@ export class ShareDialog extends DialogBox {
             let encryptionKey: string;
 
             if (BoardView.board.content.encrypted) {
-                // Get the added user's public key
-                const response = await ApiRequester.send("Users", `${username}/PublicKey`, RequestType.Get);
-
-                // Import the public key so that it can be used
-                const publicKey = await Crypto.importRSAKey(JSON.parse(response).key, RSAType.Public)
-
                 // Wrap the board's encryption key using the added user's public key,
                 // so that they can unwrap it using their own private key.
                 encryptionKey = await Crypto.wrapAnyKey(
                     BoardView.board.content.cryptoKey,
-                    publicKey
+                    await ApiRequester.users.getPublicKey(username)
                 );
             }
-            
-            await ApiRequester.send("Boards", `${BoardView.board.content.id}/Users`, RequestType.Post, {
-                username: username,
-                encryptionKey: encryptionKey // If encryption is not enabled on the board, this will simply be null.
-            });
 
+            await ApiRequester.boards.addUser(BoardView.board.content.id, username, encryptionKey);
             BoardView.collaborators.push(username);
             ToastController.new("Collaborator added", ToastType.Info);
         } catch (err) {
@@ -94,10 +82,7 @@ export class ShareDialog extends DialogBox {
 
     private async onUserRemoved(e): Promise<void> {
         try {
-            await ApiRequester.send("Boards", `${BoardView.board.content.id}/Users`, RequestType.Delete, {
-                username: e.detail["item"].name
-            });
-
+            await ApiRequester.boards.removeUser(BoardView.board.content.id, e.detail["item"].name);
             ToastController.new("Collaborator removed", ToastType.Info);
         } catch {
             ToastController.new("Failed to remove collaborator", ToastType.Error);

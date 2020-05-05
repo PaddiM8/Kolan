@@ -68,15 +68,13 @@ export class SettingsDialog extends DialogBox {
             // Get the parent's id
             // If there are ancestors, get the last item in the ancestors list, this will be the parent id
             // Otherwise, there is no parent.
-            const parentId = BoardView.board.ancestors.length > 0 ?? BoardView.board.ancestors[BoardView.board.ancestors.length - 1];
+            const parentId = BoardView.board.ancestors.length > 0
+                ? BoardView.board.ancestors[BoardView.board.ancestors.length - 1].id
+                : null;
             
             try {
                 // parentId is empty if there is no parent. The backend will understand this.
-                await ApiRequester.send("Boards", BoardView.board.content.id, RequestType.Put, {
-                    parentId: parentId,
-                    newBoardContent: JSON.stringify(processedBoard)
-                });
-
+                await ApiRequester.boards.edit(BoardView.board.content.id, parentId, processedBoard);
                 location.reload();
             } catch(err) {
                 this.showErrors(JSON.parse(err.response));
@@ -85,9 +83,10 @@ export class SettingsDialog extends DialogBox {
 
         // Send a request to change the group order only if it has been changed.
         if (this.itemHasBeenMoved) {
-            await ApiRequester.send("Boards", `${BoardView.board.content.id}/ChangeGroupOrder`, RequestType.Post, {
-                groupIds: JSON.stringify(this.list.items.map(x => x.id))
-            });
+            await ApiRequester.boards.changeGroupOrder(
+                BoardView.board.content.id,
+                this.list.items.map(x => x.id)
+            );
         }
 
         if (this.itemHasBeenMoved || this.itemAddedOrRemoved) {
@@ -141,39 +140,31 @@ export class SettingsDialog extends DialogBox {
         document.body.appendChild(confirmDialog);
 
         confirmDialog.addEventListener("submitDialog", async () => {
-            // If it's not a root board
-            const parentId = BoardView.board.ancestors.length > 0 ? BoardView.board.ancestors[-1].id : null;
-            if (BoardView.board.ancestors.length > 0) {
-                await ApiRequester.send("Boards", parentId, RequestType.Delete, {
-                    boardId: BoardView.board.content.id
-                });
-                location.href = `/Board/${parentId}`;
-            } else {
-                await ApiRequester.send("Boards", "", RequestType.Delete, { id: BoardView.board.content.id });
-                location.href = `/`;
-            }
+            // Get parent if there is one
+            const parentId = BoardView.board.ancestors.length > 0
+                ? BoardView.board.ancestors[-1].id
+                : null;
+
+            // The backend will understand if parentId is null
+            await ApiRequester.boards.delete(BoardView.board.content.id, parentId);
+            location.href = parentId ? `/Board/${parentId}` : "/";
         });
     }
 
     private async leaveBoard(): Promise<void> {
-        await ApiRequester.send("Boards", `${BoardView.board.content.id}/Users`, RequestType.Delete, {
-            username: viewData.username
-        });
+        await ApiRequester.boards.removeUser(BoardView.board.content.id, viewData.username);
 
         location.href = "/";
     }
 
     private async onItemAdded(e: CustomEvent): Promise<void> {
         const groupName = await ContentFormatter.preBackend(e.detail["value"], BoardView.board.content.cryptoKey);
-        const req = await ApiRequester.send("Groups", "", RequestType.Post, {
-            boardId: BoardView.board.content.id,
-            name: groupName
-        })
+        const groupId = await ApiRequester.groups.add(BoardView.board.content.id, groupName);
 
-        this.list.items[this.list.items.length - 1].id = JSON.parse(req).id;
+        this.list.items[this.list.items.length - 1].id = groupId;
     }
 
-    private onItemRemoved(e: CustomEvent): void {
+    private async onItemRemoved(e: CustomEvent): Promise<void> {
         const groupId = e.detail["item"].id;
 
         if (BoardView.tasklistControllers[groupId].tasklist.children.length > 0) {
@@ -181,8 +172,6 @@ export class SettingsDialog extends DialogBox {
             e.detail["object"].undoRemove();
         }
 
-        ApiRequester.send("Groups", `${groupId}`, RequestType.Delete, {
-            boardId: BoardView.board.content.id
-        });
+        await ApiRequester.groups.delete(BoardView.board.content.id, groupId);
     }
 }

@@ -31,7 +31,7 @@ class UserSettingsView extends View {
             location.reload();
         });
 
-        // Remove user
+        // Remove account
         const removeUserButton = document.getElementById("removeUserButton");
         removeUserButton.addEventListener("click", () => {
             const dialog = new PasswordDialog("Confirm password to delete (this will remove ALL your boards)", "Delete", true);
@@ -45,10 +45,7 @@ class UserSettingsView extends View {
     }
 
     private async removeUser(password: string): Promise<void> {
-        await ApiRequester.send("Users", viewData.username, RequestType.Delete, {
-            password: password
-        });
-
+        await ApiRequester.users.delete(viewData.username, password);
         location.href = "/Logout";
     }
 }

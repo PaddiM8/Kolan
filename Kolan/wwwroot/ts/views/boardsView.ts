@@ -6,7 +6,6 @@ import { Task } from "../models/task";
 import { RequestType } from "../enums/requestType";
 import { AddBoardDialog } from "../dialogs/addBoardDialog";
 import { Crypto } from "../processing/crypto";
-import { ContentFormatter } from "../processing/contentFormatter";
 
 window.addEventListener("load", () => new BoardsView());
 
@@ -41,13 +40,12 @@ class BoardsView extends View {
         const boardListController = new BoardListController(document
             .querySelector(".board-list .draggableContainer"));
 
-        const result = await ApiRequester.send("Boards", "", RequestType.Get);
-        const jsonObj = JSON.parse(result as string);
+        const result = await ApiRequester.boards.getAll();
 
         // Import/unwrap and save the RSA keys. These will be used to wrap/unwrap board encryption keys.
-        await Crypto.setRSAKeys(jsonObj.keys.publicKey, jsonObj.keys.privateKey);
+        await Crypto.setRSAKeys(result.keys.publicKey, result.keys.privateKey);
 
-        for (const board of jsonObj.boards) {
+        for (const board of result.boards) {
             // Encryption and such, if needed
             const processedBoard = await new Task(board).processPostBackend()
             boardListController.addBoardToBottom(processedBoard);

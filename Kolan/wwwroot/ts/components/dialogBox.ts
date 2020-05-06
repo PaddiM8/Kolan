@@ -28,15 +28,18 @@ export class DialogBox extends LitElement {
 
         const componentHtml = html`
          <link rel="stylesheet" type="text/css" href="../css/components/dialog.${ThemeManager.getTheme()}.css">
-         <div class="dialogBackground ${dialogTypeClass}"></div>
-         <section class="dialog ${dialogTypeClass}">
-            <h2>${html`${this.options.title}`}</h2>
-            <div id="inputs">
-                ${this.fields.map(x => html`${this.getComponentHtml(x)}`)}
-            </div>
-            <button class="submit ${submitButtonClass}" @click="${this.submit}">${html`${this.options.primaryButton}`}</button>
-            <button class="cancel secondary" @click="${this.cancelHandler}">Cancel</button>
-         </section>`;
+         <div class="dialogBackground ${dialogTypeClass}">
+            <section class="dialog ${dialogTypeClass}">
+                <h2>${html`${this.options.title}`}</h2>
+                <div id="inputs">
+                    ${this.fields.map(x => html`${this.getComponentHtml(x)}`)}
+                </div>
+                <div class="buttons">
+                    <button class="submit ${submitButtonClass}" @click="${this.submit}">${html`${this.options.primaryButton}`}</button>
+                    <button class="cancel secondary" @click="${this.cancelHandler}">Cancel</button>
+                </div>
+            </section>
+         </div>`;
 
          // Make the form submit when enter is pressed
          // this.enterToSubmit is set to false if an InputList or textarea is present in the form.
@@ -65,7 +68,7 @@ export class DialogBox extends LitElement {
         if (this.shown) {
             this.submittedAlready = false;
             this.style.display = "block";
-            (this.shadowRoot.querySelector(".dialog") as HTMLElement).style.top = (window.scrollY + 50) + "px";
+            //(this.shadowRoot.querySelector(".dialog") as HTMLElement).style.top = (window.scrollY + 50) + "px";
             this.dispatchEvent(new CustomEvent("openDialog"));
             this.onOpen();
         } else {

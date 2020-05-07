@@ -4,6 +4,7 @@ import { DialogType } from "../enums/dialogType";
 import { InputList } from "./inputList";
 import { ThemeManager } from "../themes/themeManager";
 import { DialogOptions, DialogField } from "../models/dialogOptions";
+import datepicker from "js-datepicker";
 
 /**
  * Dialog element that takes an IDialogTemplate as input and returns an object with the values as an event.
@@ -49,15 +50,17 @@ export class DialogBox extends LitElement {
              });
          }
 
+         return componentHtml;
+    }
+
+    firstUpdated() {
          // Set the default date if relevant
-         const dateElements = this.shadowRoot.querySelectorAll("input[type='date']");
+         const dateElements = this.shadowRoot.querySelectorAll("input[class='date']");
          for (const element of dateElements) {
              const dateElement = element as HTMLInputElement;
-             if (!dateElement.value) dateElement.valueAsDate = new Date();
-             dateElement.min = dateElement.value;
+             const picker = datepicker(dateElement);
+             if (!dateElement.value) picker.setDate(new Date());
          }
-
-         return componentHtml;
     }
 
     updated() {
@@ -233,7 +236,7 @@ export class DialogBox extends LitElement {
         const name = field.key;
 
         const label = field.optional
-            ? html`<label class="checkboxLabel">
+            ? html`<label class="checkboxLabel checkboxOptional">
                        <input type="checkbox"
                               class="${name}Toggle"
                               onchange="this.parentElement.nextElementSibling.nextElementSibling.disabled = !this.checked" />
@@ -272,7 +275,7 @@ export class DialogBox extends LitElement {
             case InputType.Date:
                 return html`${label}
                             <label for="${name}" class="error"></label>
-                            <input type="date" name="${name}" ?disabled=${field.optional} /><br />`;
+                            <input type="text" class="date" name="${name}" ?disabled=${field.optional} /><br />`;
             case InputType.Button:
                 const additionalClassName = field.red ? "red" : "";
                 return html`${label}

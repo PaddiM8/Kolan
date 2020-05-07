@@ -101,7 +101,6 @@ export class BoardView extends View {
             const dialog = BoardView.dialogs[dialogName];
 
             if (dialog.shown) {
-                console.log(dialog);
                 dialog.addEventListener("hideDialog", () => location.reload());
                 return;
             }

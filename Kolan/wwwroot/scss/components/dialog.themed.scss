@@ -1,5 +1,6 @@
 @import "../common";
 @import "../mixins";
+@import '../../../../node_modules/js-datepicker/src/datepicker';
 
 :host {
     display: block;
@@ -107,6 +108,10 @@ input[type="color"] {
             background-color: $background-color;
         }
     }
+}
+
+.checkboxOptional {
+    margin-bottom: 10px;
 }
 
 @media screen and (max-width: 1000px) {

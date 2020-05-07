@@ -18,6 +18,7 @@ export class DialogBox extends LitElement {
     protected list: InputList;
     private enterToSubmit = true;
     private submittedAlready = false;
+    private datePickers = {};
 
     constructor() {
         super();
@@ -59,7 +60,7 @@ export class DialogBox extends LitElement {
          for (const element of dateElements) {
              const dateElement = element as HTMLInputElement;
              const picker = datepicker(dateElement);
-             if (!dateElement.value) picker.setDate(new Date());
+             this.datePickers[dateElement.name] = picker;
          }
     }
 
@@ -89,8 +90,8 @@ export class DialogBox extends LitElement {
             if (!values[name]) continue;
             if (!element) continue;
 
-            if ("type" in element && element["type"] == "date") { // input type="date"
-                inputElement.valueAsNumber = values[name];
+            if (element.classList.contains("date")) { // input type="date"
+                this.datePickers[inputElement.name].setDate(new Date(values[name]));
 
                 // Make sure it's enabled if it has a value
                 const checkbox = inputElement.parentElement.querySelector(`.${name}Toggle`) as HTMLInputElement;
@@ -167,14 +168,14 @@ export class DialogBox extends LitElement {
             // Ignore any value if the element's toggle (if any) is not checked.
             const inputToggle = this.shadowRoot.querySelector(`.${element.name}Toggle`) as HTMLInputElement;
             if (inputToggle && !inputToggle.checked) {
-                if (element.type == "date") input[element.name] = 0;
-                else                        input[element.name] = null;
+                if (element.classList.contains("date")) input[element.name] = new Date(0).getMilliseconds();
+                else                                    input[element.name] = null;
                 continue;
             }
 
-            // Set the value
-            if (element.type == "date") {
-                input[element.name] = element.valueAsNumber
+            // Get the value
+            if (element.classList.contains("date")) {
+                input[element.name] = Date.parse(this.datePickers[element.name].dateSelected);
             } else if (element.name) {
                 input[element.name] = element.value;
             }

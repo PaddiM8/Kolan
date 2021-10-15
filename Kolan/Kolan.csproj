@@ -9,7 +9,7 @@
         <PackageReference Include="hashids.net" Version="1.2.2" />
         <PackageReference Include="Microsoft.AspNet.Signalr" Version="2.4.1" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.2.0" />
-        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.18" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.0" />
         <PackageReference Include="Microsoft.AspNetCore.Routing" Version="2.2.2" />
         <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />

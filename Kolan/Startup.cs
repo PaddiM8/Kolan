@@ -136,18 +136,6 @@ namespace Kolan
             app.UseAuthorization();
             app.UseDefaultFiles();
             app.UseStaticFiles();
-            app.UseStaticFiles(new StaticFileOptions()
-            {
-                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "..",
-                                                        "node_modules/fa-icons")),
-                RequestPath = new PathString("/node_modules/fa-icons")
-            });
-            app.UseStaticFiles(new StaticFileOptions()
-            {
-                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "..",
-                                                        "node_modules/@fortawesome/fontawesome-free/sprites")),
-                RequestPath = new PathString("/node_modules/@fortawesome/fontawesome-free/sprites")
-            });
 
             EndpointRoutingApplicationBuilderExtensions.UseEndpoints(
                 app, endpoints =>
